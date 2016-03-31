@@ -121,7 +121,9 @@ build_script:
 # variable.
 test_script:
 - cmd: cargo test --verbose
+- cmd: cargo test --verbose --release
 - cmd: cargo run --example usage
+- cmd: cargo run --example usage --release
 
 # Only build against the branches that will have pull requests built against them (master).
 # Otherwise creating feature branches on this repository and a pull requests against them will

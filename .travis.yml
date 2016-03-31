@@ -39,6 +39,7 @@ script:
     cargo test --release
   fi
   cargo run --example usage
+  cargo run --example usage --release
 after_success:
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then travis-cargo doc-upload; fi
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then travis-cargo coveralls --no-sudo --verify; fi

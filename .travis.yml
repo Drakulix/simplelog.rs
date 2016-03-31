@@ -41,8 +41,8 @@ script:
   cargo run --example usage
   cargo run --example usage --release
 after_success:
-- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then travis-cargo doc-upload; fi
-- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then travis-cargo coveralls --no-sudo --verify; fi
+- if [[ "$TRAVIS_OS_NAME" == "linux" && "$TRAVIS_RUST_VERSION" == "stable" ]]; then travis-cargo doc-upload; fi
+- if [[ "$TRAVIS_OS_NAME" == "linux" && "$TRAVIS_RUST_VERSION" == "stable" ]]; then travis-cargo coveralls --no-sudo --verify; fi
 env:
   global:
   - secure: GyobZXR5BtjkI8KRVxAjq45JWOGEybj7LIj2l8ErAt8KzsMAiIXrReSMujQg/1JYb9iwnXzHSijS0eIsNy4bST86TSq3LObQK30EkyipERqguramTgmNfz7DlZS2N3/kh88xPO8dQ9VfU/mtJhjmAaF9yWYD4KSDvmbZyFVxFdn4kpglk9/pwfaGVHvNl/VKg+9ZkzR695pUH7gFKdpS7PMpQb8/zzeLolYd3nC5a82usGVno09NAVrsZX9KGHMEaPkZAf5LbgBrEMwkWZTGIJSsN/Eirbb8KheFWPwOw/CpxKCebrRKPf+tfFuJaOm9ck1t+mgmvmCuNacZpA9EgndYu7qldzZIzWYhOxBoC8BZrCmslFhzZOHWS+bBRvSTehaI5kWLsA2MAHE4wyAKw0X2Z/N4z7AowGcrG+vQPuMkF/r0CpC86cdbQ51v2KpAU5WNVLdUCupGmfwA/DCjbDI7N/5y7doCH9xjQuX2zb+CnGkrtlry9WuAvdkIu38b54DuItznDyohhB11hHKfngw8dInQiLMuH5aiskNSMJzwullXKaiZovPb/+5pzXshohQN14yf3kNHvQxzusHXBOgyODRn403iAcCGhZHc85wcwwYJnbDYNUi3vGTYdEsGlAL9XTusAwA4MmPMiLhniDw7f8WV8ArjhBAXDR0/dlA=

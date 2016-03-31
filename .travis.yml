@@ -30,10 +30,13 @@ script:
 - |
   if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
     travis-cargo build &&
+    travis-cargo build --release &&
     travis-cargo test &&
+    travis-cargo test --release &&
     travis-cargo doc
   else
     cargo test
+    cargo test --release
   fi
   cargo run --example usage
 after_success:

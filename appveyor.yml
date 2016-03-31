@@ -112,6 +112,7 @@ install:
 # build commands. Rust will automatically be placed in the PATH environment variable.
 build_script:
 - cmd: cargo build --verbose
+- cmd: cargo build --release --verbose
 
 ## Build Script ##
 

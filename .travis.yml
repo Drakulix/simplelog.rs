@@ -32,6 +32,7 @@ script:
     travis-cargo test &&
     travis-cargo test --release &&
     travis-cargo doc
+    echo "<!doctype html>\n<title>simplelog</title>\n<meta http-equiv=refresh content=\"0;url=simplelog/index.html\">\nDocumentation for simplelog.\nStart with <a href=\"simplelog/index.html\">the <code>simplelog</code> crate</a>" > target/doc/index.html
   else
     cargo test
     cargo test --release

@@ -28,8 +28,13 @@ impl FileLogger {
     /// Fails if another Logger was already initialized.
     ///
     /// # Examples
-    /// ```norun
+    /// ```
+    /// # extern crate simplelog;
+    /// # use simplelog::*;
+    /// # use std::fs::File;
+    /// # fn main() {
     /// let _ = FileLogger::init(LogLevelFilter::Info, File::create("my_rust_bin.log").unwrap());
+    /// # }
     /// ```
     #[allow(dead_code)]
     pub fn init(log_level: LogLevelFilter, file: File) -> Result<(), SetLoggerError> {
@@ -47,8 +52,13 @@ impl FileLogger {
     /// Takes the desired `LogLevel` and `File` object (`std::fs::File` in any write-mode) as argument. They cannot be changed later on.
     ///
     /// # Examples
-    /// ```norun
-    /// let file_logger = fileLogger::new(LogLevelFilter::Info, File::create("my_rust_bin.log").unwrap());
+    /// ```
+    /// # extern crate simplelog;
+    /// # use simplelog::*;
+    /// # use std::fs::File;
+    /// # fn main() {
+    /// let file_logger = FileLogger::new(LogLevelFilter::Info, File::create("my_rust_bin.log").unwrap());
+    /// # }
     /// ```
     #[allow(dead_code)]
     pub fn new(log_level: LogLevelFilter, file: File) -> Box<FileLogger> {

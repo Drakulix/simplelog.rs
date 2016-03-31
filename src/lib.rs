@@ -20,7 +20,7 @@
 
 #![deny(missing_docs)]
 
-extern crate log;
+#[macro_use] extern crate log;
 #[cfg(feature = "term")]
 extern crate term;
 extern crate time;
@@ -52,11 +52,96 @@ pub trait SharedLogger: Log {
     /// # Examples
     ///
     /// ```
+    /// # extern crate simplelog;
+    /// # use simplelog::*;
+    /// # fn main() {
     /// let logger = SimpleLogger::new(LogLevelFilter::Info);
     /// println!("{}", logger.level());
+    /// # }
     /// ```
     fn level(&self) -> LogLevelFilter;
 
     /// Returns the logger as a Log trait object
     fn as_log(self: Box<Self>) -> Box<Log>;
+}
+
+#[cfg(test)]
+mod tests {
+    use std::io::Read;
+    use std::fs::File;
+
+    use super::*;
+
+    #[test]
+    fn test() {
+        CombinedLogger::init(
+            vec![
+                //error
+                SimpleLogger::new(LogLevelFilter::Error),
+                TermLogger::new(LogLevelFilter::Error),
+                FileLogger::new(LogLevelFilter::Error, File::create("error.log").unwrap()),
+
+                //warn
+                SimpleLogger::new(LogLevelFilter::Warn),
+                TermLogger::new(LogLevelFilter::Warn),
+                FileLogger::new(LogLevelFilter::Warn, File::create("warn.log").unwrap()),
+
+                //info
+                SimpleLogger::new(LogLevelFilter::Info),
+                TermLogger::new(LogLevelFilter::Info),
+                FileLogger::new(LogLevelFilter::Info, File::create("info.log").unwrap()),
+
+                //debug
+                SimpleLogger::new(LogLevelFilter::Debug),
+                TermLogger::new(LogLevelFilter::Debug),
+                FileLogger::new(LogLevelFilter::Debug, File::create("debug.log").unwrap()),
+
+                //trace
+                SimpleLogger::new(LogLevelFilter::Trace),
+                TermLogger::new(LogLevelFilter::Trace),
+                FileLogger::new(LogLevelFilter::Trace, File::create("trace.log").unwrap()),
+            ]
+        ).unwrap();
+
+        error!("Test Error");
+        warn!("Test Warning");
+        info!("Test Information");
+        debug!("Test Debug");
+        trace!("Test Trace");
+
+        let mut error = String::new();
+        File::open("error.log").unwrap().read_to_string(&mut error).unwrap();
+        let mut warn = String::new();
+        File::open("warn.log").unwrap().read_to_string(&mut warn).unwrap();
+        let mut info = String::new();
+        File::open("info.log").unwrap().read_to_string(&mut info).unwrap();
+        let mut debug = String::new();
+        File::open("debug.log").unwrap().read_to_string(&mut debug).unwrap();
+        let mut trace = String::new();
+        File::open("trace.log").unwrap().read_to_string(&mut trace).unwrap();
+
+        assert!(error.contains("Test Error"));
+        assert!(!error.contains("Test Warning"));
+
+        assert!(warn.contains("Test Error"));
+        assert!(warn.contains("Test Warning"));
+        assert!(!warn.contains("Test Information"));
+
+        assert!(info.contains("Test Error"));
+        assert!(info.contains("Test Warning"));
+        assert!(info.contains("Test Information"));
+        assert!(!info.contains("Test Debug"));
+
+        assert!(debug.contains("Test Error"));
+        assert!(debug.contains("Test Warning"));
+        assert!(debug.contains("Test Information"));
+        assert!(debug.contains("Test Debug"));
+        assert!(!debug.contains("Test Trace"));
+
+        assert!(trace.contains("Test Error"));
+        assert!(trace.contains("Test Warning"));
+        assert!(trace.contains("Test Information"));
+        assert!(trace.contains("Test Debug"));
+        assert!(trace.contains("Test Trace"));
+    }
 }

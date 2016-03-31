@@ -30,13 +30,18 @@ impl CombinedLogger {
     /// Fails if another logger is already set globally.
     ///
     /// # Examples
-    /// ```norun
+    /// ```
+    /// # extern crate simplelog;
+    /// # use simplelog::*;
+    /// # use std::fs::File;
+    /// # fn main() {
     /// let _ = CombinedLogger::init(
     ///             vec![
     ///                 TermLogger::new(LogLevelFilter::Info),
     ///                 FileLogger::new(LogLevelFilter::Info, File::create("my_rust_bin.log").unwrap())
     ///             ]
     ///         );
+    /// # }
     /// ```
     #[allow(dead_code)]
     pub fn init(logger: Vec<Box<SharedLogger>>) -> Result<(), SetLoggerError> {
@@ -58,13 +63,18 @@ impl CombinedLogger {
     /// All loggers need to implement log::Log.
     ///
     /// # Examples
-    /// ```norun
+    /// ```
+    /// # extern crate simplelog;
+    /// # use simplelog::*;
+    /// # use std::fs::File;
+    /// # fn main() {
     /// let combined_logger = CombinedLogger::new(
     ///             vec![
     ///                 TermLogger::new(LogLevelFilter::Debug),
     ///                 FileLogger::new(LogLevelFilter::Info, File::create("my_rust_bin.log").unwrap())
     ///             ]
     ///         );
+    /// # }
     /// ```
     #[allow(dead_code)]
     pub fn new(logger: Vec<Box<SharedLogger>>) -> Box<CombinedLogger> {

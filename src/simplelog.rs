@@ -25,8 +25,12 @@ impl SimpleLogger {
     /// Fails if another Logger was already initialized.
     ///
     /// # Examples
-    /// ```norun
+    /// ```
+    /// # extern crate simplelog;
+    /// # use simplelog::*;
+    /// # fn main() {
     /// let _ = SimpleLogger::init(LogLevelFilter::Info);
+    /// # }
     /// ```
     #[allow(dead_code)]
     pub fn init(log_level: LogLevelFilter) -> Result<(), SetLoggerError> {
@@ -44,8 +48,12 @@ impl SimpleLogger {
     /// Takes the desired LogLevel as argument. It cannot be changed later on.
     ///
     /// # Examples
-    /// ```norun
+    /// ```
+    /// # extern crate simplelog;
+    /// # use simplelog::*;
+    /// # fn main() {
     /// let simple_logger = SimpleLogger::new(LogLevelFilter::Info);
+    /// # }
     /// ```
     #[allow(dead_code)]
     pub fn new(log_level: LogLevelFilter) -> Box<SimpleLogger> {

@@ -25,8 +25,12 @@ impl TermLogger
     /// Fails if another Logger was already initialized.
     ///
     /// # Examples
-    /// ```norun
+    /// ```
+    /// # extern crate simplelog;
+    /// # use simplelog::*;
+    /// # fn main() {
     /// let _ = TermLogger::init(LogLevelFilter::Info);
+    /// # }
     /// ```
     #[allow(dead_code)]
     pub fn init(log_level: LogLevelFilter) -> Result<(), SetLoggerError> {
@@ -44,8 +48,12 @@ impl TermLogger
     /// Takes the desired LogLevel as argument. It cannot be changed later on.
     ///
     /// # Examples
-    /// ```norun
+    /// ```
+    /// # extern crate simplelog;
+    /// # use simplelog::*;
+    /// # fn main() {
     /// let term_logger = TermLogger::new(LogLevelFilter::Info);
+    /// # }
     /// ```
     #[allow(dead_code)]
     pub fn new(log_level: LogLevelFilter) -> Box<TermLogger> {
@@ -65,47 +73,36 @@ impl TermLogger
             LogLevel::Trace => color::WHITE
         };
 
-        if self.level() <= LogLevel::Warn {
-            try!(write!(term_lock, "["));
-            try!(term_lock.fg(color));
-            try!(write!(term_lock, "{}", record.level()));
-            try!(term_lock.reset());
-            try!(writeln!(term_lock,
-                "] {}",
-                    record.args()
-            ));
-        } else {
-            try!(write!(term_lock, "{:02}:{:02}:{:02} [",
-                        cur_time.tm_hour,
-                        cur_time.tm_min,
-                        cur_time.tm_sec));
-            try!(term_lock.fg(color));
-            try!(write!(term_lock, "{}", record.level()));
-            try!(term_lock.reset());
-            try!(write!(term_lock, "] "));
+        try!(write!(term_lock, "{:02}:{:02}:{:02} [",
+                    cur_time.tm_hour,
+                    cur_time.tm_min,
+                    cur_time.tm_sec));
+        try!(term_lock.fg(color));
+        try!(write!(term_lock, "{}", record.level()));
+        try!(term_lock.reset());
+        try!(write!(term_lock, "] "));
 
-            match record.level() {
-                LogLevel::Error |
-                LogLevel::Warn  |
-                LogLevel::Info  |
-                LogLevel::Debug => {
-                    try!(writeln!(term_lock,
-                        "{}: {}",
-                            record.target(),
-                            record.args()
-                    ));
-                },
-                LogLevel::Trace => {
-                    try!(writeln!(term_lock,
-                        "{}: [{}:{}] - {}",
-                            record.target(),
-                            record.location().file(),
-                            record.location().line(),
-                            record.args()
-                    ));
-                },
-            };
-        }
+        match record.level() {
+            LogLevel::Error |
+            LogLevel::Warn  |
+            LogLevel::Info  |
+            LogLevel::Debug => {
+                try!(writeln!(term_lock,
+                    "{}: {}",
+                        record.target(),
+                        record.args()
+                ));
+            },
+            LogLevel::Trace => {
+                try!(writeln!(term_lock,
+                    "{}: [{}:{}] - {}",
+                        record.target(),
+                        record.location().file(),
+                        record.location().line(),
+                        record.args()
+                ));
+            },
+        };
 
         try!(term_lock.flush());
 

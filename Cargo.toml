@@ -1,0 +1,18 @@
+[package]
+name = "simplelog"
+version = "0.1.0"
+authors = ["Drakulix <github@drakulix.de>"]
+description = "A simple and easy-to-use logging facility for Rust's log crate"
+documentation = "https://drakulix.github.io/simplelog.rs/simplelog/index.html"
+repository = "https://github.com/drakulix/simplelog.rs"
+readme = "README.md"
+keywords = ["log", "simplelog", "filelog", "logging"]
+license = "MIT OR Apache-2.0"
+
+[features]
+default = ["term"]
+
+[dependencies]
+log = "0.3"
+term = { version = "0.4", optional = true }
+time = "0.1"

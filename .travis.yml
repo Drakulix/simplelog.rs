@@ -14,12 +14,10 @@ rust:
 - stable
 - beta
 - nightly
-
 matrix:
   allow_failures:
-    - rust: nightly
-    - rust: beta
-
+  - rust: nightly
+  - rust: beta
 before_script:
 - |
   if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
@@ -41,8 +39,10 @@ script:
   cargo run --example usage
   cargo run --example usage --release
 after_success:
-- if [[ "$TRAVIS_OS_NAME" == "linux" && "$TRAVIS_RUST_VERSION" == "stable" ]]; then travis-cargo doc-upload; fi
-- if [[ "$TRAVIS_OS_NAME" == "linux" && "$TRAVIS_RUST_VERSION" == "stable" ]]; then travis-cargo coveralls --no-sudo --verify; fi
+- if [[ "$TRAVIS_OS_NAME" == "linux" && "$TRAVIS_RUST_VERSION" == "stable" ]]; then
+  travis-cargo doc-upload; fi
+- if [[ "$TRAVIS_OS_NAME" == "linux" && "$TRAVIS_RUST_VERSION" == "stable" ]]; then
+  travis-cargo coveralls --no-sudo --verify; fi
 env:
   global:
-  - secure: GyobZXR5BtjkI8KRVxAjq45JWOGEybj7LIj2l8ErAt8KzsMAiIXrReSMujQg/1JYb9iwnXzHSijS0eIsNy4bST86TSq3LObQK30EkyipERqguramTgmNfz7DlZS2N3/kh88xPO8dQ9VfU/mtJhjmAaF9yWYD4KSDvmbZyFVxFdn4kpglk9/pwfaGVHvNl/VKg+9ZkzR695pUH7gFKdpS7PMpQb8/zzeLolYd3nC5a82usGVno09NAVrsZX9KGHMEaPkZAf5LbgBrEMwkWZTGIJSsN/Eirbb8KheFWPwOw/CpxKCebrRKPf+tfFuJaOm9ck1t+mgmvmCuNacZpA9EgndYu7qldzZIzWYhOxBoC8BZrCmslFhzZOHWS+bBRvSTehaI5kWLsA2MAHE4wyAKw0X2Z/N4z7AowGcrG+vQPuMkF/r0CpC86cdbQ51v2KpAU5WNVLdUCupGmfwA/DCjbDI7N/5y7doCH9xjQuX2zb+CnGkrtlry9WuAvdkIu38b54DuItznDyohhB11hHKfngw8dInQiLMuH5aiskNSMJzwullXKaiZovPb/+5pzXshohQN14yf3kNHvQxzusHXBOgyODRn403iAcCGhZHc85wcwwYJnbDYNUi3vGTYdEsGlAL9XTusAwA4MmPMiLhniDw7f8WV8ArjhBAXDR0/dlA=
+  - secure: ZFSABW716s57zBN2/t9wB80BrJhiC/ydiw7COMQYk6UwRbroMPEp03cOB0vZeGPZOxVXJQTMd8RbH8O0MFoXDe2cwT7Cs7p+N3Pj9/AeZ2etW7lfAK5q5FtzTKWLMo+PszMIuLOPOgg1/bXWTDcWkNSdXRirhRD4xSG4o3oTobtxbFt3LyxHAFTJZGVjyVG26rQt8/ZKSNJYbGn5NNoas+lXX55eDRhSzKbJp9HRwHQN8qTRT3+cEoUFjW9P4zVtrkM2RHHCcYBTjrgaivi5rHgJf1tvhkWb7jMEdEOOOsXrXkzuRPDGDhPy+7XFHwfFTMDrGgmhHkBitS/bxrsD1282HxMQAMOThwCdS50YU3bx76TPvp2Iuj62aqzPFZ1f2UvcCRwxs6CS0SZhD7iskREdkVxh4z1gNT7IAJZ86vYV//MScWC1+r9duIsANZuy6oOW1I/7HV/vXKL7adnHdApdvJAi4n9eCA9zt8e3kwCq2Zu4BrJu7aBLNF2JNW/72n49uXRvhwpfCr978RBJnEiSPh32VsA8lJCq0rmZ8jJFEvmvMRHYF1oW8l3+Yyl1bqeV167ekDXLuCTtZa18ec/IYiFM+7bOXqH5OVAelzT0m3jNfGSlUiHxSoSE2v7UtY/Ns0yZiHYs06+MxBmcWwK5KAEO4is9n0Q22nSv7Ec=

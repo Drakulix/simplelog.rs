@@ -4,6 +4,7 @@ use log::{LogLevel, LogLevelFilter, LogMetadata, LogRecord, SetLoggerError, set_
 use time;
 use term;
 use term::{StderrTerminal, StdoutTerminal, Terminal, color};
+use std::error;
 use std::sync::{Mutex, MutexGuard};
 use std::io::{Write, Error};
 use super::SharedLogger;
@@ -33,11 +34,13 @@ impl TermLogger
     /// # }
     /// ```
     #[allow(dead_code)]
-    pub fn init(log_level: LogLevelFilter) -> Result<(), SetLoggerError> {
-        set_logger(|max_log_level| {
+    pub fn init(log_level: LogLevelFilter) -> Result<(), Box<error::Error>> {
+        let logger = try!(TermLogger::new(log_level).ok_or("a terminal couldn't be opened".to_string()));
+        try!(set_logger(|max_log_level| {
             max_log_level.set(log_level.clone());
-            TermLogger::new(log_level)
-        })
+            logger
+        }));
+        Ok(())
     }
 
     /// allows to create a new logger, that can be independently used, no matter whats globally set.
@@ -52,12 +55,16 @@ impl TermLogger
     /// # extern crate simplelog;
     /// # use simplelog::*;
     /// # fn main() {
-    /// let term_logger = TermLogger::new(LogLevelFilter::Info);
+    /// let term_logger = TermLogger::new(LogLevelFilter::Info).unwrap();
     /// # }
     /// ```
     #[allow(dead_code)]
-    pub fn new(log_level: LogLevelFilter) -> Box<TermLogger> {
-        Box::new(TermLogger { level: log_level, stderr: Mutex::new(term::stderr().unwrap()), stdout: Mutex::new(term::stdout().unwrap()) })
+    pub fn new(log_level: LogLevelFilter) -> Option<Box<TermLogger>> {
+        term::stderr().and_then(|stderr|
+            term::stdout().map(|stdout| {
+                Box::new(TermLogger { level: log_level, stderr: Mutex::new(stderr), stdout: Mutex::new(stdout) })
+            })
+        )
     }
 
     fn try_log_term<W>(&self, record: &LogRecord, mut term_lock: MutexGuard<Box<Terminal<Output=W> + Send>>) -> Result<(), Error>

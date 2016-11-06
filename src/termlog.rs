@@ -5,9 +5,49 @@ use time;
 use term;
 use term::{StderrTerminal, StdoutTerminal, Terminal, color};
 use std::error;
+use std::fmt;
 use std::sync::{Mutex, MutexGuard};
 use std::io::{Write, Error};
+use self::TermLogError::{SetLogger, Term};
 use super::SharedLogger;
+
+/// TermLogger error type.
+#[derive(Debug)]
+pub enum TermLogError {
+    SetLogger(SetLoggerError),
+    Term(String),
+}
+
+impl fmt::Display for TermLogError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match *self {
+            SetLogger(ref err) => err.fmt(f),
+            Term(ref err) => err.fmt(f),
+        }
+    }
+}
+
+impl error::Error for TermLogError {
+    fn description(&self) -> &str {
+        match * self {
+            SetLogger(ref err) => err.description(),
+            Term(ref err) => &err,
+        }
+    }
+
+    fn cause(&self) -> Option<&error::Error> {
+        match *self {
+            SetLogger(ref err) => Some(err),
+            Term(_) => None,
+        }
+    }
+}
+
+impl From<SetLoggerError> for TermLogError {
+    fn from(error: SetLoggerError) -> Self {
+        SetLogger(error)
+    }
+}
 
 /// The TermLogger struct. Provides a stderr/out based Logger implementation
 ///
@@ -34,8 +74,8 @@ impl TermLogger
     /// # }
     /// ```
     #[allow(dead_code)]
-    pub fn init(log_level: LogLevelFilter) -> Result<(), Box<error::Error>> {
-        let logger = try!(TermLogger::new(log_level).ok_or("a terminal couldn't be opened".to_string()));
+    pub fn init(log_level: LogLevelFilter) -> Result<(), TermLogError> {
+        let logger = try!(TermLogger::new(log_level).ok_or(Term("a terminal couldn't be opened".to_string())));
         try!(set_logger(|max_log_level| {
             max_log_level.set(log_level.clone());
             logger

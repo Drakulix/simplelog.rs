@@ -37,7 +37,7 @@ impl CombinedLogger {
     /// # fn main() {
     /// let _ = CombinedLogger::init(
     ///             vec![
-    ///                 TermLogger::new(LogLevelFilter::Info),
+    ///                 TermLogger::new(LogLevelFilter::Info).unwrap(),
     ///                 FileLogger::new(LogLevelFilter::Info, File::create("my_rust_bin.log").unwrap())
     ///             ]
     ///         );
@@ -70,7 +70,7 @@ impl CombinedLogger {
     /// # fn main() {
     /// let combined_logger = CombinedLogger::new(
     ///             vec![
-    ///                 TermLogger::new(LogLevelFilter::Debug),
+    ///                 TermLogger::new(LogLevelFilter::Debug).unwrap(),
     ///                 FileLogger::new(LogLevelFilter::Info, File::create("my_rust_bin.log").unwrap())
     ///             ]
     ///         );

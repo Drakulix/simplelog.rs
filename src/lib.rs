@@ -78,27 +78,27 @@ mod tests {
             vec![
                 //error
                 SimpleLogger::new(LogLevelFilter::Error),
-                TermLogger::new(LogLevelFilter::Error),
+                TermLogger::new(LogLevelFilter::Error).unwrap(),
                 FileLogger::new(LogLevelFilter::Error, File::create("error.log").unwrap()),
 
                 //warn
                 SimpleLogger::new(LogLevelFilter::Warn),
-                TermLogger::new(LogLevelFilter::Warn),
+                TermLogger::new(LogLevelFilter::Warn).unwrap(),
                 FileLogger::new(LogLevelFilter::Warn, File::create("warn.log").unwrap()),
 
                 //info
                 SimpleLogger::new(LogLevelFilter::Info),
-                TermLogger::new(LogLevelFilter::Info),
+                TermLogger::new(LogLevelFilter::Info).unwrap(),
                 FileLogger::new(LogLevelFilter::Info, File::create("info.log").unwrap()),
 
                 //debug
                 SimpleLogger::new(LogLevelFilter::Debug),
-                TermLogger::new(LogLevelFilter::Debug),
+                TermLogger::new(LogLevelFilter::Debug).unwrap(),
                 FileLogger::new(LogLevelFilter::Debug, File::create("debug.log").unwrap()),
 
                 //trace
                 SimpleLogger::new(LogLevelFilter::Trace),
-                TermLogger::new(LogLevelFilter::Trace),
+                TermLogger::new(LogLevelFilter::Trace).unwrap(),
                 FileLogger::new(LogLevelFilter::Trace, File::create("trace.log").unwrap()),
             ]
         ).unwrap();

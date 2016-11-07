@@ -8,6 +8,14 @@ repository = "https://github.com/drakulix/simplelog.rs"
 readme = "README.md"
 keywords = ["log", "simplelog", "filelog", "logging"]
 license = "MIT OR Apache-2.0"
+include = [
+    "**/*.rs",
+    "Cargo.toml",
+    "CHANGELOG.md",
+    "README.md",
+    "LICENSE.APACHE2",
+    "LICENSE.MIT",
+]
 
 [features]
 default = ["term"]

@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `CombinedLogger` struct in crate `simplelog`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, CombinedLogger">
+
+    <title>simplelog::CombinedLogger - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='index.html'>simplelog</a></p><script>window.sidebarCurrent = {name: 'CombinedLogger', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content struct">
+<h1 class='fqn'><span class='in-band'>Struct <a href='index.html'>simplelog</a>::<wbr><a class='struct' href=''>CombinedLogger</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-245' class='srclink' href='../src/simplelog/src/loggers/comblog.rs.html#16-19' title='goto source code'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct CombinedLogger {
+    // some fields omitted
+}</pre><div class='docblock'><p>The CombinedLogger struct. Provides a Logger implementation that proxies multiple Loggers as one.</p>
+
+<p>The purpose is to allow multiple Loggers to be set globally</p>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><span class='in-band'><code>impl <a class='struct' href='../simplelog/struct.CombinedLogger.html' title='simplelog::CombinedLogger'>CombinedLogger</a></code></span><span class='out-of-band'><div class='ghost'></div><a id='src-248' class='srclink' href='../src/simplelog/src/loggers/comblog.rs.html#21-89' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.init' class='method'><code>fn <a href='#method.init' class='fnname'>init</a>(logger: <a class='struct' href='https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html' title='alloc::boxed::Box'>Box</a>&lt;<a class='trait' href='../simplelog/trait.SharedLogger.html' title='simplelog::SharedLogger'>SharedLogger</a>&gt;&gt;) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>,&nbsp;<a class='struct' href='../log/struct.SetLoggerError.html' title='log::SetLoggerError'>SetLoggerError</a>&gt;</code></h4>
+<div class='docblock'><p>init function. Globally initializes the CombinedLogger as the one and only used log facility.</p>
+
+<p>Takes all used Loggers as a Vector argument. None of those Loggers should already be set globally.</p>
+
+<p>All loggers need to implement <code>log::Log</code> and <code>logger::SharedLogger</code> and need to provide a way to be
+initialized without calling <code>set_logger</code>. All loggers of this library provide a <code>new(..)</code>` method
+for that purpose.
+Fails if another logger is already set globally.</p>
+
+<h1 id='examples' class='section-header'><a href='#examples'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>let</span> _ <span class='op'>=</span> <span class='ident'>CombinedLogger</span>::<span class='ident'>init</span>(
+            <span class='macro'>vec</span><span class='macro'>!</span>[
+                <span class='ident'>TermLogger</span>::<span class='ident'>new</span>(<span class='ident'>LogLevelFilter</span>::<span class='ident'>Info</span>, <span class='ident'>Config</span>::<span class='ident'>default</span>()).<span class='ident'>unwrap</span>(),
+                <span class='ident'>WriteLogger</span>::<span class='ident'>new</span>(<span class='ident'>LogLevelFilter</span>::<span class='ident'>Info</span>, <span class='ident'>Config</span>::<span class='ident'>default</span>(), <span class='ident'>File</span>::<span class='ident'>create</span>(<span class='string'>&quot;my_rust_bin.log&quot;</span>).<span class='ident'>unwrap</span>())
+            ]
+        );</pre>
+</div><h4 id='method.new' class='method'><code>fn <a href='#method.new' class='fnname'>new</a>(logger: <a class='struct' href='https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html' title='alloc::boxed::Box'>Box</a>&lt;<a class='trait' href='../simplelog/trait.SharedLogger.html' title='simplelog::SharedLogger'>SharedLogger</a>&gt;&gt;) -&gt; <a class='struct' href='https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html' title='alloc::boxed::Box'>Box</a>&lt;<a class='struct' href='../simplelog/struct.CombinedLogger.html' title='simplelog::CombinedLogger'>CombinedLogger</a>&gt;</code></h4>
+<div class='docblock'><p>allows to create a new logger, that can be independently used, no matter whats globally set.</p>
+
+<p>no macros are provided for this case and you probably
+dont want to use this function, but <code>init()</code><code>, if you dont want to build a</code>CombinedLogger`.</p>
+
+<p>Takes all used loggers as a Vector argument. The log level is automatically determined by the
+lowest log level used by the given loggers.</p>
+
+<p>All loggers need to implement log::Log.</p>
+
+<h1 id='examples-1' class='section-header'><a href='#examples-1'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>let</span> <span class='ident'>combined_logger</span> <span class='op'>=</span> <span class='ident'>CombinedLogger</span>::<span class='ident'>new</span>(
+            <span class='macro'>vec</span><span class='macro'>!</span>[
+                <span class='ident'>TermLogger</span>::<span class='ident'>new</span>(<span class='ident'>LogLevelFilter</span>::<span class='ident'>Debug</span>, <span class='ident'>Config</span>::<span class='ident'>default</span>()).<span class='ident'>unwrap</span>(),
+                <span class='ident'>WriteLogger</span>::<span class='ident'>new</span>(<span class='ident'>LogLevelFilter</span>::<span class='ident'>Info</span>, <span class='ident'>Config</span>::<span class='ident'>default</span>(), <span class='ident'>File</span>::<span class='ident'>create</span>(<span class='string'>&quot;my_rust_bin.log&quot;</span>).<span class='ident'>unwrap</span>())
+            ]
+        );</pre>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><span class='in-band'><code>impl <a class='trait' href='../log/trait.Log.html' title='log::Log'>Log</a> for <a class='struct' href='../simplelog/struct.CombinedLogger.html' title='simplelog::CombinedLogger'>CombinedLogger</a></code></span><span class='out-of-band'><div class='ghost'></div><a id='src-258' class='srclink' href='../src/simplelog/src/loggers/comblog.rs.html#91-104' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.enabled' class='method'><code>fn <a href='../log/trait.Log.html#tymethod.enabled' class='fnname'>enabled</a>(&amp;self, metadata: &amp;<a class='struct' href='../log/struct.LogMetadata.html' title='log::LogMetadata'>LogMetadata</a>) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+<div class='docblock'><p>Determines if a log message with the specified metadata would be logged. <a href="../log/trait.Log.html#tymethod.enabled">Read more</a></p>
+</div><h4 id='method.log' class='method'><code>fn <a href='../log/trait.Log.html#tymethod.log' class='fnname'>log</a>(&amp;self, record: &amp;<a class='struct' href='../log/struct.LogRecord.html' title='log::LogRecord'>LogRecord</a>)</code></h4>
+<div class='docblock'><p>Logs the <code>LogRecord</code>. <a href="../log/trait.Log.html#tymethod.log">Read more</a></p>
+</div></div><h3 class='impl'><span class='in-band'><code>impl <a class='trait' href='../simplelog/trait.SharedLogger.html' title='simplelog::SharedLogger'>SharedLogger</a> for <a class='struct' href='../simplelog/struct.CombinedLogger.html' title='simplelog::CombinedLogger'>CombinedLogger</a></code></span><span class='out-of-band'><div class='ghost'></div><a id='src-266' class='srclink' href='../src/simplelog/src/loggers/comblog.rs.html#106-121' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.level' class='method'><code>fn <a href='../simplelog/trait.SharedLogger.html#tymethod.level' class='fnname'>level</a>(&amp;self) -&gt; <a class='enum' href='../simplelog/enum.LogLevelFilter.html' title='simplelog::LogLevelFilter'>LogLevelFilter</a></code></h4>
+<div class='docblock'><p>Returns the set LogLevel for this Logger <a href="../simplelog/trait.SharedLogger.html#tymethod.level">Read more</a></p>
+</div><h4 id='method.config' class='method'><code>fn <a href='../simplelog/trait.SharedLogger.html#tymethod.config' class='fnname'>config</a>(&amp;self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;&amp;<a class='struct' href='../simplelog/struct.Config.html' title='simplelog::Config'>Config</a>&gt;</code></h4>
+<div class='docblock'><p>Inspect the config of a running Logger <a href="../simplelog/trait.SharedLogger.html#tymethod.config">Read more</a></p>
+</div><h4 id='method.as_log' class='method'><code>fn <a href='../simplelog/trait.SharedLogger.html#tymethod.as_log' class='fnname'>as_log</a>(self: <a class='struct' href='https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html' title='alloc::boxed::Box'>Box</a>&lt;Self&gt;) -&gt; <a class='struct' href='https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html' title='alloc::boxed::Box'>Box</a>&lt;<a class='trait' href='../log/trait.Log.html' title='log::Log'>Log</a>&gt;</code></h4>
+<div class='docblock'><p>Returns the logger as a Log trait object</p>
+</div></div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../";
+        window.currentCrate = "simplelog";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../jquery.js"></script>
+    <script src="../main.js"></script>
+    
+    <script defer src="../search-index.js"></script>
+</body>
+</html>

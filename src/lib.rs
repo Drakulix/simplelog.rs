@@ -25,17 +25,13 @@
 extern crate term;
 extern crate time;
 
-mod simplelog;
-#[cfg(feature = "term")]
-mod termlog;
-mod filelog;
-mod comblog;
+mod config;
+mod loggers;
 
-pub use self::simplelog::SimpleLogger;
+pub use self::config::Config;
+pub use self::loggers::{SimpleLogger, WriteLogger, CombinedLogger};
 #[cfg(feature = "term")]
-pub use self::termlog::TermLogger;
-pub use self::filelog::FileLogger;
-pub use self::comblog::CombinedLogger;
+pub use self::loggers::TermLogger;
 
 pub use log::LogLevelFilter;
 
@@ -55,11 +51,27 @@ pub trait SharedLogger: Log {
     /// # extern crate simplelog;
     /// # use simplelog::*;
     /// # fn main() {
-    /// let logger = SimpleLogger::new(LogLevelFilter::Info);
+    /// let logger = SimpleLogger::new(LogLevelFilter::Info, Config::default());
     /// println!("{}", logger.level());
     /// # }
     /// ```
     fn level(&self) -> LogLevelFilter;
+
+    /// Inspect the config of a running Logger
+    ///
+    /// An Option is returned, because some Logger may not contain a Config
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # extern crate simplelog;
+    /// # use simplelog::*;
+    /// # fn main() {
+    /// let logger = SimpleLogger::new(LogLevelFilter::Info, Config::default());
+    /// println!("{:?}", logger.config());
+    /// # }
+    /// ```
+    fn config(&self) -> Option<&Config>;
 
     /// Returns the logger as a Log trait object
     fn as_log(self: Box<Self>) -> Box<Log>;
@@ -77,29 +89,29 @@ mod tests {
         CombinedLogger::init(
             vec![
                 //error
-                SimpleLogger::new(LogLevelFilter::Error),
-                TermLogger::new(LogLevelFilter::Error).unwrap(),
-                FileLogger::new(LogLevelFilter::Error, File::create("error.log").unwrap()),
+                SimpleLogger::new(LogLevelFilter::Error, Config::default()),
+                TermLogger::new(LogLevelFilter::Error, Config::default()).unwrap(),
+                WriteLogger::new(LogLevelFilter::Error, Config::default(), File::create("error.log").unwrap()),
 
                 //warn
-                SimpleLogger::new(LogLevelFilter::Warn),
-                TermLogger::new(LogLevelFilter::Warn).unwrap(),
-                FileLogger::new(LogLevelFilter::Warn, File::create("warn.log").unwrap()),
+                SimpleLogger::new(LogLevelFilter::Warn, Config::default()),
+                TermLogger::new(LogLevelFilter::Warn, Config::default()).unwrap(),
+                WriteLogger::new(LogLevelFilter::Warn, Config::default(), File::create("warn.log").unwrap()),
 
                 //info
-                SimpleLogger::new(LogLevelFilter::Info),
-                TermLogger::new(LogLevelFilter::Info).unwrap(),
-                FileLogger::new(LogLevelFilter::Info, File::create("info.log").unwrap()),
+                SimpleLogger::new(LogLevelFilter::Info, Config::default()),
+                TermLogger::new(LogLevelFilter::Info, Config::default()).unwrap(),
+                WriteLogger::new(LogLevelFilter::Info, Config::default(), File::create("info.log").unwrap()),
 
                 //debug
-                SimpleLogger::new(LogLevelFilter::Debug),
-                TermLogger::new(LogLevelFilter::Debug).unwrap(),
-                FileLogger::new(LogLevelFilter::Debug, File::create("debug.log").unwrap()),
+                SimpleLogger::new(LogLevelFilter::Debug, Config::default()),
+                TermLogger::new(LogLevelFilter::Debug, Config::default()).unwrap(),
+                WriteLogger::new(LogLevelFilter::Debug, Config::default(), File::create("debug.log").unwrap()),
 
                 //trace
-                SimpleLogger::new(LogLevelFilter::Trace),
-                TermLogger::new(LogLevelFilter::Trace).unwrap(),
-                FileLogger::new(LogLevelFilter::Trace, File::create("trace.log").unwrap()),
+                SimpleLogger::new(LogLevelFilter::Trace, Config::default()),
+                TermLogger::new(LogLevelFilter::Trace, Config::default()).unwrap(),
+                WriteLogger::new(LogLevelFilter::Trace, Config::default(), File::create("trace.log").unwrap()),
             ]
         ).unwrap();
 

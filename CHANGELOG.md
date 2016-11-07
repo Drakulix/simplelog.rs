@@ -1,0 +1,27 @@
+## v0.3.0
+    - Merged PullRequest by *Antoni Boucher* - Avoid unwrapping in `TermLogger`:
+        - `TermLogger::new` now returns an Option
+        - `TermLogger::init` now has its own ErrorType
+    - Move FileLogger to WriteLogger
+        - More generic, accepts not only `File`, but everything that implements `Write`
+    - Loggers now initialize with a `Config` struct, that list, what parts of the typical log message shall be printed, at which levels
+        - Migrate from `::init(level, ...)` to `::init(level, Config::default(), ...)`
+        - Migrate from `::new(level, ...)` or `::new(level, Config::default(), ...)`
+        - Exception: `CombinedLogger` has no use for its own `Config` and does not take the new argument
+        - Optionally use rust's `Default` syntax to override some settings
+            - E.g. always print location: `Config { location: LogLevelFilter::Error, ..Default::default() }`
+            - E.g. never print the target: `Config { target: LogLevelFilter::Off, ..Default::default() }`
+    - Target does now by default only log for Debug and lower
+    - Added CHANGELOG
+    - Removed some internal code duplication
+
+## v0.2.0
+    - Local changes that (accidentially) made it to crates.io, but not git
+        - Basically a worse version of *Antoni Boucher* 0.3.0 changes
+        - Got noticed, when he made a Pull Request
+
+    Sorry, what a mess. If you still have that version, here are the docs:
+        https://docs.rs/simplelog/0.2.0/
+
+## v0.1.0
+    - Initial Release

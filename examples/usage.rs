@@ -1,15 +1,15 @@
 #[macro_use]extern crate log;
 extern crate simplelog;
 
-use simplelog::{TermLogger, FileLogger, CombinedLogger, LogLevelFilter};
+use simplelog::*;
 
 use std::fs::File;
 
 fn main() {
     CombinedLogger::init(
         vec![
-            TermLogger::new(LogLevelFilter::Warn).unwrap(),
-            FileLogger::new(LogLevelFilter::Info, File::create("my_rust_binary.log").unwrap()),
+            TermLogger::new(LogLevelFilter::Warn, Config::default()).unwrap(),
+            WriteLogger::new(LogLevelFilter::Info, Config::default(), File::create("my_rust_binary.log").unwrap()),
         ]
     ).unwrap();
 

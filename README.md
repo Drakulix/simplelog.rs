@@ -10,9 +10,9 @@ easy alternative.
 ## Concept
 `simplelog` provides a series of logging facilities, that can be easily combined.
 
-- `SimpleLogger` (very basic logger that logs to stdout)
-- `TermLogger` (advanced terminal logger, that splits to stdout/err and has color support) (can be excluded on unsupported platforms)
-- `FileLogger` (logs to a given file)
+- `SimpleLogger` (very basic logger that logs to stderr/out, should never fail)
+- `TermLogger` (advanced terminal logger, that splits to stderr/out and has color support) (can be excluded on unsupported platforms)
+- `WriteLogger` (logs to a given struct implementing `Write`. e.g. a file)
 - `CombinedLogger` (can be used to form combinations of the above loggers)
 
 ## Usage
@@ -20,15 +20,15 @@ easy alternative.
 #[macro_use]extern crate log;
 extern crate simplelog;
 
-use simplelog::{TermLogger, FileLogger, CombinedLogger, LogLevelFilter};
+use simplelog::{Config, TermLogger, FileLogger, CombinedLogger, LogLevelFilter};
 
 use std::fs::File;
 
 fn main() {
     CombinedLogger::init(
         vec![
-            TermLogger::new(LogLevelFilter::Warn),
-            FileLogger::new(LogLevelFilter::Info, File::create("my_rust_binary.log").unwrap()),
+            TermLogger::new(LogLevelFilter::Warn, Config::default()),
+            FileLogger::new(LogLevelFilter::Info, Config::default(), File::create("my_rust_binary.log").unwrap()),
         ]
     ).unwrap();
 
@@ -56,11 +56,11 @@ and my_rust_binary.log
 Just add
 ```
 [dependencies]
-simplelog = "^0.1.0"
+simplelog = "^0.3.0"
 ```
 to your `Cargo.toml`
 
-## [Documentation](https://drakulix.github.io/simplelog.rs/simplelog/index.html)
+## [Documentation](https://docs.rs/simplelog/)
 
 ## Contributing
 If you wish to contribute your own logger to `simplelog` or advance/extend existing loggers,

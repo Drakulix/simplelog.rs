@@ -8,7 +8,7 @@
 //! Module providing the CombinedLogger Implementation
 
 use log::{LogLevelFilter, LogMetadata, LogRecord, SetLoggerError, set_logger, Log};
-use super::SharedLogger;
+use ::{SharedLogger, Config};
 
 /// The CombinedLogger struct. Provides a Logger implementation that proxies multiple Loggers as one.
 ///
@@ -37,13 +37,12 @@ impl CombinedLogger {
     /// # fn main() {
     /// let _ = CombinedLogger::init(
     ///             vec![
-    ///                 TermLogger::new(LogLevelFilter::Info).unwrap(),
-    ///                 FileLogger::new(LogLevelFilter::Info, File::create("my_rust_bin.log").unwrap())
+    ///                 TermLogger::new(LogLevelFilter::Info, Config::default()).unwrap(),
+    ///                 WriteLogger::new(LogLevelFilter::Info, Config::default(), File::create("my_rust_bin.log").unwrap())
     ///             ]
     ///         );
     /// # }
     /// ```
-    #[allow(dead_code)]
     pub fn init(logger: Vec<Box<SharedLogger>>) -> Result<(), SetLoggerError> {
         set_logger(|max_log_level| {
             let result = CombinedLogger::new(logger);
@@ -70,13 +69,12 @@ impl CombinedLogger {
     /// # fn main() {
     /// let combined_logger = CombinedLogger::new(
     ///             vec![
-    ///                 TermLogger::new(LogLevelFilter::Debug).unwrap(),
-    ///                 FileLogger::new(LogLevelFilter::Info, File::create("my_rust_bin.log").unwrap())
+    ///                 TermLogger::new(LogLevelFilter::Debug, Config::default()).unwrap(),
+    ///                 WriteLogger::new(LogLevelFilter::Info, Config::default(), File::create("my_rust_bin.log").unwrap())
     ///             ]
     ///         );
     /// # }
     /// ```
-    #[allow(dead_code)]
     pub fn new(logger: Vec<Box<SharedLogger>>) -> Box<CombinedLogger> {
         let mut log_level = LogLevelFilter::Off;
         for log in &logger {
@@ -109,6 +107,11 @@ impl SharedLogger for CombinedLogger {
 
     fn level(&self) -> LogLevelFilter {
         self.level
+    }
+
+    fn config(&self) -> Option<&Config>
+    {
+        None
     }
 
     fn as_log(self: Box<Self>) -> Box<Log> {

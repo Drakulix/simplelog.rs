@@ -7,19 +7,19 @@ use ::Config;
 pub fn try_log<W>(config: &Config, record: &LogRecord, write: &mut W) -> Result<(), Error>
     where W: Write + Sized
 {
-    if config.time >= record.level() {
+    if config.time <= record.level() {
         try!(write_time(write));
     }
 
-    if config.level >= record.level() {
+    if config.level <= record.level() {
         try!(write_level(record, write));
     }
 
-    if config.target >= record.level() {
+    if config.target <= record.level() {
         try!(write_target(record, write));
     }
 
-    if config.location >= record.level() {
+    if config.location <= record.level() {
         try!(write_location(record, write));
     }
 
@@ -44,7 +44,7 @@ pub fn write_time<W>(write: &mut W) -> Result<(), Error>
 pub fn write_level<W>(record: &LogRecord, write: &mut W) -> Result<(), Error>
     where W: Write + Sized
 {
-    try!(write!(write, "[{}]", record.level()));
+    try!(write!(write, "[{}] ", record.level()));
     Ok(())
 }
 

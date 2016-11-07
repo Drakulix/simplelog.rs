@@ -10,7 +10,7 @@
 //!
 //! - `SimpleLogger` (very basic logger that logs to stdout)
 //! - `TermLogger` (advanced terminal logger, that splits to stdout/err and has color support) (can be excluded on unsupported platforms)
-//! - `FileLogger` (logs to a given file)
+//! - `WriteLogger` (logs to a given struct implementing `Write`, e.g. a file)
 //! - `CombinedLogger` (can be used to form combinations of the above loggers)
 //!
 //! Only one Logger should be initialized of the start of your program

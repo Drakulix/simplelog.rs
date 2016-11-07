@@ -46,7 +46,7 @@ impl<W: Write + Send + 'static> WriteLogger<W> {
     /// allows to create a new logger, that can be independently used, no matter what is globally set.
     ///
     /// no macros are provided for this case and you probably
-    /// dont want to use this function, but `init()``, if you dont want to build a `CombinedLogger`.
+    /// dont want to use this function, but `init()`, if you dont want to build a `CombinedLogger`.
     ///
     /// Takes the desired `LogLevel`, `Config` and `Write` struct as arguments. They cannot be changed later on.
     ///

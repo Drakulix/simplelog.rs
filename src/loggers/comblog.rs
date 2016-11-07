@@ -54,7 +54,7 @@ impl CombinedLogger {
     /// allows to create a new logger, that can be independently used, no matter whats globally set.
     ///
     /// no macros are provided for this case and you probably
-    /// dont want to use this function, but `init()``, if you dont want to build a `CombinedLogger`.
+    /// dont want to use this function, but `init()`, if you dont want to build a `CombinedLogger`.
     ///
     /// Takes all used loggers as a Vector argument. The log level is automatically determined by the
     /// lowest log level used by the given loggers.

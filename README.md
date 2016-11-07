@@ -20,7 +20,7 @@ easy alternative.
 #[macro_use]extern crate log;
 extern crate simplelog;
 
-use simplelog::{Config, TermLogger, FileLogger, CombinedLogger, LogLevelFilter};
+use simplelog::{Config, TermLogger, WriteLogger, CombinedLogger, LogLevelFilter};
 
 use std::fs::File;
 
@@ -28,7 +28,7 @@ fn main() {
     CombinedLogger::init(
         vec![
             TermLogger::new(LogLevelFilter::Warn, Config::default()),
-            FileLogger::new(LogLevelFilter::Info, Config::default(), File::create("my_rust_binary.log").unwrap()),
+            WriteLogger::new(LogLevelFilter::Info, Config::default(), File::create("my_rust_binary.log").unwrap()),
         ]
     ).unwrap();
 

@@ -31,6 +31,4 @@ script:
   cargo run --example usage --release
 after_success:
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then travis-cargo --only stable coveralls --no-sudo --verify; fi
-env:
-  global:
-  - secure: ZFSABW716s57zBN2/t9wB80BrJhiC/ydiw7COMQYk6UwRbroMPEp03cOB0vZeGPZOxVXJQTMd8RbH8O0MFoXDe2cwT7Cs7p+N3Pj9/AeZ2etW7lfAK5q5FtzTKWLMo+PszMIuLOPOgg1/bXWTDcWkNSdXRirhRD4xSG4o3oTobtxbFt3LyxHAFTJZGVjyVG26rQt8/ZKSNJYbGn5NNoas+lXX55eDRhSzKbJp9HRwHQN8qTRT3+cEoUFjW9P4zVtrkM2RHHCcYBTjrgaivi5rHgJf1tvhkWb7jMEdEOOOsXrXkzuRPDGDhPy+7XFHwfFTMDrGgmhHkBitS/bxrsD1282HxMQAMOThwCdS50YU3bx76TPvp2Iuj62aqzPFZ1f2UvcCRwxs6CS0SZhD7iskREdkVxh4z1gNT7IAJZ86vYV//MScWC1+r9duIsANZuy6oOW1I/7HV/vXKL7adnHdApdvJAi4n9eCA9zt8e3kwCq2Zu4BrJu7aBLNF2JNW/72n49uXRvhwpfCr978RBJnEiSPh32VsA8lJCq0rmZ8jJFEvmvMRHYF1oW8l3+Yyl1bqeV167ekDXLuCTtZa18ec/IYiFM+7bOXqH5OVAelzT0m3jNfGSlUiHxSoSE2v7UtY/Ns0yZiHYs06+MxBmcWwK5KAEO4is9n0Q22nSv7Ec=
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ./kcov/build/src/kcov --verify --coveralls-id=$TRAVIS_JOB_ID --exclude-pattern=/.cargo target/kcov target/debug/simplelog-*; fi

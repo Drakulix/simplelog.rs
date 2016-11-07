@@ -31,4 +31,4 @@ script:
   cargo run --example usage --release
 after_success:
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then travis-cargo --only stable coveralls --no-sudo --verify; fi
-- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ./kcov/build/src/kcov --verify --coveralls-id=$TRAVIS_JOB_ID --exclude-pattern=/.cargo target/kcov target/debug/simplelog-*; fi
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then for exe in target/debug/simplelog-*; do ./kcov/build/src/kcov --verify --coveralls-id=$TRAVIS_JOB_ID --exclude-pattern=/.cargo target/kcov $exe; fi; fi

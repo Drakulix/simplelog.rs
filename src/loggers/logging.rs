@@ -7,19 +7,19 @@ use ::Config;
 pub fn try_log<W>(config: &Config, record: &LogRecord, write: &mut W) -> Result<(), Error>
     where W: Write + Sized
 {
-    if config.time <= record.level() {
+    if config.time.is_some() && config.time.unwrap() <= record.level() {
         try!(write_time(write));
     }
 
-    if config.level <= record.level() {
+    if config.level.is_some() && config.level.unwrap() <= record.level() {
         try!(write_level(record, write));
     }
 
-    if config.target <= record.level() {
+    if config.target.is_some() && config.target.unwrap() <= record.level() {
         try!(write_target(record, write));
     }
 
-    if config.location <= record.level() {
+    if config.location.is_some() && config.location.unwrap() <= record.level() {
         try!(write_location(record, write));
     }
 

@@ -122,21 +122,21 @@ impl TermLogger
             LogLevel::Trace => color::WHITE
         };
 
-        if self.config.time <= record.level() {
+        if self.config.time.is_some() || self.config.time.unwrap() <= record.level() {
             try!(write_time(&mut *term_lock));
         }
 
-        if self.config.level <= record.level() {
+        if self.config.level.is_some() || self.config.level.unwrap() <= record.level() {
             try!(term_lock.fg(color));
             try!(write_level(record, &mut *term_lock));
             try!(term_lock.reset());
         }
 
-        if self.config.target <= record.level() {
+        if self.config.target.is_some() || self.config.target.unwrap() <= record.level() {
             try!(write_target(record, &mut *term_lock));
         }
 
-        if self.config.location <= record.level() {
+        if self.config.location.is_some() || self.config.location.unwrap() <= record.level() {
             try!(write_location(record, &mut *term_lock));
         }
 

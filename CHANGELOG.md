@@ -1,3 +1,10 @@
+## v0.4.0
+    - `Config` is not using `LogLevelFilter` anymore but `Option<LogLevel>`
+        - `None` represents no logging of the `Config` parameter at all
+        - `LogLevelFilter::Off` was supposed to provide this feature, but is actually
+          ordered higher then `LogLevelFilter::Error`, and presents *no filtering* instead
+          of the incorrectly assumed *filter everything*.
+
 ## v0.3.0
     - Merged PullRequest by *Antoni Boucher* - Avoid unwrapping in `TermLogger`:
         - `TermLogger::new` now returns an Option

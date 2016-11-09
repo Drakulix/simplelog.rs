@@ -136,8 +136,6 @@ mod tests {
             }
         ).unwrap();
 
-        println!("{}", i);
-
         error!("Test Error");
         warn!("Test Warning");
         info!("Test Information");

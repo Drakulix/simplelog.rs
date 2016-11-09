@@ -33,7 +33,7 @@ pub use self::loggers::{SimpleLogger, WriteLogger, CombinedLogger};
 #[cfg(feature = "term")]
 pub use self::loggers::TermLogger;
 
-pub use log::LogLevelFilter;
+pub use log::{LogLevel, LogLevelFilter};
 
 use log::Log;
 
@@ -86,34 +86,57 @@ mod tests {
 
     #[test]
     fn test() {
+        let mut i = 0;
+
         CombinedLogger::init(
-            vec![
-                //error
-                SimpleLogger::new(LogLevelFilter::Error, Config::default()),
-                TermLogger::new(LogLevelFilter::Error, Config::default()).unwrap(),
-                WriteLogger::new(LogLevelFilter::Error, Config::default(), File::create("error.log").unwrap()),
+            {
+                let mut vec = Vec::new();
+                let mut conf = Config {
+                    time: None,
+                    level: None,
+                    target: None,
+                    location: None,
+                };
 
-                //warn
-                SimpleLogger::new(LogLevelFilter::Warn, Config::default()),
-                TermLogger::new(LogLevelFilter::Warn, Config::default()).unwrap(),
-                WriteLogger::new(LogLevelFilter::Warn, Config::default(), File::create("warn.log").unwrap()),
+                for elem in vec![None, Some(LogLevel::Trace), Some(LogLevel::Debug), Some(LogLevel::Info), Some(LogLevel::Warn), Some(LogLevel::Error)]
+                {
+                    conf.location = elem;
+                    conf.target = elem;
+                    conf.level = elem;
+                    conf.time = elem;
+                    i += 1;
 
-                //info
-                SimpleLogger::new(LogLevelFilter::Info, Config::default()),
-                TermLogger::new(LogLevelFilter::Info, Config::default()).unwrap(),
-                WriteLogger::new(LogLevelFilter::Info, Config::default(), File::create("info.log").unwrap()),
+                    //error
+                    vec.push(SimpleLogger::new(LogLevelFilter::Error, conf) as Box<SharedLogger>);
+                    vec.push(TermLogger::new(LogLevelFilter::Error, conf).unwrap() as Box<SharedLogger>);
+                    vec.push(WriteLogger::new(LogLevelFilter::Error, conf, File::create(&format!("error_{}.log", i)).unwrap()) as Box<SharedLogger>);
 
-                //debug
-                SimpleLogger::new(LogLevelFilter::Debug, Config::default()),
-                TermLogger::new(LogLevelFilter::Debug, Config::default()).unwrap(),
-                WriteLogger::new(LogLevelFilter::Debug, Config::default(), File::create("debug.log").unwrap()),
+                    //warn
+                    vec.push(SimpleLogger::new(LogLevelFilter::Warn, conf) as Box<SharedLogger>);
+                    vec.push(TermLogger::new(LogLevelFilter::Warn, conf).unwrap() as Box<SharedLogger>);
+                    vec.push(WriteLogger::new(LogLevelFilter::Warn, conf, File::create(&format!("warn_{}.log", i)).unwrap()) as Box<SharedLogger>);
 
-                //trace
-                SimpleLogger::new(LogLevelFilter::Trace, Config::default()),
-                TermLogger::new(LogLevelFilter::Trace, Config::default()).unwrap(),
-                WriteLogger::new(LogLevelFilter::Trace, Config::default(), File::create("trace.log").unwrap()),
-            ]
+                    //info
+                    vec.push(SimpleLogger::new(LogLevelFilter::Info, conf) as Box<SharedLogger>);
+                    vec.push(TermLogger::new(LogLevelFilter::Info, conf).unwrap() as Box<SharedLogger>);
+                    vec.push(WriteLogger::new(LogLevelFilter::Info, conf, File::create(&format!("info_{}.log", i)).unwrap()) as Box<SharedLogger>);
+
+                    //debug
+                    vec.push(SimpleLogger::new(LogLevelFilter::Debug, conf) as Box<SharedLogger>);
+                    vec.push(TermLogger::new(LogLevelFilter::Debug, conf).unwrap() as Box<SharedLogger>);
+                    vec.push(WriteLogger::new(LogLevelFilter::Debug, conf, File::create(&format!("debug_{}.log", i)).unwrap()) as Box<SharedLogger>);
+
+                    //trace
+                    vec.push(SimpleLogger::new(LogLevelFilter::Trace, conf) as Box<SharedLogger>);
+                    vec.push(TermLogger::new(LogLevelFilter::Trace, conf).unwrap() as Box<SharedLogger>);
+                    vec.push(WriteLogger::new(LogLevelFilter::Trace, conf, File::create(&format!("trace_{}.log", i)).unwrap()) as Box<SharedLogger>);
+                }
+
+                vec
+            }
         ).unwrap();
+
+        println!("{}", i);
 
         error!("Test Error");
         warn!("Test Warning");
@@ -121,39 +144,48 @@ mod tests {
         debug!("Test Debug");
         trace!("Test Trace");
 
-        let mut error = String::new();
-        File::open("error.log").unwrap().read_to_string(&mut error).unwrap();
-        let mut warn = String::new();
-        File::open("warn.log").unwrap().read_to_string(&mut warn).unwrap();
-        let mut info = String::new();
-        File::open("info.log").unwrap().read_to_string(&mut info).unwrap();
-        let mut debug = String::new();
-        File::open("debug.log").unwrap().read_to_string(&mut debug).unwrap();
-        let mut trace = String::new();
-        File::open("trace.log").unwrap().read_to_string(&mut trace).unwrap();
+        for j in 1..i
+        {
+            let mut error = String::new();
+            File::open(&format!("error_{}.log", j)).unwrap().read_to_string(&mut error).unwrap();
+            let mut warn = String::new();
+            File::open(&format!("warn_{}.log", j)).unwrap().read_to_string(&mut warn).unwrap();
+            let mut info = String::new();
+            File::open(&format!("info_{}.log", j)).unwrap().read_to_string(&mut info).unwrap();
+            let mut debug = String::new();
+            File::open(&format!("debug_{}.log", j)).unwrap().read_to_string(&mut debug).unwrap();
+            let mut trace = String::new();
+            File::open(&format!("trace_{}.log", j)).unwrap().read_to_string(&mut trace).unwrap();
 
-        assert!(error.contains("Test Error"));
-        assert!(!error.contains("Test Warning"));
+            assert!(error.contains("Test Error"));
+            assert!(!error.contains("Test Warning"));
+            assert!(!error.contains("Test Information"));
+            assert!(!error.contains("Test Debug"));
+            assert!(!error.contains("Test Trace"));
 
-        assert!(warn.contains("Test Error"));
-        assert!(warn.contains("Test Warning"));
-        assert!(!warn.contains("Test Information"));
+            assert!(warn.contains("Test Error"));
+            assert!(warn.contains("Test Warning"));
+            assert!(!warn.contains("Test Information"));
+            assert!(!warn.contains("Test Debug"));
+            assert!(!warn.contains("Test Trace"));
 
-        assert!(info.contains("Test Error"));
-        assert!(info.contains("Test Warning"));
-        assert!(info.contains("Test Information"));
-        assert!(!info.contains("Test Debug"));
+            assert!(info.contains("Test Error"));
+            assert!(info.contains("Test Warning"));
+            assert!(info.contains("Test Information"));
+            assert!(!info.contains("Test Debug"));
+            assert!(!info.contains("Test Trace"));
 
-        assert!(debug.contains("Test Error"));
-        assert!(debug.contains("Test Warning"));
-        assert!(debug.contains("Test Information"));
-        assert!(debug.contains("Test Debug"));
-        assert!(!debug.contains("Test Trace"));
+            assert!(debug.contains("Test Error"));
+            assert!(debug.contains("Test Warning"));
+            assert!(debug.contains("Test Information"));
+            assert!(debug.contains("Test Debug"));
+            assert!(!debug.contains("Test Trace"));
 
-        assert!(trace.contains("Test Error"));
-        assert!(trace.contains("Test Warning"));
-        assert!(trace.contains("Test Information"));
-        assert!(trace.contains("Test Debug"));
-        assert!(trace.contains("Test Trace"));
+            assert!(trace.contains("Test Error"));
+            assert!(trace.contains("Test Warning"));
+            assert!(trace.contains("Test Information"));
+            assert!(trace.contains("Test Debug"));
+            assert!(trace.contains("Test Trace"));
+        }
     }
 }

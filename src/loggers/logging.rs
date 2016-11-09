@@ -7,20 +7,29 @@ use ::Config;
 pub fn try_log<W>(config: &Config, record: &LogRecord, write: &mut W) -> Result<(), Error>
     where W: Write + Sized
 {
-    if config.time.is_some() && config.time.unwrap() <= record.level() {
-        try!(write_time(write));
+
+    if let Some(time) = config.time {
+        if time <= record.level() {
+            try!(write_time(write));
+        }
     }
 
-    if config.level.is_some() && config.level.unwrap() <= record.level() {
-        try!(write_level(record, write));
+    if let Some(level) = config.level {
+        if level <= record.level() {
+            try!(write_level(record, write));
+        }
     }
 
-    if config.target.is_some() && config.target.unwrap() <= record.level() {
-        try!(write_target(record, write));
+    if let Some(target) = config.target {
+        if target <= record.level() {
+            try!(write_target(record, write));
+        }
     }
 
-    if config.location.is_some() && config.location.unwrap() <= record.level() {
-        try!(write_location(record, write));
+    if let Some(location) = config.location {
+        if location <= record.level() {
+            try!(write_location(record, write));
+        }
     }
 
     try!(write_args(record, write));

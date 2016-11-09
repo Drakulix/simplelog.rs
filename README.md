@@ -56,7 +56,7 @@ and my_rust_binary.log
 Just add
 ```
 [dependencies]
-simplelog = "^0.4.0"
+simplelog = "^0.4.1"
 ```
 to your `Cargo.toml`
 

@@ -31,7 +31,7 @@ mod loggers;
 pub use self::config::Config;
 pub use self::loggers::{SimpleLogger, WriteLogger, CombinedLogger};
 #[cfg(feature = "term")]
-pub use self::loggers::TermLogger;
+pub use self::loggers::{TermLogger, TermLogError};
 
 pub use log::{LogLevel, LogLevelFilter};
 

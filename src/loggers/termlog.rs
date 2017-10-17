@@ -14,13 +14,14 @@ use super::logging::*;
 use ::{Config, SharedLogger};
 
 /// TermLogger error type.
-///
-/// TermLogger initialization might also fail if stdout or stderr could not be opened,
-/// e.g. when no tty is attached to the process, it runs detached in the background, etc
-/// This is represented by the `Term` Kind
 #[derive(Debug)]
 pub enum TermLogError {
+    ///The type returned by set_logger if set_logger has already been called.
     SetLogger(SetLoggerError),
+
+    ///TermLogger initialization might also fail if stdout or stderr could not be opened,
+    ///e.g. when no tty is attached to the process, it runs detached in the background, etc
+    /// This is represented by the `Term` Kind
     Term,
 }
 

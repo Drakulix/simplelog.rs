@@ -1,3 +1,12 @@
+## v0.4.3
+    - Publically export TermLogger Error type
+
+## v0.4.2
+    - Removed a debug println! statement
+
+## v0.4.1
+    - Fix `None` config value
+
 ## v0.4.0
     - `Config` is not using `LogLevelFilter` anymore but `Option<LogLevel>`
         - `None` represents no logging of the `Config` parameter at all

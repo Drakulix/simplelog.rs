@@ -1,34 +1,32 @@
 sudo: false
 language: rust
-os:
-- linux
-- osx
+cache: cargo
+
 addons:
   apt:
     packages:
     - libcurl4-openssl-dev
     - libelf-dev
     - libdw-dev
+    - libssl-dev
     - binutils-dev
+
 rust:
 - stable
 - beta
 - nightly
+
 matrix:
   allow_failures:
   - rust: nightly
   - rust: beta
+
 before_script:
-- |
-  if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-    pip install 'travis-cargo<0.2' --user &&
-    export PATH=$HOME/.local/bin:$PATH
-  fi
+- export PATH=$HOME/.cargo/bin:$PATH
+- which cargo-tarpaulin || cargo install cargo-tarpaulin
+- which cargo-install-update || cargo install cargo-update
+- cargo install-update -a
+
 script:
-- |
-  cargo test --verbose
-  cargo run --example usage
-  cargo run --example usage --release
-after_success:
-- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then travis-cargo --only stable coveralls --no-sudo --verify; fi
-- if [[ "$TRAVIS_OS_NAME" == "linux" && "$TRAVIS_RUST_VERSION" == "stable" ]]; then for exe in target/debug/simplelog-*; do ./kcov/build/src/kcov --verify --coveralls-id=$TRAVIS_JOB_ID --exclude-pattern=/.cargo target/kcov $exe; done; fi
+- cargo test --all
+- cargo tarpaulin --ciserver travis-ci --coveralls $TRAVIS_JOB_ID

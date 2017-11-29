@@ -17,17 +17,17 @@ easy alternative.
 
 ## Usage
 ```rust
-#[macro_use]extern crate log;
+#[macro_use] extern crate log;
 extern crate simplelog;
 
-use simplelog::{Config, TermLogger, WriteLogger, CombinedLogger, LogLevelFilter};
+use simplelog::*;
 
 use std::fs::File;
 
 fn main() {
     CombinedLogger::init(
         vec![
-            TermLogger::new(LogLevelFilter::Warn, Config::default()),
+            TermLogger::new(LogLevelFilter::Warn, Config::default()).unwrap(),
             WriteLogger::new(LogLevelFilter::Info, Config::default(), File::create("my_rust_binary.log").unwrap()),
         ]
     ).unwrap();
@@ -36,6 +36,7 @@ fn main() {
     info!("This only appears in the log file");
     debug!("This level is currently not enabled for any logger");
 }
+
 ```
 
 ### Results in

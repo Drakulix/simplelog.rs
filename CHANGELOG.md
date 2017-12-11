@@ -1,3 +1,6 @@
+## v0.4.4
+    - Fixed building non-default feature sets
+
 ## v0.4.3
     - Publically export TermLogger Error type
 

@@ -96,6 +96,7 @@ mod tests {
                     level: None,
                     target: None,
                     location: None,
+                    time_format: None,
                 };
 
                 for elem in vec![None, Some(LogLevel::Trace), Some(LogLevel::Debug), Some(LogLevel::Info), Some(LogLevel::Warn), Some(LogLevel::Error)]

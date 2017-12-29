@@ -10,7 +10,7 @@ pub fn try_log<W>(config: &Config, record: &LogRecord, write: &mut W) -> Result<
 
     if let Some(time) = config.time {
         if time <= record.level() {
-            try!(write_time(write));
+            try!(write_time(write, config));
         }
     }
 
@@ -38,12 +38,15 @@ pub fn try_log<W>(config: &Config, record: &LogRecord, write: &mut W) -> Result<
 }
 
 #[inline(always)]
-pub fn write_time<W>(write: &mut W) -> Result<(), Error>
+pub fn write_time<W>(write: &mut W, config: &Config) -> Result<(), Error>
     where W: Write + Sized
 {
     let cur_time = chrono::Utc::now();
-    try!(write!(write, "{} ",
-                cur_time.format("%H:%M:%S"),));
+    try!(write!(write, "{} ", cur_time.format(
+            config
+                .time_format
+                .unwrap_or("%H:%M:%S")
+    )));
     Ok(())
 }
 

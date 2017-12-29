@@ -15,8 +15,7 @@ use log::LogLevel;
 /// want to show the source line only on `Trace` use that.
 /// Passing `None` will completely disable the part.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct Config
-{
+pub struct Config {
     ///At which level and below the current time shall be logged
     pub time: Option<LogLevel>,
     ///At which level and below the level itself shall be logged
@@ -25,6 +24,8 @@ pub struct Config
     pub target: Option<LogLevel>,
     ///At which level and below a source code reference shall be logged
     pub location: Option<LogLevel>,
+    ///A chrono strftime string. See: https://docs.rs/chrono/0.4.0/chrono/format/strftime/index.html#specifiers
+    pub time_format: Option<&'static str>,
 }
 
 impl Default for Config {
@@ -34,6 +35,7 @@ impl Default for Config {
             level: Some(LogLevel::Error),
             target: Some(LogLevel::Debug),
             location: Some(LogLevel::Trace),
+            time_format: None,
         }
     }
 }

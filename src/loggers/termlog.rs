@@ -125,7 +125,7 @@ impl TermLogger
 
         if let Some(time) = self.config.time {
             if time <= record.level() {
-                try!(write_time(&mut *term_lock));
+                try!(write_time(&mut *term_lock, &self.config));
             }
         }
 

@@ -1,5 +1,5 @@
 use log::LogRecord;
-use time;
+use chrono;
 use std::io::{Write, Error};
 use ::Config;
 
@@ -10,7 +10,7 @@ pub fn try_log<W>(config: &Config, record: &LogRecord, write: &mut W) -> Result<
 
     if let Some(time) = config.time {
         if time <= record.level() {
-            try!(write_time(write));
+            try!(write_time(write, config));
         }
     }
 
@@ -38,14 +38,15 @@ pub fn try_log<W>(config: &Config, record: &LogRecord, write: &mut W) -> Result<
 }
 
 #[inline(always)]
-pub fn write_time<W>(write: &mut W) -> Result<(), Error>
+pub fn write_time<W>(write: &mut W, config: &Config) -> Result<(), Error>
     where W: Write + Sized
 {
-    let cur_time = time::now();
-    try!(write!(write, "{:02}:{:02}:{:02} ",
-                cur_time.tm_hour,
-                cur_time.tm_min,
-                cur_time.tm_sec));
+    let cur_time = chrono::Utc::now();
+    try!(write!(write, "{} ", cur_time.format(
+            config
+                .time_format
+                .unwrap_or("%H:%M:%S")
+    )));
     Ok(())
 }
 

@@ -23,4 +23,4 @@ default = ["term"]
 [dependencies]
 log = "0.3"
 term = { version = "0.4", optional = true }
-time = "0.1"
+chrono = "0.4.0"

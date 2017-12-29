@@ -23,7 +23,7 @@
 #[macro_use] extern crate log;
 #[cfg(feature = "term")]
 extern crate term;
-extern crate time;
+extern crate chrono;
 
 mod config;
 mod loggers;

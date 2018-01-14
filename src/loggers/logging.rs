@@ -1,10 +1,10 @@
-use log::LogRecord;
+use log::Record;
 use chrono;
 use std::io::{Write, Error};
 use ::Config;
 
 #[inline(always)]
-pub fn try_log<W>(config: &Config, record: &LogRecord, write: &mut W) -> Result<(), Error>
+pub fn try_log<W>(config: &Config, record: &Record, write: &mut W) -> Result<(), Error>
     where W: Write + Sized
 {
 
@@ -51,7 +51,7 @@ pub fn write_time<W>(write: &mut W, config: &Config) -> Result<(), Error>
 }
 
 #[inline(always)]
-pub fn write_level<W>(record: &LogRecord, write: &mut W) -> Result<(), Error>
+pub fn write_level<W>(record: &Record, write: &mut W) -> Result<(), Error>
     where W: Write + Sized
 {
     try!(write!(write, "[{}] ", record.level()));
@@ -59,7 +59,7 @@ pub fn write_level<W>(record: &LogRecord, write: &mut W) -> Result<(), Error>
 }
 
 #[inline(always)]
-pub fn write_target<W>(record: &LogRecord, write: &mut W) -> Result<(), Error>
+pub fn write_target<W>(record: &Record, write: &mut W) -> Result<(), Error>
     where W: Write + Sized
 {
     try!(write!(write, "{}: ", record.target()));
@@ -67,17 +67,20 @@ pub fn write_target<W>(record: &LogRecord, write: &mut W) -> Result<(), Error>
 }
 
 #[inline(always)]
-pub fn write_location<W>(record: &LogRecord, write: &mut W) -> Result<(), Error>
+pub fn write_location<W>(record: &Record, write: &mut W) -> Result<(), Error>
     where W: Write + Sized
 {
-    try!(write!(write, "[{}:{}] ",
-        record.location().file(),
-        record.location().line()));
+    let file = record.file().unwrap_or("<unknown>");
+    if let Some(line) = record.line() {
+        try!(write!(write, "[{}:{}] ", file, line));
+    } else {
+        try!(write!(write, "[{}:<unknown>] ", file));
+    }
     Ok(())
 }
 
 #[inline(always)]
-pub fn write_args<W>(record: &LogRecord, write: &mut W) -> Result<(), Error>
+pub fn write_args<W>(record: &Record, write: &mut W) -> Result<(), Error>
     where W: Write + Sized
 {
     try!(writeln!(write, "{}", record.args()));

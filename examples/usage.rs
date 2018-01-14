@@ -8,8 +8,8 @@ use std::fs::File;
 fn main() {
     CombinedLogger::init(
         vec![
-            TermLogger::new(LogLevelFilter::Warn, Config::default()).unwrap(),
-            WriteLogger::new(LogLevelFilter::Info, Config::default(), File::create("my_rust_binary.log").unwrap()),
+            TermLogger::new(LevelFilter::Warn, Config::default()).unwrap(),
+            WriteLogger::new(LevelFilter::Info, Config::default(), File::create("my_rust_binary.log").unwrap()),
         ]
     ).unwrap();
 

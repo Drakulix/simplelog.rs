@@ -1,6 +1,6 @@
 //! Module providing the TermLogger Implementation
 
-use log::{LogLevel, LogLevelFilter, LogMetadata, LogRecord, SetLoggerError, set_logger, Log};
+use log::{Level, LevelFilter, Metadata, Record, SetLoggerError, set_boxed_logger, set_max_level, Log};
 use term;
 use term::{StderrTerminal, StdoutTerminal, Terminal, color};
 use std::error;
@@ -59,7 +59,7 @@ impl From<SetLoggerError> for TermLogError {
 ///
 /// Supports colored output
 pub struct TermLogger {
-    level: LogLevelFilter,
+    level: LevelFilter,
     config: Config,
     stderr: Mutex<Box<StderrTerminal>>,
     stdout: Mutex<Box<StdoutTerminal>>,
@@ -69,7 +69,7 @@ impl TermLogger
 {
     /// init function. Globally initializes the TermLogger as the one and only used log facility.
     ///
-    /// Takes the desired `LogLevel` and `Config` as arguments. They cannot be changed later on.
+    /// Takes the desired `Level` and `Config` as arguments. They cannot be changed later on.
     /// Fails if another Logger was already initialized.
     ///
     /// # Examples
@@ -77,15 +77,13 @@ impl TermLogger
     /// # extern crate simplelog;
     /// # use simplelog::*;
     /// # fn main() {
-    /// let _ = TermLogger::init(LogLevelFilter::Info, Config::default());
+    /// let _ = TermLogger::init(LevelFilter::Info, Config::default());
     /// # }
     /// ```
-    pub fn init(log_level: LogLevelFilter, config: Config) -> Result<(), TermLogError> {
+    pub fn init(log_level: LevelFilter, config: Config) -> Result<(), TermLogError> {
         let logger = try!(TermLogger::new(log_level, config).ok_or(Term));
-        try!(set_logger(|max_log_level| {
-            max_log_level.set(log_level.clone());
-            logger
-        }));
+        set_max_level(log_level.clone());
+        try!(set_boxed_logger(logger));
         Ok(())
     }
 
@@ -94,17 +92,17 @@ impl TermLogger
     /// no macros are provided for this case and you probably
     /// dont want to use this function, but `init()`, if you dont want to build a `CombinedLogger`.
     ///
-    /// Takes the desired `LogLevel` and `Config` as arguments. They cannot be changed later on.
+    /// Takes the desired `Level` and `Config` as arguments. They cannot be changed later on.
     ///
     /// # Examples
     /// ```
     /// # extern crate simplelog;
     /// # use simplelog::*;
     /// # fn main() {
-    /// let term_logger = TermLogger::new(LogLevelFilter::Info, Config::default()).unwrap();
+    /// let term_logger = TermLogger::new(LevelFilter::Info, Config::default()).unwrap();
     /// # }
     /// ```
-    pub fn new(log_level: LogLevelFilter, config: Config) -> Option<Box<TermLogger>> {
+    pub fn new(log_level: LevelFilter, config: Config) -> Option<Box<TermLogger>> {
         term::stderr().and_then(|stderr|
             term::stdout().map(|stdout| {
                 Box::new(TermLogger { level: log_level, config: config, stderr: Mutex::new(stderr), stdout: Mutex::new(stdout) })
@@ -112,15 +110,15 @@ impl TermLogger
         )
     }
 
-    fn try_log_term<W>(&self, record: &LogRecord, mut term_lock: MutexGuard<Box<Terminal<Output=W> + Send>>) -> Result<(), Error>
+    fn try_log_term<W>(&self, record: &Record, mut term_lock: MutexGuard<Box<Terminal<Output=W> + Send>>) -> Result<(), Error>
         where W: Write + Sized
     {
         let color = match record.level() {
-            LogLevel::Error => color::RED,
-            LogLevel::Warn => color::YELLOW,
-            LogLevel::Info => color::BLUE,
-            LogLevel::Debug => color::CYAN,
-            LogLevel::Trace => color::WHITE
+            Level::Error => color::RED,
+            Level::Warn => color::YELLOW,
+            Level::Info => color::BLUE,
+            Level::Debug => color::CYAN,
+            Level::Trace => color::WHITE
         };
 
         if let Some(time) = self.config.time {
@@ -154,9 +152,9 @@ impl TermLogger
         Ok(())
     }
 
-    fn try_log(&self, record: &LogRecord) -> Result<(), Error> {
+    fn try_log(&self, record: &Record) -> Result<(), Error> {
         if self.enabled(record.metadata()) {
-            if record.level() == LogLevel::Error {
+            if record.level() == Level::Error {
                 self.try_log_term(record, self.stderr.lock().unwrap())
             } else {
                 self.try_log_term(record, self.stdout.lock().unwrap())
@@ -169,18 +167,22 @@ impl TermLogger
 
 impl Log for TermLogger
 {
-    fn enabled(&self, metadata: &LogMetadata) -> bool {
+    fn enabled(&self, metadata: &Metadata) -> bool {
         metadata.level() <= self.level
     }
 
-    fn log(&self, record: &LogRecord) {
+    fn log(&self, record: &Record) {
         let _ = self.try_log(record);
     }
+
+    /// The `Log::log` implementation internally calls `try_log_term` which
+    /// always flushes so this does nothing.
+    fn flush(&self) { }
 }
 
 impl SharedLogger for TermLogger
 {
-    fn level(&self) -> LogLevelFilter {
+    fn level(&self) -> LevelFilter {
         self.level
     }
 

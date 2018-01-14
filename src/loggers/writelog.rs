@@ -7,7 +7,7 @@
 
 //! Module providing the FileLogger Implementation
 
-use log::{LogLevelFilter, LogMetadata, LogRecord, SetLoggerError, set_logger, Log};
+use log::{LevelFilter, Metadata, Record, SetLoggerError, set_boxed_logger, set_max_level, Log};
 use std::io::Write;
 use std::sync::Mutex;
 use ::{Config, SharedLogger};
@@ -15,7 +15,7 @@ use super::logging::try_log;
 
 /// The WriteLogger struct. Provides a Logger implementation for structs implementing `Write`, e.g. File
 pub struct WriteLogger<W: Write + Send + 'static> {
-    level: LogLevelFilter,
+    level: LevelFilter,
     config: Config,
     writable: Mutex<W>,
 }
@@ -24,7 +24,7 @@ impl<W: Write + Send + 'static> WriteLogger<W> {
 
     /// init function. Globally initializes the WriteLogger as the one and only used log facility.
     ///
-    /// Takes the desired `LogLevel`, `Config` and `Write` struct as arguments. They cannot be changed later on.
+    /// Takes the desired `Level`, `Config` and `Write` struct as arguments. They cannot be changed later on.
     /// Fails if another Logger was already initialized.
     ///
     /// # Examples
@@ -33,14 +33,12 @@ impl<W: Write + Send + 'static> WriteLogger<W> {
     /// # use simplelog::*;
     /// # use std::fs::File;
     /// # fn main() {
-    /// let _ = WriteLogger::init(LogLevelFilter::Info, Config::default(), File::create("my_rust_bin.log").unwrap());
+    /// let _ = WriteLogger::init(LevelFilter::Info, Config::default(), File::create("my_rust_bin.log").unwrap());
     /// # }
     /// ```
-    pub fn init(log_level: LogLevelFilter, config: Config, writable: W) -> Result<(), SetLoggerError> {
-        set_logger(|max_log_level| {
-            max_log_level.set(log_level.clone());
-            WriteLogger::new(log_level, config, writable)
-        })
+    pub fn init(log_level: LevelFilter, config: Config, writable: W) -> Result<(), SetLoggerError> {
+        set_max_level(log_level.clone());
+        set_boxed_logger(WriteLogger::new(log_level, config, writable))
     }
 
     /// allows to create a new logger, that can be independently used, no matter what is globally set.
@@ -48,7 +46,7 @@ impl<W: Write + Send + 'static> WriteLogger<W> {
     /// no macros are provided for this case and you probably
     /// dont want to use this function, but `init()`, if you dont want to build a `CombinedLogger`.
     ///
-    /// Takes the desired `LogLevel`, `Config` and `Write` struct as arguments. They cannot be changed later on.
+    /// Takes the desired `Level`, `Config` and `Write` struct as arguments. They cannot be changed later on.
     ///
     /// # Examples
     /// ```
@@ -56,10 +54,10 @@ impl<W: Write + Send + 'static> WriteLogger<W> {
     /// # use simplelog::*;
     /// # use std::fs::File;
     /// # fn main() {
-    /// let file_logger = WriteLogger::new(LogLevelFilter::Info, Config::default(), File::create("my_rust_bin.log").unwrap());
+    /// let file_logger = WriteLogger::new(LevelFilter::Info, Config::default(), File::create("my_rust_bin.log").unwrap());
     /// # }
     /// ```
-    pub fn new(log_level: LogLevelFilter, config: Config, writable: W) -> Box<WriteLogger<W>> {
+    pub fn new(log_level: LevelFilter, config: Config, writable: W) -> Box<WriteLogger<W>> {
         Box::new(WriteLogger { level: log_level, config: config, writable: Mutex::new(writable) })
     }
 
@@ -67,21 +65,25 @@ impl<W: Write + Send + 'static> WriteLogger<W> {
 
 impl<W: Write + Send + 'static> Log for WriteLogger<W> {
 
-    fn enabled(&self, metadata: &LogMetadata) -> bool {
+    fn enabled(&self, metadata: &Metadata) -> bool {
         metadata.level() <= self.level
     }
 
-    fn log(&self, record: &LogRecord) {
+    fn log(&self, record: &Record) {
         if self.enabled(record.metadata()) {
             let mut write_lock = self.writable.lock().unwrap();
             let _ = try_log(&self.config, record, &mut *write_lock);
         }
     }
+
+    /// The `Log::log` implementation internally calls `try_log` which always
+    /// flushes so this does nothing.
+    fn flush(&self) { }
 }
 
 impl<W: Write + Send + 'static> SharedLogger for WriteLogger<W> {
 
-    fn level(&self) -> LogLevelFilter {
+    fn level(&self) -> LevelFilter {
         self.level
     }
 

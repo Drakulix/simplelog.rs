@@ -7,14 +7,14 @@
 
 //! Module providing the CombinedLogger Implementation
 
-use log::{LogLevelFilter, LogMetadata, LogRecord, SetLoggerError, set_logger, Log};
+use log::{LevelFilter, Metadata, Record, SetLoggerError, set_boxed_logger, set_max_level, Log};
 use ::{SharedLogger, Config};
 
 /// The CombinedLogger struct. Provides a Logger implementation that proxies multiple Loggers as one.
 ///
 /// The purpose is to allow multiple Loggers to be set globally
 pub struct CombinedLogger {
-    level: LogLevelFilter,
+    level: LevelFilter,
     logger: Vec<Box<SharedLogger>>,
 }
 
@@ -37,18 +37,16 @@ impl CombinedLogger {
     /// # fn main() {
     /// let _ = CombinedLogger::init(
     ///             vec![
-    ///                 TermLogger::new(LogLevelFilter::Info, Config::default()).unwrap(),
-    ///                 WriteLogger::new(LogLevelFilter::Info, Config::default(), File::create("my_rust_bin.log").unwrap())
+    ///                 TermLogger::new(LevelFilter::Info, Config::default()).unwrap(),
+    ///                 WriteLogger::new(LevelFilter::Info, Config::default(), File::create("my_rust_bin.log").unwrap())
     ///             ]
     ///         );
     /// # }
     /// ```
     pub fn init(logger: Vec<Box<SharedLogger>>) -> Result<(), SetLoggerError> {
-        set_logger(|max_log_level| {
-            let result = CombinedLogger::new(logger);
-            max_log_level.set(result.level());
-            result
-        })
+        let comblog = CombinedLogger::new(logger);
+        set_max_level(comblog.level());
+        set_boxed_logger(comblog)
     }
 
     /// allows to create a new logger, that can be independently used, no matter whats globally set.
@@ -69,14 +67,14 @@ impl CombinedLogger {
     /// # fn main() {
     /// let combined_logger = CombinedLogger::new(
     ///             vec![
-    ///                 TermLogger::new(LogLevelFilter::Debug, Config::default()).unwrap(),
-    ///                 WriteLogger::new(LogLevelFilter::Info, Config::default(), File::create("my_rust_bin.log").unwrap())
+    ///                 TermLogger::new(LevelFilter::Debug, Config::default()).unwrap(),
+    ///                 WriteLogger::new(LevelFilter::Info, Config::default(), File::create("my_rust_bin.log").unwrap())
     ///             ]
     ///         );
     /// # }
     /// ```
     pub fn new(logger: Vec<Box<SharedLogger>>) -> Box<CombinedLogger> {
-        let mut log_level = LogLevelFilter::Off;
+        let mut log_level = LevelFilter::Off;
         for log in &logger {
             if log_level < log.level() {
                 log_level = log.level();
@@ -90,22 +88,28 @@ impl CombinedLogger {
 
 impl Log for CombinedLogger {
 
-    fn enabled(&self, metadata: &LogMetadata) -> bool {
+    fn enabled(&self, metadata: &Metadata) -> bool {
         metadata.level() <= self.level
     }
 
-    fn log(&self, record: &LogRecord) {
+    fn log(&self, record: &Record) {
         if self.enabled(record.metadata()) {
             for log in &self.logger {
                 log.log(record);
             }
         }
     }
+
+    fn flush(&self) {
+        for log in &self.logger {
+            log.flush();
+        }
+    }
 }
 
 impl SharedLogger for CombinedLogger {
 
-    fn level(&self) -> LogLevelFilter {
+    fn level(&self) -> LevelFilter {
         self.level
     }
 

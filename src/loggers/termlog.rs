@@ -148,7 +148,6 @@ impl TermLogger
         }
 
         try!(write_args(record, &mut *term_lock));
-        try!(term_lock.flush());
         Ok(())
     }
 
@@ -175,9 +174,10 @@ impl Log for TermLogger
         let _ = self.try_log(record);
     }
 
-    /// The `Log::log` implementation internally calls `try_log_term` which
-    /// always flushes so this does nothing.
-    fn flush(&self) { }
+    fn flush(&self) {
+        let _ = self.stdout.lock().unwrap().flush();
+        let _ = self.stderr.lock().unwrap().flush();
+    }
 }
 
 impl SharedLogger for TermLogger

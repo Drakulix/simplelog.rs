@@ -76,9 +76,9 @@ impl<W: Write + Send + 'static> Log for WriteLogger<W> {
         }
     }
 
-    /// The `Log::log` implementation internally calls `try_log` which always
-    /// flushes so this does nothing.
-    fn flush(&self) { }
+    fn flush(&self) {
+        let _ = self.writable.lock().unwrap().flush();
+    }
 }
 
 impl<W: Write + Send + 'static> SharedLogger for WriteLogger<W> {

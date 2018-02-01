@@ -33,7 +33,6 @@ pub fn try_log<W>(config: &Config, record: &Record, write: &mut W) -> Result<(),
     }
 
     try!(write_args(record, write));
-    try!(write.flush());
     Ok(())
 }
 

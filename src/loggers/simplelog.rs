@@ -81,9 +81,10 @@ impl Log for SimpleLogger {
         }
     }
 
-    /// The `Log::log` implementation internally calls `try_log` which always
-    /// flushes so this does nothing.
-    fn flush(&self) { }
+    fn flush(&self) {
+        use std::io::Write;
+        let _ = stdout().flush();
+    }
 }
 
 impl SharedLogger for SimpleLogger {

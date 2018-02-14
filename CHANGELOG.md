@@ -1,3 +1,6 @@
+## v0.5.0
+    - Update `simplelog` to `log` 0.4
+
 ## v0.4.4
     - Fixed building non-default feature sets
 

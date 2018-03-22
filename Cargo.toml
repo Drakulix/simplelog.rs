@@ -21,6 +21,6 @@ include = [
 default = ["term"]
 
 [dependencies]
-log = { version = "0.4", features = ["std"] }
-term = { version = "0.4", optional = true }
+log = { version = "0.4.1", features = ["std"] }
+term = { version = "0.5.1", optional = true }
 chrono = "0.4.0"

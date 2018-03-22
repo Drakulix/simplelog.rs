@@ -1,4 +1,4 @@
-## UNRELEASED
+## v0.5.1
     - Updated `simplelog` to `log` 0.4.1
     - Updated `simplelog` to `term` 0.5.1
     - Fixed compiler warning about unused `#[macro_use]`

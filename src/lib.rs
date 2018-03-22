@@ -20,7 +20,8 @@
 
 #![deny(missing_docs)]
 
-#[macro_use] extern crate log;
+#[cfg_attr(test, macro_use)]
+extern crate log;
 #[cfg(feature = "term")]
 extern crate term;
 extern crate chrono;

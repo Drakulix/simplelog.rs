@@ -5,7 +5,7 @@ use term;
 use term::{StderrTerminal, StdoutTerminal, Terminal, color};
 use std::error;
 use std::fmt;
-use std::sync::{Mutex, MutexGuard};
+use std::sync::Mutex;
 use std::io::{Write, Error};
 
 use self::TermLogError::{SetLogger, Term};
@@ -55,14 +55,18 @@ impl From<SetLoggerError> for TermLogError {
     }
 }
 
+struct OutputStreams {
+    stderr: Box<StderrTerminal>,
+    stdout: Box<StdoutTerminal>,
+}
+
 /// The TermLogger struct. Provides a stderr/out based Logger implementation
 ///
 /// Supports colored output
 pub struct TermLogger {
     level: LevelFilter,
     config: Config,
-    stderr: Mutex<Box<StderrTerminal>>,
-    stdout: Mutex<Box<StdoutTerminal>>,
+    streams: Mutex<OutputStreams>,
 }
 
 impl TermLogger
@@ -105,12 +109,17 @@ impl TermLogger
     pub fn new(log_level: LevelFilter, config: Config) -> Option<Box<TermLogger>> {
         term::stderr().and_then(|stderr|
             term::stdout().map(|stdout| {
-                Box::new(TermLogger { level: log_level, config: config, stderr: Mutex::new(stderr), stdout: Mutex::new(stdout) })
+                let streams = Mutex::new( OutputStreams {
+                    stderr: stderr,
+                    stdout: stdout,
+                });
+                Box::new(TermLogger { level: log_level, config: config, streams: streams
+                })
             })
         )
     }
 
-    fn try_log_term<W>(&self, record: &Record, mut term_lock: MutexGuard<Box<Terminal<Output=W> + Send>>) -> Result<(), Error>
+    fn try_log_term<W>(&self, record: &Record, term_lock: &mut Box<Terminal<Output=W> + Send>) -> Result<(), Error>
         where W: Write + Sized
     {
         let color = match record.level() {
@@ -153,10 +162,13 @@ impl TermLogger
 
     fn try_log(&self, record: &Record) -> Result<(), Error> {
         if self.enabled(record.metadata()) {
+
+            let mut streams = self.streams.lock().unwrap();
+
             if record.level() == Level::Error {
-                self.try_log_term(record, self.stderr.lock().unwrap())
+                self.try_log_term(record, &mut streams.stderr)
             } else {
-                self.try_log_term(record, self.stdout.lock().unwrap())
+                self.try_log_term(record, &mut streams.stdout)
             }
         } else {
             Ok(())
@@ -175,8 +187,9 @@ impl Log for TermLogger
     }
 
     fn flush(&self) {
-        let _ = self.stdout.lock().unwrap().flush();
-        let _ = self.stderr.lock().unwrap().flush();
+        let mut streams = self.streams.lock().unwrap();
+        let _ = streams.stdout.flush();
+        let _ = streams.stderr.flush();
     }
 }
 

@@ -8,6 +8,7 @@
 //! Module providing the SimpleLogger Implementation
 
 use std::io::{stderr, stdout};
+use std::sync::Mutex;
 use log::{Level, LevelFilter, Metadata, Record, SetLoggerError, set_max_level, set_boxed_logger, Log};
 use ::{Config, SharedLogger};
 use super::logging::try_log;
@@ -16,6 +17,7 @@ use super::logging::try_log;
 pub struct SimpleLogger {
     level: LevelFilter,
     config: Config,
+    output_lock: Mutex<()>,
 }
 
 impl SimpleLogger {
@@ -54,7 +56,7 @@ impl SimpleLogger {
     /// # }
     /// ```
     pub fn new(log_level: LevelFilter, config: Config) -> Box<SimpleLogger> {
-        Box::new(SimpleLogger { level: log_level, config: config })
+        Box::new(SimpleLogger { level: log_level, config: config, output_lock: Mutex::new(()) })
     }
 }
 
@@ -66,6 +68,9 @@ impl Log for SimpleLogger {
 
     fn log(&self, record: &Record) {
         if self.enabled(record.metadata()) {
+
+            let _lock = self.output_lock.lock().unwrap();
+
             match record.level() {
                 Level::Error => {
                     let stderr = stderr();

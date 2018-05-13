@@ -1,3 +1,6 @@
+## v0.5.2
+    - Don't interleave stdout and stderr (PR #23, credits to @hansjorg)
+
 ## v0.5.1
     - Updated `simplelog` to `log` 0.4.1
     - Updated `simplelog` to `term` 0.5.1

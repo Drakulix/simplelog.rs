@@ -144,6 +144,14 @@ impl TermLogger
             }
         }
 
+		if let Some(thread) = self.config.thread {
+			if thread <= record.level() {
+				try!(term_lock.fg(color));
+				 try!(write_thread_id(record, &mut *term_lock));
+                try!(term_lock.reset());
+			}
+		}
+
         if let Some(target) = self.config.target {
             if target <= record.level() {
                 try!(write_target(record, &mut *term_lock));

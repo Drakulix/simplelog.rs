@@ -1,6 +1,7 @@
 use log::Record;
 use chrono;
 use std::io::{Write, Error};
+use std::thread;
 use ::Config;
 
 #[inline(always)]
@@ -19,6 +20,12 @@ pub fn try_log<W>(config: &Config, record: &Record, write: &mut W) -> Result<(),
             try!(write_level(record, write));
         }
     }
+
+	if let Some(thread) = config.thread {
+		if thread <= record.level() {
+			try!(write_thread_id(record, write));
+		}
+	}
 
     if let Some(target) = config.target {
         if target <= record.level() {
@@ -84,4 +91,14 @@ pub fn write_args<W>(record: &Record, write: &mut W) -> Result<(), Error>
 {
     try!(writeln!(write, "{}", record.args()));
     Ok(())
+}
+
+pub fn write_thread_id<W>(_record: &Record, write: &mut W) -> Result<(), Error>
+	where W: Write + Sized
+{
+	let id = format!("{:?}",  thread::current().id());
+	let id = id.replace("ThreadId(", "");
+	let id = id.replace(")", "");	
+	try!(write!(write, "({}) ", id));
+	Ok(())
 }

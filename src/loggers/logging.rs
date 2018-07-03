@@ -1,6 +1,7 @@
 use chrono;
 use log::Record;
 use std::io::{Error, Write};
+use std::thread;
 use Config;
 
 #[inline(always)]
@@ -17,6 +18,12 @@ where
     if let Some(level) = config.level {
         if level <= record.level() {
             try!(write_level(record, write));
+        }
+    }
+
+    if let Some(thread) = config.thread {
+        if thread <= record.level() {
+            try!(write_thread_id(write));
         }
     }
 
@@ -81,6 +88,17 @@ where
     } else {
         try!(write!(write, "[{}:<unknown>] ", file));
     }
+    Ok(())
+}
+
+pub fn write_thread_id<W>(write: &mut W) -> Result<(), Error>
+where
+    W: Write + Sized,
+{
+    let id = format!("{:?}", thread::current().id());
+    let id = id.replace("ThreadId(", "");
+    let id = id.replace(")", "");
+    try!(write!(write, "({}) ", id));
     Ok(())
 }
 

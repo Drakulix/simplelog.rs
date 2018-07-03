@@ -22,6 +22,8 @@ pub struct Config {
     pub time: Option<Level>,
     ///At which level and below the level itself shall be logged
     pub level: Option<Level>,
+	///At which level and below the thread id shall be logged. Default DEBUG
+	pub thread: Option<Level>,
     ///At which level and below the target shall be logged
     pub target: Option<Level>,
     ///At which level and below a source code reference shall be logged
@@ -38,6 +40,7 @@ impl Default for Config {
         Config {
             time: Some(Level::Error),
             level: Some(Level::Error),
+			thread: Some(Level::Debug),
             target: Some(Level::Debug),
             location: Some(Level::Trace),
             time_format: None,

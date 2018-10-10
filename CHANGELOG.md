@@ -1,3 +1,6 @@
+## v0.5.3
+    - Fix minimal chrono version / update to chrono v0.4.1 (PR #27, credits to @samueltardieu)
+
 ## v0.5.2
     - Don't interleave stdout and stderr (PR #23, credits to @hansjorg)
 

@@ -12,6 +12,7 @@
 //! - `TermLogger` (advanced terminal logger, that splits to stdout/err and has color support) (can be excluded on unsupported platforms)
 //! - `WriteLogger` (logs to a given struct implementing `Write`, e.g. a file)
 //! - `CombinedLogger` (can be used to form combinations of the above loggers)
+//! - `TestLogger` (specialized logger for tests. Uses print!() / println!() for tests to be able to capture the output)
 //!
 //! Only one Logger should be initialized of the start of your program
 //! through the `Logger::init(...)` method. For the actual calling syntax
@@ -31,6 +32,8 @@ mod loggers;
 
 pub use self::config::Config;
 pub use self::loggers::{CombinedLogger, SimpleLogger, WriteLogger};
+#[cfg(feature = "test")]
+pub use self::loggers::TestLogger;
 #[cfg(feature = "term")]
 pub use self::loggers::{TermLogError, TermLogger};
 

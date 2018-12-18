@@ -89,52 +89,75 @@ mod tests {
     fn test() {
         let mut i = 0;
 
-        CombinedLogger::init(
-            {
-                let mut vec = Vec::new();
-                let mut conf = Config {
-                    time: None,
-                    level: None,
-                    target: None,
-                    location: None,
-                    time_format: None,
-                };
+        CombinedLogger::init({
+            let mut vec = Vec::new();
+            let mut conf = Config {
+                time: None,
+                level: None,
+                target: None,
+                location: None,
+                time_format: None,
+                ..Default::default()
+            };
 
-                for elem in vec![None, Some(Level::Trace), Some(Level::Debug), Some(Level::Info), Some(Level::Warn), Some(Level::Error)]
-                {
-                    conf.location = elem;
-                    conf.target = elem;
-                    conf.level = elem;
-                    conf.time = elem;
-                    i += 1;
+            for elem in vec![
+                None,
+                Some(Level::Trace),
+                Some(Level::Debug),
+                Some(Level::Info),
+                Some(Level::Warn),
+                Some(Level::Error),
+            ] {
+                conf.location = elem;
+                conf.target = elem;
+                conf.level = elem;
+                conf.time = elem;
+                i += 1;
 
-                    //error
-                    vec.push(SimpleLogger::new(LevelFilter::Error, conf) as Box<SharedLogger>);
-                    vec.push(TermLogger::new(LevelFilter::Error, conf).unwrap() as Box<SharedLogger>);
-                    vec.push(WriteLogger::new(LevelFilter::Error, conf, File::create(&format!("error_{}.log", i)).unwrap()) as Box<SharedLogger>);
+                //error
+                vec.push(SimpleLogger::new(LevelFilter::Error, conf) as Box<SharedLogger>);
+                vec.push(TermLogger::new(LevelFilter::Error, conf).unwrap() as Box<SharedLogger>);
+                vec.push(WriteLogger::new(
+                    LevelFilter::Error,
+                    conf,
+                    File::create(&format!("error_{}.log", i)).unwrap(),
+                ) as Box<SharedLogger>);
 
-                    //warn
-                    vec.push(SimpleLogger::new(LevelFilter::Warn, conf) as Box<SharedLogger>);
-                    vec.push(TermLogger::new(LevelFilter::Warn, conf).unwrap() as Box<SharedLogger>);
-                    vec.push(WriteLogger::new(LevelFilter::Warn, conf, File::create(&format!("warn_{}.log", i)).unwrap()) as Box<SharedLogger>);
+                //warn
+                vec.push(SimpleLogger::new(LevelFilter::Warn, conf) as Box<SharedLogger>);
+                vec.push(TermLogger::new(LevelFilter::Warn, conf).unwrap() as Box<SharedLogger>);
+                vec.push(WriteLogger::new(
+                    LevelFilter::Warn,
+                    conf,
+                    File::create(&format!("warn_{}.log", i)).unwrap(),
+                ) as Box<SharedLogger>);
 
-                    //info
-                    vec.push(SimpleLogger::new(LevelFilter::Info, conf) as Box<SharedLogger>);
-                    vec.push(TermLogger::new(LevelFilter::Info, conf).unwrap() as Box<SharedLogger>);
-                    vec.push(WriteLogger::new(LevelFilter::Info, conf, File::create(&format!("info_{}.log", i)).unwrap()) as Box<SharedLogger>);
+                //info
+                vec.push(SimpleLogger::new(LevelFilter::Info, conf) as Box<SharedLogger>);
+                vec.push(TermLogger::new(LevelFilter::Info, conf).unwrap() as Box<SharedLogger>);
+                vec.push(WriteLogger::new(
+                    LevelFilter::Info,
+                    conf,
+                    File::create(&format!("info_{}.log", i)).unwrap(),
+                ) as Box<SharedLogger>);
 
-                    //debug
-                    vec.push(SimpleLogger::new(LevelFilter::Debug, conf) as Box<SharedLogger>);
-                    vec.push(TermLogger::new(LevelFilter::Debug, conf).unwrap() as Box<SharedLogger>);
-                    vec.push(WriteLogger::new(LevelFilter::Debug, conf, File::create(&format!("debug_{}.log", i)).unwrap()) as Box<SharedLogger>);
+                //debug
+                vec.push(SimpleLogger::new(LevelFilter::Debug, conf) as Box<SharedLogger>);
+                vec.push(TermLogger::new(LevelFilter::Debug, conf).unwrap() as Box<SharedLogger>);
+                vec.push(WriteLogger::new(
+                    LevelFilter::Debug,
+                    conf,
+                    File::create(&format!("debug_{}.log", i)).unwrap(),
+                ) as Box<SharedLogger>);
 
-                    //trace
-                    vec.push(SimpleLogger::new(LevelFilter::Trace, conf) as Box<SharedLogger>);
-                    vec.push(TermLogger::new(LevelFilter::Trace, conf).unwrap() as Box<SharedLogger>);
-                    vec.push(WriteLogger::new(LevelFilter::Trace, conf, File::create(&format!("trace_{}.log", i)).unwrap()) as Box<SharedLogger>);
-                }
-
-                vec
+                //trace
+                vec.push(SimpleLogger::new(LevelFilter::Trace, conf) as Box<SharedLogger>);
+                vec.push(TermLogger::new(LevelFilter::Trace, conf).unwrap() as Box<SharedLogger>);
+                vec.push(WriteLogger::new(
+                    LevelFilter::Trace,
+                    conf,
+                    File::create(&format!("trace_{}.log", i)).unwrap(),
+                ) as Box<SharedLogger>);
             }
         ).unwrap();
 

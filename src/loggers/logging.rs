@@ -40,7 +40,9 @@ pub fn try_log<W>(config: &Config, record: &Record, write: &mut W) -> Result<(),
 pub fn write_time<W>(write: &mut W, config: &Config) -> Result<(), Error>
     where W: Write + Sized
 {
-    let cur_time = chrono::Utc::now();
+    let cur_time = chrono::Utc::now().with_timezone::<chrono::offset::FixedOffset>(
+        &chrono::TimeZone::from_offset(&config.offset),
+    );
     try!(write!(write, "{} ", cur_time.format(
             config
                 .time_format

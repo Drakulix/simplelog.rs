@@ -1,5 +1,7 @@
 use log::Level;
 
+pub use chrono::offset::{FixedOffset, Local, Offset, TimeZone, Utc};
+
 /// Configuration for the Loggers
 ///
 /// All loggers print the message in the following form:
@@ -26,6 +28,9 @@ pub struct Config {
     pub location: Option<Level>,
     ///A chrono strftime string. See: https://docs.rs/chrono/0.4.0/chrono/format/strftime/index.html#specifiers
     pub time_format: Option<&'static str>,
+    /// Chrono Offset used for logging time (default is UTC)
+    pub offset: FixedOffset,
+    
 }
 
 impl Default for Config {
@@ -36,6 +41,7 @@ impl Default for Config {
             target: Some(Level::Debug),
             location: Some(Level::Trace),
             time_format: None,
+            offset: Utc.fix(),
         }
     }
 }

@@ -20,19 +20,19 @@
 
 #![deny(missing_docs)]
 
+extern crate chrono;
 #[cfg_attr(test, macro_use)]
 extern crate log;
 #[cfg(feature = "term")]
 extern crate term;
-extern crate chrono;
 
 mod config;
 mod loggers;
 
 pub use self::config::Config;
-pub use self::loggers::{SimpleLogger, WriteLogger, CombinedLogger};
+pub use self::loggers::{CombinedLogger, SimpleLogger, WriteLogger};
 #[cfg(feature = "term")]
-pub use self::loggers::{TermLogger, TermLogError};
+pub use self::loggers::{TermLogError, TermLogger};
 
 pub use log::{Level, LevelFilter};
 
@@ -80,8 +80,8 @@ pub trait SharedLogger: Log {
 
 #[cfg(test)]
 mod tests {
-    use std::io::Read;
     use std::fs::File;
+    use std::io::Read;
 
     use super::*;
 
@@ -159,7 +159,10 @@ mod tests {
                     File::create(&format!("trace_{}.log", i)).unwrap(),
                 ) as Box<SharedLogger>);
             }
-        ).unwrap();
+
+            vec
+        })
+        .unwrap();
 
         error!("Test Error");
         warn!("Test Warning");
@@ -167,18 +170,32 @@ mod tests {
         debug!("Test Debug");
         trace!("Test Trace");
 
-        for j in 1..i
-        {
+        for j in 1..i {
             let mut error = String::new();
-            File::open(&format!("error_{}.log", j)).unwrap().read_to_string(&mut error).unwrap();
+            File::open(&format!("error_{}.log", j))
+                .unwrap()
+                .read_to_string(&mut error)
+                .unwrap();
             let mut warn = String::new();
-            File::open(&format!("warn_{}.log", j)).unwrap().read_to_string(&mut warn).unwrap();
+            File::open(&format!("warn_{}.log", j))
+                .unwrap()
+                .read_to_string(&mut warn)
+                .unwrap();
             let mut info = String::new();
-            File::open(&format!("info_{}.log", j)).unwrap().read_to_string(&mut info).unwrap();
+            File::open(&format!("info_{}.log", j))
+                .unwrap()
+                .read_to_string(&mut info)
+                .unwrap();
             let mut debug = String::new();
-            File::open(&format!("debug_{}.log", j)).unwrap().read_to_string(&mut debug).unwrap();
+            File::open(&format!("debug_{}.log", j))
+                .unwrap()
+                .read_to_string(&mut debug)
+                .unwrap();
             let mut trace = String::new();
-            File::open(&format!("trace_{}.log", j)).unwrap().read_to_string(&mut trace).unwrap();
+            File::open(&format!("trace_{}.log", j))
+                .unwrap()
+                .read_to_string(&mut trace)
+                .unwrap();
 
             assert!(error.contains("Test Error"));
             assert!(!error.contains("Test Warning"));

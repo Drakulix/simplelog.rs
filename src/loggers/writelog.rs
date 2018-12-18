@@ -7,11 +7,11 @@
 
 //! Module providing the FileLogger Implementation
 
-use log::{LevelFilter, Metadata, Record, SetLoggerError, set_boxed_logger, set_max_level, Log};
+use super::logging::try_log;
+use log::{set_boxed_logger, set_max_level, LevelFilter, Log, Metadata, Record, SetLoggerError};
 use std::io::Write;
 use std::sync::Mutex;
-use ::{Config, SharedLogger};
-use super::logging::try_log;
+use {Config, SharedLogger};
 
 /// The WriteLogger struct. Provides a Logger implementation for structs implementing `Write`, e.g. File
 pub struct WriteLogger<W: Write + Send + 'static> {
@@ -21,7 +21,6 @@ pub struct WriteLogger<W: Write + Send + 'static> {
 }
 
 impl<W: Write + Send + 'static> WriteLogger<W> {
-
     /// init function. Globally initializes the WriteLogger as the one and only used log facility.
     ///
     /// Takes the desired `Level`, `Config` and `Write` struct as arguments. They cannot be changed later on.
@@ -58,13 +57,15 @@ impl<W: Write + Send + 'static> WriteLogger<W> {
     /// # }
     /// ```
     pub fn new(log_level: LevelFilter, config: Config, writable: W) -> Box<WriteLogger<W>> {
-        Box::new(WriteLogger { level: log_level, config: config, writable: Mutex::new(writable) })
+        Box::new(WriteLogger {
+            level: log_level,
+            config: config,
+            writable: Mutex::new(writable),
+        })
     }
-
 }
 
 impl<W: Write + Send + 'static> Log for WriteLogger<W> {
-
     fn enabled(&self, metadata: &Metadata) -> bool {
         metadata.level() <= self.level
     }
@@ -82,18 +83,15 @@ impl<W: Write + Send + 'static> Log for WriteLogger<W> {
 }
 
 impl<W: Write + Send + 'static> SharedLogger for WriteLogger<W> {
-
     fn level(&self) -> LevelFilter {
         self.level
     }
 
-    fn config(&self) -> Option<&Config>
-    {
+    fn config(&self) -> Option<&Config> {
         Some(&self.config)
     }
 
     fn as_log(self: Box<Self>) -> Box<Log> {
         Box::new(*self)
     }
-
 }

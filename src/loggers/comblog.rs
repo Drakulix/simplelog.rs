@@ -7,8 +7,8 @@
 
 //! Module providing the CombinedLogger Implementation
 
-use log::{LevelFilter, Metadata, Record, SetLoggerError, set_boxed_logger, set_max_level, Log};
-use ::{SharedLogger, Config};
+use log::{set_boxed_logger, set_max_level, LevelFilter, Log, Metadata, Record, SetLoggerError};
+use {Config, SharedLogger};
 
 /// The CombinedLogger struct. Provides a Logger implementation that proxies multiple Loggers as one.
 ///
@@ -19,7 +19,6 @@ pub struct CombinedLogger {
 }
 
 impl CombinedLogger {
-
     /// init function. Globally initializes the CombinedLogger as the one and only used log facility.
     ///
     /// Takes all used Loggers as a Vector argument. None of those Loggers should already be set globally.
@@ -81,13 +80,14 @@ impl CombinedLogger {
             }
         }
 
-        Box::new(CombinedLogger { level: log_level, logger: logger })
+        Box::new(CombinedLogger {
+            level: log_level,
+            logger: logger,
+        })
     }
-
 }
 
 impl Log for CombinedLogger {
-
     fn enabled(&self, metadata: &Metadata) -> bool {
         metadata.level() <= self.level
     }
@@ -108,18 +108,15 @@ impl Log for CombinedLogger {
 }
 
 impl SharedLogger for CombinedLogger {
-
     fn level(&self) -> LevelFilter {
         self.level
     }
 
-    fn config(&self) -> Option<&Config>
-    {
+    fn config(&self) -> Option<&Config> {
         None
     }
 
     fn as_log(self: Box<Self>) -> Box<Log> {
         Box::new(*self)
     }
-
 }

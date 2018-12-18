@@ -1,17 +1,19 @@
 //! Module providing the TermLogger Implementation
 
-use log::{Level, LevelFilter, Metadata, Record, SetLoggerError, set_boxed_logger, set_max_level, Log};
-use term;
-use term::{StderrTerminal, StdoutTerminal, Terminal, color};
+use log::{
+    set_boxed_logger, set_max_level, Level, LevelFilter, Log, Metadata, Record, SetLoggerError,
+};
 use std::error;
 use std::fmt;
+use std::io::{Error, Write};
 use std::sync::Mutex;
-use std::io::{Write, Error};
+use term;
+use term::{color, StderrTerminal, StdoutTerminal, Terminal};
 
 use self::TermLogError::{SetLogger, Term};
 use super::logging::*;
 
-use ::{Config, SharedLogger};
+use {Config, SharedLogger};
 
 /// TermLogger error type.
 #[derive(Debug)]
@@ -35,7 +37,7 @@ impl fmt::Display for TermLogError {
 
 impl error::Error for TermLogError {
     fn description(&self) -> &str {
-        match * self {
+        match *self {
             SetLogger(ref err) => err.description(),
             Term => "A terminal could not be opened",
         }
@@ -69,8 +71,7 @@ pub struct TermLogger {
     streams: Mutex<OutputStreams>,
 }
 
-impl TermLogger
-{
+impl TermLogger {
     /// init function. Globally initializes the TermLogger as the one and only used log facility.
     ///
     /// Takes the desired `Level` and `Config` as arguments. They cannot be changed later on.
@@ -107,27 +108,35 @@ impl TermLogger
     /// # }
     /// ```
     pub fn new(log_level: LevelFilter, config: Config) -> Option<Box<TermLogger>> {
-        term::stderr().and_then(|stderr|
+        term::stderr().and_then(|stderr| {
             term::stdout().map(|stdout| {
-                let streams = Mutex::new( OutputStreams {
+                let streams = Mutex::new(OutputStreams {
                     stderr: stderr,
                     stdout: stdout,
                 });
-                Box::new(TermLogger { level: log_level, config: config, streams: streams
+                Box::new(TermLogger {
+                    level: log_level,
+                    config: config,
+                    streams: streams,
                 })
             })
-        )
+        })
     }
 
-    fn try_log_term<W>(&self, record: &Record, term_lock: &mut Box<Terminal<Output=W> + Send>) -> Result<(), Error>
-        where W: Write + Sized
+    fn try_log_term<W>(
+        &self,
+        record: &Record,
+        term_lock: &mut Box<Terminal<Output = W> + Send>,
+    ) -> Result<(), Error>
+    where
+        W: Write + Sized,
     {
         let color = match record.level() {
             Level::Error => color::RED,
             Level::Warn => color::YELLOW,
             Level::Info => color::BLUE,
             Level::Debug => color::CYAN,
-            Level::Trace => color::WHITE
+            Level::Trace => color::WHITE,
         };
 
         if let Some(time) = self.config.time {
@@ -162,7 +171,6 @@ impl TermLogger
 
     fn try_log(&self, record: &Record) -> Result<(), Error> {
         if self.enabled(record.metadata()) {
-
             let mut streams = self.streams.lock().unwrap();
 
             if record.level() == Level::Error {
@@ -176,8 +184,7 @@ impl TermLogger
     }
 }
 
-impl Log for TermLogger
-{
+impl Log for TermLogger {
     fn enabled(&self, metadata: &Metadata) -> bool {
         metadata.level() <= self.level
     }
@@ -193,14 +200,12 @@ impl Log for TermLogger
     }
 }
 
-impl SharedLogger for TermLogger
-{
+impl SharedLogger for TermLogger {
     fn level(&self) -> LevelFilter {
         self.level
     }
 
-    fn config(&self) -> Option<&Config>
-    {
+    fn config(&self) -> Option<&Config> {
         Some(&self.config)
     }
 

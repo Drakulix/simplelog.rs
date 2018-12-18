@@ -7,11 +7,13 @@
 
 //! Module providing the SimpleLogger Implementation
 
+use super::logging::try_log;
+use log::{
+    set_boxed_logger, set_max_level, Level, LevelFilter, Log, Metadata, Record, SetLoggerError,
+};
 use std::io::{stderr, stdout};
 use std::sync::Mutex;
-use log::{Level, LevelFilter, Metadata, Record, SetLoggerError, set_max_level, set_boxed_logger, Log};
-use ::{Config, SharedLogger};
-use super::logging::try_log;
+use {Config, SharedLogger};
 
 /// The SimpleLogger struct. Provides a very basic Logger implementation
 pub struct SimpleLogger {
@@ -21,7 +23,6 @@ pub struct SimpleLogger {
 }
 
 impl SimpleLogger {
-
     /// init function. Globally initializes the SimpleLogger as the one and only used log facility.
     ///
     /// Takes the desired `Level` and `Config` as arguments. They cannot be changed later on.
@@ -56,19 +57,21 @@ impl SimpleLogger {
     /// # }
     /// ```
     pub fn new(log_level: LevelFilter, config: Config) -> Box<SimpleLogger> {
-        Box::new(SimpleLogger { level: log_level, config: config, output_lock: Mutex::new(()) })
+        Box::new(SimpleLogger {
+            level: log_level,
+            config: config,
+            output_lock: Mutex::new(()),
+        })
     }
 }
 
 impl Log for SimpleLogger {
-
     fn enabled(&self, metadata: &Metadata) -> bool {
         metadata.level() <= self.level
     }
 
     fn log(&self, record: &Record) {
         if self.enabled(record.metadata()) {
-
             let _lock = self.output_lock.lock().unwrap();
 
             match record.level() {
@@ -76,7 +79,7 @@ impl Log for SimpleLogger {
                     let stderr = stderr();
                     let mut stderr_lock = stderr.lock();
                     let _ = try_log(&self.config, record, &mut stderr_lock);
-                },
+                }
                 _ => {
                     let stdout = stdout();
                     let mut stdout_lock = stdout.lock();
@@ -93,18 +96,15 @@ impl Log for SimpleLogger {
 }
 
 impl SharedLogger for SimpleLogger {
-
     fn level(&self) -> LevelFilter {
         self.level
     }
 
-    fn config(&self) -> Option<&Config>
-    {
+    fn config(&self) -> Option<&Config> {
         Some(&self.config)
     }
 
     fn as_log(self: Box<Self>) -> Box<Log> {
         Box::new(*self)
     }
-
 }

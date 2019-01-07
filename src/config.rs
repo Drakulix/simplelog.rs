@@ -26,6 +26,8 @@ pub struct Config {
     pub location: Option<Level>,
     ///A chrono strftime string. See: https://docs.rs/chrono/0.4.0/chrono/format/strftime/index.html#specifiers
     pub time_format: Option<&'static str>,
+    ///Log times in the local timezone
+    pub local_timezone: bool,
 }
 
 impl Default for Config {
@@ -36,6 +38,7 @@ impl Default for Config {
             target: Some(Level::Debug),
             location: Some(Level::Trace),
             time_format: None,
+            local_timezone: false,
         }
     }
 }

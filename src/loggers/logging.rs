@@ -1,13 +1,13 @@
-use log::Record;
 use chrono;
-use std::io::{Write, Error};
-use ::Config;
+use log::Record;
+use std::io::{Error, Write};
+use Config;
 
 #[inline(always)]
 pub fn try_log<W>(config: &Config, record: &Record, write: &mut W) -> Result<(), Error>
-    where W: Write + Sized
+where
+    W: Write + Sized,
 {
-
     if let Some(time) = config.time {
         if time <= record.level() {
             try!(write_time(write, config));
@@ -38,20 +38,21 @@ pub fn try_log<W>(config: &Config, record: &Record, write: &mut W) -> Result<(),
 
 #[inline(always)]
 pub fn write_time<W>(write: &mut W, config: &Config) -> Result<(), Error>
-    where W: Write + Sized
+where
+    W: Write + Sized,
 {
-    let cur_time = chrono::Utc::now();
-    try!(write!(write, "{} ", cur_time.format(
-            config
-                .time_format
-                .unwrap_or("%H:%M:%S")
-    )));
-    Ok(())
+    let time_format = config.time_format.unwrap_or("%H:%M:%S");
+    if config.local_timezone {
+        write!(write, "{} ", chrono::Local::now().format(time_format))
+    } else {
+        write!(write, "{} ", chrono::Utc::now().format(time_format))
+    }
 }
 
 #[inline(always)]
 pub fn write_level<W>(record: &Record, write: &mut W) -> Result<(), Error>
-    where W: Write + Sized
+where
+    W: Write + Sized,
 {
     try!(write!(write, "[{}] ", record.level()));
     Ok(())
@@ -59,7 +60,8 @@ pub fn write_level<W>(record: &Record, write: &mut W) -> Result<(), Error>
 
 #[inline(always)]
 pub fn write_target<W>(record: &Record, write: &mut W) -> Result<(), Error>
-    where W: Write + Sized
+where
+    W: Write + Sized,
 {
     try!(write!(write, "{}: ", record.target()));
     Ok(())
@@ -67,7 +69,8 @@ pub fn write_target<W>(record: &Record, write: &mut W) -> Result<(), Error>
 
 #[inline(always)]
 pub fn write_location<W>(record: &Record, write: &mut W) -> Result<(), Error>
-    where W: Write + Sized
+where
+    W: Write + Sized,
 {
     let file = record.file().unwrap_or("<unknown>");
     if let Some(line) = record.line() {
@@ -80,7 +83,8 @@ pub fn write_location<W>(record: &Record, write: &mut W) -> Result<(), Error>
 
 #[inline(always)]
 pub fn write_args<W>(record: &Record, write: &mut W) -> Result<(), Error>
-    where W: Write + Sized
+where
+    W: Write + Sized,
 {
     try!(writeln!(write, "{}", record.args()));
     Ok(())

@@ -26,6 +26,13 @@ pub struct Config {
     pub location: Option<Level>,
     ///A chrono strftime string. See: https://docs.rs/chrono/0.4.0/chrono/format/strftime/index.html#specifiers
     pub time_format: Option<&'static str>,
+
+    /// Allowed module filters
+    /// If specified, only records from modules starting with one of these entries will be printed
+    pub filter_allow: Option<&'static [&'static str]>,
+    /// Denied module filters
+    /// If specified, records from modules starting with one of these entries will be ignored
+    pub filter_ignore: Option<&'static [&'static str]>,
 }
 
 impl Default for Config {
@@ -36,6 +43,8 @@ impl Default for Config {
             target: Some(Level::Debug),
             location: Some(Level::Trace),
             time_format: None,
+            filter_allow: None,
+            filter_ignore: None,
         }
     }
 }

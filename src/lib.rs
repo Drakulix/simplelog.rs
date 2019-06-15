@@ -98,6 +98,8 @@ mod tests {
                     target: None,
                     location: None,
                     time_format: None,
+                    filter_allow: None,
+                    filter_ignore: None,
                 };
 
                 for elem in vec![None, Some(Level::Trace), Some(Level::Debug), Some(Level::Info), Some(Level::Warn), Some(Level::Error)]

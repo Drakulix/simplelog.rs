@@ -7,6 +7,9 @@ use ::Config;
 pub fn try_log<W>(config: &Config, record: &Record, write: &mut W) -> Result<(), Error>
     where W: Write + Sized
 {
+    if should_skip(config, record) {
+        return Ok(())
+    }
 
     if let Some(time) = config.time {
         if time <= record.level() {
@@ -84,4 +87,27 @@ pub fn write_args<W>(record: &Record, write: &mut W) -> Result<(), Error>
 {
     try!(writeln!(write, "{}", record.args()));
     Ok(())
+}
+
+#[inline(always)]
+pub fn should_skip(config: &Config, record: &Record) -> bool {
+     // If a module path and allowed list are available
+    if let (Some(path), Some(allowed)) = (record.module_path(), config.filter_allow) {
+        // Check that the module path matches at least one allow filter
+        if let None = allowed.iter().find(|v| path.starts_with(*v) ) {
+            // If not, skip any further writing
+            return true
+        }
+    }
+
+    // If a module path and ignore list are available
+    if let (Some(path), Some(ignore)) = (record.module_path(), config.filter_ignore) {
+        // Check that the module path does not match any ignore filters
+        if let Some(_) = ignore.iter().find(|v| path.starts_with(*v) ) {
+            // If not, skip any further writing
+            return true
+        }
+    }
+
+    return false
 }

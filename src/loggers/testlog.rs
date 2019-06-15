@@ -9,6 +9,7 @@
 
 use log::{set_boxed_logger, set_max_level, LevelFilter, Log, Metadata, Record, SetLoggerError};
 use {Config, SharedLogger};
+use super::logging::should_skip;
 
 use std::thread;
 
@@ -98,6 +99,10 @@ impl SharedLogger for TestLogger {
 
 #[inline(always)]
 pub fn log(config: &Config, record: &Record) {
+    if should_skip(&config, &record) {
+        return;
+    }
+
     if let Some(time) = config.time {
         if time <= record.level() {
             write_time(config);

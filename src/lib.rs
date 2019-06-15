@@ -94,14 +94,7 @@ mod tests {
 
         CombinedLogger::init({
             let mut vec = Vec::new();
-            let mut conf = Config {
-                time: None,
-                level: None,
-                target: None,
-                location: None,
-                time_format: None,
-                ..Default::default()
-            };
+            let mut conf = Config::default();
 
             for elem in vec![
                 None,

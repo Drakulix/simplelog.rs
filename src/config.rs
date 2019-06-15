@@ -32,7 +32,16 @@ pub struct Config {
     pub time_format: Option<&'static str>,
     /// Chrono Offset used for logging time (default is UTC)
     pub offset: FixedOffset,
-    
+    /// Allowed module filters.
+    /// If specified, only records from modules starting with one of these entries will be printed
+    /// 
+    /// For example, `filter_allow: Some(&["tokio::uds"])` would allow only logging from the `tokio` crates `uds` module.
+    pub filter_allow: Option<&'static [&'static str]>,
+    /// Denied module filters.
+    /// If specified, records from modules starting with one of these entries will be ignored
+    /// 
+    /// For example, `filter_ignore: Some(&["tokio::uds"])` would deny logging from the `tokio` crates `uds` module.
+    pub filter_ignore: Option<&'static [&'static str]>,
 }
 
 impl Default for Config {
@@ -45,6 +54,8 @@ impl Default for Config {
             location: Some(Level::Trace),
             time_format: None,
             offset: Utc.fix(),
+            filter_allow: None,
+            filter_ignore: None,
         }
     }
 }

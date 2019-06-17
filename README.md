@@ -27,7 +27,7 @@ use std::fs::File;
 fn main() {
     CombinedLogger::init(
         vec![
-            TermLogger::new(LevelFilter::Warn, Config::default()).unwrap(),
+            TermLogger::new(LevelFilter::Warn, Config::default(), TerminalMode::Mixed).unwrap(),
             WriteLogger::new(LevelFilter::Info, Config::default(), File::create("my_rust_binary.log").unwrap()),
         ]
     ).unwrap();
@@ -42,7 +42,7 @@ fn main() {
 ### Results in
 ```
 $ cargo run --example usage
-   Compiling simplelog v0.5.0 (file:///home/drakulix/Projects/simplelog)
+   Compiling simplelog v0.6.0 (file:///home/drakulix/Projects/simplelog)
      Running `target/debug/examples/usage`
 [ERROR] Bright red error
 ```
@@ -57,7 +57,7 @@ and my_rust_binary.log
 Just add
 ```
 [dependencies]
-simplelog = "^0.5.0"
+simplelog = "^0.6.0"
 ```
 to your `Cargo.toml`
 

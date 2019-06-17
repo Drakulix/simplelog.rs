@@ -1,17 +1,19 @@
 //! Module providing the TermLogger Implementation
 
-use log::{Level, LevelFilter, Metadata, Record, SetLoggerError, set_boxed_logger, set_max_level, Log};
-use term;
-use term::{StderrTerminal, StdoutTerminal, Terminal, color};
+use log::{
+    set_boxed_logger, set_max_level, Level, LevelFilter, Log, Metadata, Record, SetLoggerError,
+};
 use std::error;
 use std::fmt;
+use std::io::{Error, Write};
 use std::sync::Mutex;
-use std::io::{Write, Error};
+use term;
+use term::{color, StderrTerminal, StdoutTerminal, Terminal};
 
 use self::TermLogError::{SetLogger, Term};
 use super::logging::*;
 
-use ::{Config, SharedLogger};
+use crate::{Config, SharedLogger};
 
 /// TermLogger error type.
 #[derive(Debug)]
@@ -26,7 +28,7 @@ pub enum TermLogError {
 }
 
 impl fmt::Display for TermLogError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use std::error::Error as FmtError;
 
         write!(f, "{}", self.description())
@@ -35,13 +37,13 @@ impl fmt::Display for TermLogError {
 
 impl error::Error for TermLogError {
     fn description(&self) -> &str {
-        match * self {
+        match *self {
             SetLogger(ref err) => err.description(),
             Term => "A terminal could not be opened",
         }
     }
 
-    fn cause(&self) -> Option<&error::Error> {
+    fn cause(&self) -> Option<&dyn error::Error> {
         match *self {
             SetLogger(ref err) => Some(err),
             Term => None,
@@ -55,9 +57,39 @@ impl From<SetLoggerError> for TermLogError {
     }
 }
 
+enum StdTerminal {
+    Stderr(Box<StderrTerminal>),
+    Stdout(Box<StdoutTerminal>),
+}
+
+impl StdTerminal {
+    fn flush(&mut self) -> Result<(), Error> {
+        match self {
+            StdTerminal::Stderr(term) => term.flush(),
+            StdTerminal::Stdout(term) => term.flush(),
+        }
+    }
+}
+
 struct OutputStreams {
-    stderr: Box<StderrTerminal>,
-    stdout: Box<StdoutTerminal>,
+    err: StdTerminal,
+    out: StdTerminal,
+}
+
+/// Specifies which streams should be used when logging
+pub enum TerminalMode {
+    /// Only use Stdout
+    Stdout,
+    /// Only use Stderr
+    Stderr,
+    /// Use Stderr for Errors and Stdout otherwise
+    Mixed,
+}
+
+impl Default for TerminalMode {
+    fn default() -> TerminalMode {
+        TerminalMode::Mixed
+    }
 }
 
 /// The TermLogger struct. Provides a stderr/out based Logger implementation
@@ -69,8 +101,7 @@ pub struct TermLogger {
     streams: Mutex<OutputStreams>,
 }
 
-impl TermLogger
-{
+impl TermLogger {
     /// init function. Globally initializes the TermLogger as the one and only used log facility.
     ///
     /// Takes the desired `Level` and `Config` as arguments. They cannot be changed later on.
@@ -81,13 +112,17 @@ impl TermLogger
     /// # extern crate simplelog;
     /// # use simplelog::*;
     /// # fn main() {
-    /// let _ = TermLogger::init(LevelFilter::Info, Config::default());
+    /// let _ = TermLogger::init(LevelFilter::Info, Config::default(), TerminalMode::Mixed);
     /// # }
     /// ```
-    pub fn init(log_level: LevelFilter, config: Config) -> Result<(), TermLogError> {
-        let logger = try!(TermLogger::new(log_level, config).ok_or(Term));
+    pub fn init(
+        log_level: LevelFilter,
+        config: Config,
+        mode: TerminalMode,
+    ) -> Result<(), TermLogError> {
+        let logger = TermLogger::new(log_level, config, mode).ok_or(Term)?;
         set_max_level(log_level.clone());
-        try!(set_boxed_logger(logger));
+        set_boxed_logger(logger)?;
         Ok(())
     }
 
@@ -103,72 +138,119 @@ impl TermLogger
     /// # extern crate simplelog;
     /// # use simplelog::*;
     /// # fn main() {
-    /// let term_logger = TermLogger::new(LevelFilter::Info, Config::default()).unwrap();
+    /// let term_logger = TermLogger::new(LevelFilter::Info, Config::default(), TerminalMode::Mixed).unwrap();
     /// # }
     /// ```
-    pub fn new(log_level: LevelFilter, config: Config) -> Option<Box<TermLogger>> {
-        term::stderr().and_then(|stderr|
-            term::stdout().map(|stdout| {
-                let streams = Mutex::new( OutputStreams {
-                    stderr: stderr,
-                    stdout: stdout,
-                });
-                Box::new(TermLogger { level: log_level, config: config, streams: streams
+    pub fn new(
+        log_level: LevelFilter,
+        config: Config,
+        mode: TerminalMode,
+    ) -> Option<Box<TermLogger>> {
+        let streams = match mode {
+            TerminalMode::Stdout => term::stdout().and_then(|stdout| {
+                term::stdout().map(|stdout2| {
+                    Mutex::new(OutputStreams {
+                        err: StdTerminal::Stdout(stdout),
+                        out: StdTerminal::Stdout(stdout2),
+                    })
                 })
+            }),
+            TerminalMode::Stderr => term::stderr().and_then(|stderr| {
+                term::stderr().map(|stderr2| {
+                    Mutex::new(OutputStreams {
+                        err: StdTerminal::Stderr(stderr),
+                        out: StdTerminal::Stderr(stderr2),
+                    })
+                })
+            }),
+            TerminalMode::Mixed => term::stderr().and_then(|stderr| {
+                term::stdout().map(|stdout| {
+                    Mutex::new(OutputStreams {
+                        err: StdTerminal::Stderr(stderr),
+                        out: StdTerminal::Stdout(stdout),
+                    })
+                })
+            }),
+        };
+
+        streams.map(|streams| {
+            Box::new(TermLogger {
+                level: log_level,
+                config: config,
+                streams: streams,
             })
-        )
+        })
     }
 
-    fn try_log_term<W>(&self, record: &Record, term_lock: &mut Box<Terminal<Output=W> + Send>) -> Result<(), Error>
-        where W: Write + Sized
+    fn try_log_term<W>(
+        &self,
+        record: &Record<'_>,
+        term_lock: &mut Box<dyn Terminal<Output = W> + Send>,
+    ) -> Result<(), Error>
+    where
+        W: Write + Sized,
     {
         let color = match record.level() {
             Level::Error => color::RED,
             Level::Warn => color::YELLOW,
             Level::Info => color::BLUE,
             Level::Debug => color::CYAN,
-            Level::Trace => color::WHITE
+            Level::Trace => color::WHITE,
         };
 
         if let Some(time) = self.config.time {
             if time <= record.level() {
-                try!(write_time(&mut *term_lock, &self.config));
+                write_time(&mut *term_lock, &self.config)?;
             }
         }
 
         if let Some(level) = self.config.level {
             if level <= record.level() {
-                try!(term_lock.fg(color));
-                try!(write_level(record, &mut *term_lock));
-                try!(term_lock.reset());
+                term_lock.fg(color)?;
+                write_level(record, &mut *term_lock)?;
+                term_lock.reset()?;
+            }
+        }
+
+        if let Some(thread) = self.config.thread {
+            if thread <= record.level() {
+                write_thread_id(&mut *term_lock)?;
             }
         }
 
         if let Some(target) = self.config.target {
             if target <= record.level() {
-                try!(write_target(record, &mut *term_lock));
+                write_target(record, &mut *term_lock)?;
             }
         }
 
         if let Some(location) = self.config.location {
             if location <= record.level() {
-                try!(write_location(record, &mut *term_lock));
+                write_location(record, &mut *term_lock)?;
             }
         }
 
-        try!(write_args(record, &mut *term_lock));
-        Ok(())
+        write_args(record, &mut *term_lock)
     }
 
-    fn try_log(&self, record: &Record) -> Result<(), Error> {
+    fn try_log(&self, record: &Record<'_>) -> Result<(), Error> {
         if self.enabled(record.metadata()) {
+            if should_skip(&self.config, record) {
+                return Ok(());
+            }
 
             let mut streams = self.streams.lock().unwrap();
 
             if record.level() == Level::Error {
-                self.try_log_term(record, &mut streams.stderr)
+                match streams.err {
+                    StdTerminal::Stderr(ref mut term) => self.try_log_term(record, term),
+                    StdTerminal::Stdout(ref mut term) => self.try_log_term(record, term),
+                }
             } else {
-                self.try_log_term(record, &mut streams.stdout)
+                match streams.out {
+                    StdTerminal::Stderr(ref mut term) => self.try_log_term(record, term),
+                    StdTerminal::Stdout(ref mut term) => self.try_log_term(record, term),
+                }
             }
         } else {
             Ok(())
@@ -176,35 +258,32 @@ impl TermLogger
     }
 }
 
-impl Log for TermLogger
-{
-    fn enabled(&self, metadata: &Metadata) -> bool {
+impl Log for TermLogger {
+    fn enabled(&self, metadata: &Metadata<'_>) -> bool {
         metadata.level() <= self.level
     }
 
-    fn log(&self, record: &Record) {
+    fn log(&self, record: &Record<'_>) {
         let _ = self.try_log(record);
     }
 
     fn flush(&self) {
         let mut streams = self.streams.lock().unwrap();
-        let _ = streams.stdout.flush();
-        let _ = streams.stderr.flush();
+        let _ = streams.out.flush();
+        let _ = streams.err.flush();
     }
 }
 
-impl SharedLogger for TermLogger
-{
+impl SharedLogger for TermLogger {
     fn level(&self) -> LevelFilter {
         self.level
     }
 
-    fn config(&self) -> Option<&Config>
-    {
+    fn config(&self) -> Option<&Config> {
         Some(&self.config)
     }
 
-    fn as_log(self: Box<Self>) -> Box<Log> {
+    fn as_log(self: Box<Self>) -> Box<dyn Log> {
         Box::new(*self)
     }
 }

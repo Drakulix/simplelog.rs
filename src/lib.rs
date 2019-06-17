@@ -12,31 +12,30 @@
 //! - `TermLogger` (advanced terminal logger, that splits to stdout/err and has color support) (can be excluded on unsupported platforms)
 //! - `WriteLogger` (logs to a given struct implementing `Write`, e.g. a file)
 //! - `CombinedLogger` (can be used to form combinations of the above loggers)
+//! - `TestLogger` (specialized logger for tests. Uses print!() / println!() for tests to be able to capture the output)
 //!
 //! Only one Logger should be initialized of the start of your program
 //! through the `Logger::init(...)` method. For the actual calling syntax
 //! take a look at the documentation of the specific implementation(s) you wanna use.
 //!
 
-#![deny(missing_docs)]
-
-#[cfg_attr(test, macro_use)]
-extern crate log;
-#[cfg(feature = "term")]
-extern crate term;
-extern crate chrono;
+#![deny(missing_docs, rust_2018_idioms)]
 
 mod config;
 mod loggers;
 
 pub use self::config::Config;
-pub use self::loggers::{SimpleLogger, WriteLogger, CombinedLogger};
+#[cfg(feature = "test")]
+pub use self::loggers::TestLogger;
+pub use self::loggers::{CombinedLogger, SimpleLogger, WriteLogger};
 #[cfg(feature = "term")]
-pub use self::loggers::{TermLogger, TermLogError};
+pub use self::loggers::{TermLogError, TermLogger, TerminalMode};
 
 pub use log::{Level, LevelFilter};
 
 use log::Log;
+#[cfg(test)]
+use log::*;
 
 /// Trait to have a common interface to obtain the Level of Loggers
 ///
@@ -75,13 +74,13 @@ pub trait SharedLogger: Log {
     fn config(&self) -> Option<&Config>;
 
     /// Returns the logger as a Log trait object
-    fn as_log(self: Box<Self>) -> Box<Log>;
+    fn as_log(self: Box<Self>) -> Box<dyn Log>;
 }
 
 #[cfg(test)]
 mod tests {
-    use std::io::Read;
     use std::fs::File;
+    use std::io::Read;
 
     use super::*;
 
@@ -89,54 +88,88 @@ mod tests {
     fn test() {
         let mut i = 0;
 
-        CombinedLogger::init(
-            {
-                let mut vec = Vec::new();
-                let mut conf = Config {
-                    time: None,
-                    level: None,
-                    target: None,
-                    location: None,
-                    time_format: None,
-                };
+        CombinedLogger::init({
+            let mut vec = Vec::new();
+            let mut conf = Config::default();
 
-                for elem in vec![None, Some(Level::Trace), Some(Level::Debug), Some(Level::Info), Some(Level::Warn), Some(Level::Error)]
-                {
-                    conf.location = elem;
-                    conf.target = elem;
-                    conf.level = elem;
-                    conf.time = elem;
-                    i += 1;
+            for elem in vec![
+                None,
+                Some(Level::Trace),
+                Some(Level::Debug),
+                Some(Level::Info),
+                Some(Level::Warn),
+                Some(Level::Error),
+            ] {
+                conf.location = elem;
+                conf.target = elem;
+                conf.level = elem;
+                conf.time = elem;
+                i += 1;
 
-                    //error
-                    vec.push(SimpleLogger::new(LevelFilter::Error, conf) as Box<SharedLogger>);
-                    vec.push(TermLogger::new(LevelFilter::Error, conf).unwrap() as Box<SharedLogger>);
-                    vec.push(WriteLogger::new(LevelFilter::Error, conf, File::create(&format!("error_{}.log", i)).unwrap()) as Box<SharedLogger>);
+                //error
+                vec.push(SimpleLogger::new(LevelFilter::Error, conf) as Box<dyn SharedLogger>);
+                vec.push(
+                    TermLogger::new(LevelFilter::Error, conf, TerminalMode::Mixed).unwrap()
+                        as Box<dyn SharedLogger>,
+                );
+                vec.push(WriteLogger::new(
+                    LevelFilter::Error,
+                    conf,
+                    File::create(&format!("error_{}.log", i)).unwrap(),
+                ) as Box<dyn SharedLogger>);
 
-                    //warn
-                    vec.push(SimpleLogger::new(LevelFilter::Warn, conf) as Box<SharedLogger>);
-                    vec.push(TermLogger::new(LevelFilter::Warn, conf).unwrap() as Box<SharedLogger>);
-                    vec.push(WriteLogger::new(LevelFilter::Warn, conf, File::create(&format!("warn_{}.log", i)).unwrap()) as Box<SharedLogger>);
+                //warn
+                vec.push(SimpleLogger::new(LevelFilter::Warn, conf) as Box<dyn SharedLogger>);
+                vec.push(
+                    TermLogger::new(LevelFilter::Warn, conf, TerminalMode::Mixed).unwrap()
+                        as Box<dyn SharedLogger>,
+                );
+                vec.push(WriteLogger::new(
+                    LevelFilter::Warn,
+                    conf,
+                    File::create(&format!("warn_{}.log", i)).unwrap(),
+                ) as Box<dyn SharedLogger>);
 
-                    //info
-                    vec.push(SimpleLogger::new(LevelFilter::Info, conf) as Box<SharedLogger>);
-                    vec.push(TermLogger::new(LevelFilter::Info, conf).unwrap() as Box<SharedLogger>);
-                    vec.push(WriteLogger::new(LevelFilter::Info, conf, File::create(&format!("info_{}.log", i)).unwrap()) as Box<SharedLogger>);
+                //info
+                vec.push(SimpleLogger::new(LevelFilter::Info, conf) as Box<dyn SharedLogger>);
+                vec.push(
+                    TermLogger::new(LevelFilter::Info, conf, TerminalMode::Mixed).unwrap()
+                        as Box<dyn SharedLogger>,
+                );
+                vec.push(WriteLogger::new(
+                    LevelFilter::Info,
+                    conf,
+                    File::create(&format!("info_{}.log", i)).unwrap(),
+                ) as Box<dyn SharedLogger>);
 
-                    //debug
-                    vec.push(SimpleLogger::new(LevelFilter::Debug, conf) as Box<SharedLogger>);
-                    vec.push(TermLogger::new(LevelFilter::Debug, conf).unwrap() as Box<SharedLogger>);
-                    vec.push(WriteLogger::new(LevelFilter::Debug, conf, File::create(&format!("debug_{}.log", i)).unwrap()) as Box<SharedLogger>);
+                //debug
+                vec.push(SimpleLogger::new(LevelFilter::Debug, conf) as Box<dyn SharedLogger>);
+                vec.push(
+                    TermLogger::new(LevelFilter::Debug, conf, TerminalMode::Mixed).unwrap()
+                        as Box<dyn SharedLogger>,
+                );
+                vec.push(WriteLogger::new(
+                    LevelFilter::Debug,
+                    conf,
+                    File::create(&format!("debug_{}.log", i)).unwrap(),
+                ) as Box<dyn SharedLogger>);
 
-                    //trace
-                    vec.push(SimpleLogger::new(LevelFilter::Trace, conf) as Box<SharedLogger>);
-                    vec.push(TermLogger::new(LevelFilter::Trace, conf).unwrap() as Box<SharedLogger>);
-                    vec.push(WriteLogger::new(LevelFilter::Trace, conf, File::create(&format!("trace_{}.log", i)).unwrap()) as Box<SharedLogger>);
-                }
-
-                vec
+                //trace
+                vec.push(SimpleLogger::new(LevelFilter::Trace, conf) as Box<dyn SharedLogger>);
+                vec.push(
+                    TermLogger::new(LevelFilter::Trace, conf, TerminalMode::Mixed).unwrap()
+                        as Box<dyn SharedLogger>,
+                );
+                vec.push(WriteLogger::new(
+                    LevelFilter::Trace,
+                    conf,
+                    File::create(&format!("trace_{}.log", i)).unwrap(),
+                ) as Box<dyn SharedLogger>);
             }
-        ).unwrap();
+
+            vec
+        })
+        .unwrap();
 
         error!("Test Error");
         warn!("Test Warning");
@@ -144,18 +177,32 @@ mod tests {
         debug!("Test Debug");
         trace!("Test Trace");
 
-        for j in 1..i
-        {
+        for j in 1..i {
             let mut error = String::new();
-            File::open(&format!("error_{}.log", j)).unwrap().read_to_string(&mut error).unwrap();
+            File::open(&format!("error_{}.log", j))
+                .unwrap()
+                .read_to_string(&mut error)
+                .unwrap();
             let mut warn = String::new();
-            File::open(&format!("warn_{}.log", j)).unwrap().read_to_string(&mut warn).unwrap();
+            File::open(&format!("warn_{}.log", j))
+                .unwrap()
+                .read_to_string(&mut warn)
+                .unwrap();
             let mut info = String::new();
-            File::open(&format!("info_{}.log", j)).unwrap().read_to_string(&mut info).unwrap();
+            File::open(&format!("info_{}.log", j))
+                .unwrap()
+                .read_to_string(&mut info)
+                .unwrap();
             let mut debug = String::new();
-            File::open(&format!("debug_{}.log", j)).unwrap().read_to_string(&mut debug).unwrap();
+            File::open(&format!("debug_{}.log", j))
+                .unwrap()
+                .read_to_string(&mut debug)
+                .unwrap();
             let mut trace = String::new();
-            File::open(&format!("trace_{}.log", j)).unwrap().read_to_string(&mut trace).unwrap();
+            File::open(&format!("trace_{}.log", j))
+                .unwrap()
+                .read_to_string(&mut trace)
+                .unwrap();
 
             assert!(error.contains("Test Error"));
             assert!(!error.contains("Test Warning"));

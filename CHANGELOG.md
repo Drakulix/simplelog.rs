@@ -1,3 +1,11 @@
+## v0.6.0
+    - Add time offset parameter (defaults to UTC)
+    - Add thread_id output (credits to @kurtlawrence)
+    - Pad log level
+    - Add TestLogger (credits to @AlexW-GH)
+    - Add stream configuration to TermLogger
+    - Implement allow- and ignore-filtering (credits to @ryankurte)
+
 ## v0.5.3
     - Fix minimal chrono version / update to chrono v0.4.1 (PR #27, credits to @samueltardieu)
 

@@ -7,9 +7,9 @@
 
 //! Module providing the TestLogger Implementation
 
+use super::logging::should_skip;
 use log::{set_boxed_logger, set_max_level, LevelFilter, Log, Metadata, Record, SetLoggerError};
 use {Config, SharedLogger};
-use super::logging::should_skip;
 
 use std::thread;
 

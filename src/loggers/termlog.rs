@@ -235,11 +235,9 @@ impl TermLogger {
     }
 
     fn try_log(&self, record: &Record) -> Result<(), Error> {
-        
         if self.enabled(record.metadata()) {
-
             if should_skip(&self.config, record) {
-                return Ok(())
+                return Ok(());
             }
 
             let mut streams = self.streams.lock().unwrap();

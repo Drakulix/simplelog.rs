@@ -11,7 +11,7 @@ use super::logging::try_log;
 use log::{set_boxed_logger, set_max_level, LevelFilter, Log, Metadata, Record, SetLoggerError};
 use std::io::Write;
 use std::sync::Mutex;
-use {Config, SharedLogger};
+use crate::{Config, SharedLogger};
 
 /// The WriteLogger struct. Provides a Logger implementation for structs implementing `Write`, e.g. File
 pub struct WriteLogger<W: Write + Send + 'static> {
@@ -66,11 +66,11 @@ impl<W: Write + Send + 'static> WriteLogger<W> {
 }
 
 impl<W: Write + Send + 'static> Log for WriteLogger<W> {
-    fn enabled(&self, metadata: &Metadata) -> bool {
+    fn enabled(&self, metadata: &Metadata<'_>) -> bool {
         metadata.level() <= self.level
     }
 
-    fn log(&self, record: &Record) {
+    fn log(&self, record: &Record<'_>) {
         if self.enabled(record.metadata()) {
             let mut write_lock = self.writable.lock().unwrap();
             let _ = try_log(&self.config, record, &mut *write_lock);
@@ -91,7 +91,7 @@ impl<W: Write + Send + 'static> SharedLogger for WriteLogger<W> {
         Some(&self.config)
     }
 
-    fn as_log(self: Box<Self>) -> Box<Log> {
+    fn as_log(self: Box<Self>) -> Box<dyn Log> {
         Box::new(*self)
     }
 }

@@ -1,8 +1,5 @@
-#[macro_use]
-extern crate log;
-extern crate simplelog;
-
 use simplelog::*;
+use log::*;
 
 use std::fs::File;
 

@@ -9,7 +9,7 @@
 
 use super::logging::should_skip;
 use log::{set_boxed_logger, set_max_level, LevelFilter, Log, Metadata, Record, SetLoggerError};
-use {Config, SharedLogger};
+use crate::{Config, SharedLogger};
 
 use std::thread;
 
@@ -70,11 +70,11 @@ impl TestLogger {
 }
 
 impl Log for TestLogger {
-    fn enabled(&self, metadata: &Metadata) -> bool {
+    fn enabled(&self, metadata: &Metadata<'_>) -> bool {
         metadata.level() <= self.level
     }
 
-    fn log(&self, record: &Record) {
+    fn log(&self, record: &Record<'_>) {
         if self.enabled(record.metadata()) {
             let _ = log(&self.config, record);
         }
@@ -92,13 +92,13 @@ impl SharedLogger for TestLogger {
         Some(&self.config)
     }
 
-    fn as_log(self: Box<Self>) -> Box<Log> {
+    fn as_log(self: Box<Self>) -> Box<dyn Log> {
         Box::new(*self)
     }
 }
 
 #[inline(always)]
-pub fn log(config: &Config, record: &Record) {
+pub fn log(config: &Config, record: &Record<'_>) {
     if should_skip(&config, &record) {
         return;
     }
@@ -146,7 +146,7 @@ pub fn write_time(config: &Config) {
 }
 
 #[inline(always)]
-pub fn write_level(record: &Record) {
+pub fn write_level(record: &Record<'_>) {
     print!("[{}] ", record.level());
 }
 
@@ -159,12 +159,12 @@ pub fn write_thread_id() {
 }
 
 #[inline(always)]
-pub fn write_target(record: &Record) {
+pub fn write_target(record: &Record<'_>) {
     print!("{}: ", record.target());
 }
 
 #[inline(always)]
-pub fn write_location(record: &Record) {
+pub fn write_location(record: &Record<'_>) {
     let file = record.file().unwrap_or("<unknown>");
     if let Some(line) = record.line() {
         print!("[{}:{}] ", file, line);
@@ -174,6 +174,6 @@ pub fn write_location(record: &Record) {
 }
 
 #[inline(always)]
-pub fn write_args(record: &Record) {
+pub fn write_args(record: &Record<'_>) {
     println!("{}", record.args());
 }

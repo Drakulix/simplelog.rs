@@ -13,7 +13,7 @@ use term::{color, StderrTerminal, StdoutTerminal, Terminal};
 use self::TermLogError::{SetLogger, Term};
 use super::logging::*;
 
-use {Config, SharedLogger};
+use crate::{Config, SharedLogger};
 
 /// TermLogger error type.
 #[derive(Debug)]
@@ -28,7 +28,7 @@ pub enum TermLogError {
 }
 
 impl fmt::Display for TermLogError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use std::error::Error as FmtError;
 
         write!(f, "{}", self.description())
@@ -43,7 +43,7 @@ impl error::Error for TermLogError {
         }
     }
 
-    fn cause(&self) -> Option<&error::Error> {
+    fn cause(&self) -> Option<&dyn error::Error> {
         match *self {
             SetLogger(ref err) => Some(err),
             Term => None,
@@ -120,9 +120,9 @@ impl TermLogger {
         config: Config,
         mode: TerminalMode,
     ) -> Result<(), TermLogError> {
-        let logger = try!(TermLogger::new(log_level, config, mode).ok_or(Term));
+        let logger = TermLogger::new(log_level, config, mode).ok_or(Term)?;
         set_max_level(log_level.clone());
-        try!(set_boxed_logger(logger));
+        set_boxed_logger(logger)?;
         Ok(())
     }
 
@@ -184,8 +184,8 @@ impl TermLogger {
 
     fn try_log_term<W>(
         &self,
-        record: &Record,
-        term_lock: &mut Box<Terminal<Output = W> + Send>,
+        record: &Record<'_>,
+        term_lock: &mut Box<dyn Terminal<Output = W> + Send>,
     ) -> Result<(), Error>
     where
         W: Write + Sized,
@@ -200,41 +200,40 @@ impl TermLogger {
 
         if let Some(time) = self.config.time {
             if time <= record.level() {
-                try!(write_time(&mut *term_lock, &self.config));
+                write_time(&mut *term_lock, &self.config)?;
             }
         }
 
         if let Some(level) = self.config.level {
             if level <= record.level() {
-                try!(term_lock.fg(color));
-                try!(write_level(record, &mut *term_lock));
-                try!(term_lock.reset());
+                term_lock.fg(color)?;
+                write_level(record, &mut *term_lock)?;
+                term_lock.reset()?;
             }
         }
 
         if let Some(thread) = self.config.thread {
             if thread <= record.level() {
-                try!(write_thread_id(&mut *term_lock));
+                write_thread_id(&mut *term_lock)?;
             }
         }
 
         if let Some(target) = self.config.target {
             if target <= record.level() {
-                try!(write_target(record, &mut *term_lock));
+                write_target(record, &mut *term_lock)?;
             }
         }
 
         if let Some(location) = self.config.location {
             if location <= record.level() {
-                try!(write_location(record, &mut *term_lock));
+                write_location(record, &mut *term_lock)?;
             }
         }
 
-        try!(write_args(record, &mut *term_lock));
-        Ok(())
+        write_args(record, &mut *term_lock)
     }
 
-    fn try_log(&self, record: &Record) -> Result<(), Error> {
+    fn try_log(&self, record: &Record<'_>) -> Result<(), Error> {
         if self.enabled(record.metadata()) {
             if should_skip(&self.config, record) {
                 return Ok(());
@@ -260,11 +259,11 @@ impl TermLogger {
 }
 
 impl Log for TermLogger {
-    fn enabled(&self, metadata: &Metadata) -> bool {
+    fn enabled(&self, metadata: &Metadata<'_>) -> bool {
         metadata.level() <= self.level
     }
 
-    fn log(&self, record: &Record) {
+    fn log(&self, record: &Record<'_>) {
         let _ = self.try_log(record);
     }
 
@@ -284,7 +283,7 @@ impl SharedLogger for TermLogger {
         Some(&self.config)
     }
 
-    fn as_log(self: Box<Self>) -> Box<Log> {
+    fn as_log(self: Box<Self>) -> Box<dyn Log> {
         Box::new(*self)
     }
 }

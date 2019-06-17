@@ -19,13 +19,7 @@
 //! take a look at the documentation of the specific implementation(s) you wanna use.
 //!
 
-#![deny(missing_docs)]
-
-extern crate chrono;
-#[cfg_attr(test, macro_use)]
-extern crate log;
-#[cfg(feature = "term")]
-extern crate term;
+#![deny(missing_docs, rust_2018_idioms)]
 
 mod config;
 mod loggers;
@@ -40,6 +34,8 @@ pub use self::loggers::{TermLogError, TermLogger, TerminalMode};
 pub use log::{Level, LevelFilter};
 
 use log::Log;
+#[cfg(test)]
+use log::*;
 
 /// Trait to have a common interface to obtain the Level of Loggers
 ///
@@ -78,7 +74,7 @@ pub trait SharedLogger: Log {
     fn config(&self) -> Option<&Config>;
 
     /// Returns the logger as a Log trait object
-    fn as_log(self: Box<Self>) -> Box<Log>;
+    fn as_log(self: Box<Self>) -> Box<dyn Log>;
 }
 
 #[cfg(test)]
@@ -111,64 +107,64 @@ mod tests {
                 i += 1;
 
                 //error
-                vec.push(SimpleLogger::new(LevelFilter::Error, conf) as Box<SharedLogger>);
+                vec.push(SimpleLogger::new(LevelFilter::Error, conf) as Box<dyn SharedLogger>);
                 vec.push(
                     TermLogger::new(LevelFilter::Error, conf, TerminalMode::Mixed).unwrap()
-                        as Box<SharedLogger>,
+                        as Box<dyn SharedLogger>,
                 );
                 vec.push(WriteLogger::new(
                     LevelFilter::Error,
                     conf,
                     File::create(&format!("error_{}.log", i)).unwrap(),
-                ) as Box<SharedLogger>);
+                ) as Box<dyn SharedLogger>);
 
                 //warn
-                vec.push(SimpleLogger::new(LevelFilter::Warn, conf) as Box<SharedLogger>);
+                vec.push(SimpleLogger::new(LevelFilter::Warn, conf) as Box<dyn SharedLogger>);
                 vec.push(
                     TermLogger::new(LevelFilter::Warn, conf, TerminalMode::Mixed).unwrap()
-                        as Box<SharedLogger>,
+                        as Box<dyn SharedLogger>,
                 );
                 vec.push(WriteLogger::new(
                     LevelFilter::Warn,
                     conf,
                     File::create(&format!("warn_{}.log", i)).unwrap(),
-                ) as Box<SharedLogger>);
+                ) as Box<dyn SharedLogger>);
 
                 //info
-                vec.push(SimpleLogger::new(LevelFilter::Info, conf) as Box<SharedLogger>);
+                vec.push(SimpleLogger::new(LevelFilter::Info, conf) as Box<dyn SharedLogger>);
                 vec.push(
                     TermLogger::new(LevelFilter::Info, conf, TerminalMode::Mixed).unwrap()
-                        as Box<SharedLogger>,
+                        as Box<dyn SharedLogger>,
                 );
                 vec.push(WriteLogger::new(
                     LevelFilter::Info,
                     conf,
                     File::create(&format!("info_{}.log", i)).unwrap(),
-                ) as Box<SharedLogger>);
+                ) as Box<dyn SharedLogger>);
 
                 //debug
-                vec.push(SimpleLogger::new(LevelFilter::Debug, conf) as Box<SharedLogger>);
+                vec.push(SimpleLogger::new(LevelFilter::Debug, conf) as Box<dyn SharedLogger>);
                 vec.push(
                     TermLogger::new(LevelFilter::Debug, conf, TerminalMode::Mixed).unwrap()
-                        as Box<SharedLogger>,
+                        as Box<dyn SharedLogger>,
                 );
                 vec.push(WriteLogger::new(
                     LevelFilter::Debug,
                     conf,
                     File::create(&format!("debug_{}.log", i)).unwrap(),
-                ) as Box<SharedLogger>);
+                ) as Box<dyn SharedLogger>);
 
                 //trace
-                vec.push(SimpleLogger::new(LevelFilter::Trace, conf) as Box<SharedLogger>);
+                vec.push(SimpleLogger::new(LevelFilter::Trace, conf) as Box<dyn SharedLogger>);
                 vec.push(
                     TermLogger::new(LevelFilter::Trace, conf, TerminalMode::Mixed).unwrap()
-                        as Box<SharedLogger>,
+                        as Box<dyn SharedLogger>,
                 );
                 vec.push(WriteLogger::new(
                     LevelFilter::Trace,
                     conf,
                     File::create(&format!("trace_{}.log", i)).unwrap(),
-                ) as Box<SharedLogger>);
+                ) as Box<dyn SharedLogger>);
             }
 
             vec

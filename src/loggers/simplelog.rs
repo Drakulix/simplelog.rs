@@ -13,7 +13,7 @@ use log::{
 };
 use std::io::{stderr, stdout};
 use std::sync::Mutex;
-use {Config, SharedLogger};
+use crate::{Config, SharedLogger};
 
 /// The SimpleLogger struct. Provides a very basic Logger implementation
 pub struct SimpleLogger {
@@ -66,11 +66,11 @@ impl SimpleLogger {
 }
 
 impl Log for SimpleLogger {
-    fn enabled(&self, metadata: &Metadata) -> bool {
+    fn enabled(&self, metadata: &Metadata<'_>) -> bool {
         metadata.level() <= self.level
     }
 
-    fn log(&self, record: &Record) {
+    fn log(&self, record: &Record<'_>) {
         if self.enabled(record.metadata()) {
             let _lock = self.output_lock.lock().unwrap();
 
@@ -104,7 +104,7 @@ impl SharedLogger for SimpleLogger {
         Some(&self.config)
     }
 
-    fn as_log(self: Box<Self>) -> Box<Log> {
+    fn as_log(self: Box<Self>) -> Box<dyn Log> {
         Box::new(*self)
     }
 }

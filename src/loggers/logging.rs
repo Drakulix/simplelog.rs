@@ -64,7 +64,7 @@ pub fn write_level<W>(record: &Record, write: &mut W) -> Result<(), Error>
 where
     W: Write + Sized,
 {
-    try!(write!(write, "[{}] ", record.level()));
+    try!(write!(write, "[{: >5}] ", record.level()));
     Ok(())
 }
 

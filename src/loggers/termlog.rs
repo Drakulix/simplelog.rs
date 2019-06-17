@@ -57,9 +57,39 @@ impl From<SetLoggerError> for TermLogError {
     }
 }
 
+enum StdTerminal {
+    Stderr(Box<StderrTerminal>),
+    Stdout(Box<StdoutTerminal>),
+}
+
+impl StdTerminal {
+    fn flush(&mut self) -> Result<(), Error> {
+        match self {
+            StdTerminal::Stderr(term) => term.flush(),
+            StdTerminal::Stdout(term) => term.flush(),
+        }
+    }
+}
+
 struct OutputStreams {
-    stderr: Box<StderrTerminal>,
-    stdout: Box<StdoutTerminal>,
+    err: StdTerminal,
+    out: StdTerminal,
+}
+
+/// Specifies which streams should be used when logging
+pub enum TerminalMode {
+    /// Only use Stdout
+    Stdout,
+    /// Only use Stderr
+    Stderr,
+    /// Use Stderr for Errors and Stdout otherwise
+    Mixed,
+}
+
+impl Default for TerminalMode {
+    fn default() -> TerminalMode {
+        TerminalMode::Mixed
+    }
 }
 
 /// The TermLogger struct. Provides a stderr/out based Logger implementation
@@ -82,11 +112,15 @@ impl TermLogger {
     /// # extern crate simplelog;
     /// # use simplelog::*;
     /// # fn main() {
-    /// let _ = TermLogger::init(LevelFilter::Info, Config::default());
+    /// let _ = TermLogger::init(LevelFilter::Info, Config::default(), TerminalMode::Mixed);
     /// # }
     /// ```
-    pub fn init(log_level: LevelFilter, config: Config) -> Result<(), TermLogError> {
-        let logger = try!(TermLogger::new(log_level, config).ok_or(Term));
+    pub fn init(
+        log_level: LevelFilter,
+        config: Config,
+        mode: TerminalMode,
+    ) -> Result<(), TermLogError> {
+        let logger = try!(TermLogger::new(log_level, config, mode).ok_or(Term));
         set_max_level(log_level.clone());
         try!(set_boxed_logger(logger));
         Ok(())
@@ -104,21 +138,46 @@ impl TermLogger {
     /// # extern crate simplelog;
     /// # use simplelog::*;
     /// # fn main() {
-    /// let term_logger = TermLogger::new(LevelFilter::Info, Config::default()).unwrap();
+    /// let term_logger = TermLogger::new(LevelFilter::Info, Config::default(), TerminalMode::Mixed).unwrap();
     /// # }
     /// ```
-    pub fn new(log_level: LevelFilter, config: Config) -> Option<Box<TermLogger>> {
-        term::stderr().and_then(|stderr| {
-            term::stdout().map(|stdout| {
-                let streams = Mutex::new(OutputStreams {
-                    stderr: stderr,
-                    stdout: stdout,
-                });
-                Box::new(TermLogger {
-                    level: log_level,
-                    config: config,
-                    streams: streams,
+    pub fn new(
+        log_level: LevelFilter,
+        config: Config,
+        mode: TerminalMode,
+    ) -> Option<Box<TermLogger>> {
+        let streams = match mode {
+            TerminalMode::Stdout => term::stdout().and_then(|stdout| {
+                term::stdout().map(|stdout2| {
+                    Mutex::new(OutputStreams {
+                        err: StdTerminal::Stdout(stdout),
+                        out: StdTerminal::Stdout(stdout2),
+                    })
                 })
+            }),
+            TerminalMode::Stderr => term::stderr().and_then(|stderr| {
+                term::stderr().map(|stderr2| {
+                    Mutex::new(OutputStreams {
+                        err: StdTerminal::Stderr(stderr),
+                        out: StdTerminal::Stderr(stderr2),
+                    })
+                })
+            }),
+            TerminalMode::Mixed => term::stderr().and_then(|stderr| {
+                term::stdout().map(|stdout| {
+                    Mutex::new(OutputStreams {
+                        err: StdTerminal::Stderr(stderr),
+                        out: StdTerminal::Stdout(stdout),
+                    })
+                })
+            }),
+        };
+
+        streams.map(|streams| {
+            Box::new(TermLogger {
+                level: log_level,
+                config: config,
+                streams: streams,
             })
         })
     }
@@ -180,9 +239,15 @@ impl TermLogger {
             let mut streams = self.streams.lock().unwrap();
 
             if record.level() == Level::Error {
-                self.try_log_term(record, &mut streams.stderr)
+                match streams.err {
+                    StdTerminal::Stderr(ref mut term) => self.try_log_term(record, term),
+                    StdTerminal::Stdout(ref mut term) => self.try_log_term(record, term),
+                }
             } else {
-                self.try_log_term(record, &mut streams.stdout)
+                match streams.out {
+                    StdTerminal::Stderr(ref mut term) => self.try_log_term(record, term),
+                    StdTerminal::Stdout(ref mut term) => self.try_log_term(record, term),
+                }
             }
         } else {
             Ok(())
@@ -201,8 +266,8 @@ impl Log for TermLogger {
 
     fn flush(&self) {
         let mut streams = self.streams.lock().unwrap();
-        let _ = streams.stdout.flush();
-        let _ = streams.stderr.flush();
+        let _ = streams.out.flush();
+        let _ = streams.err.flush();
     }
 }
 

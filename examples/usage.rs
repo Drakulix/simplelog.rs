@@ -8,7 +8,7 @@ use std::fs::File;
 
 fn main() {
     CombinedLogger::init(vec![
-        TermLogger::new(LevelFilter::Warn, Config::default()).unwrap(),
+        TermLogger::new(LevelFilter::Warn, Config::default(), TerminalMode::Mixed).unwrap(),
         WriteLogger::new(
             LevelFilter::Info,
             Config::default(),

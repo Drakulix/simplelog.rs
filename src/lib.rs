@@ -31,11 +31,11 @@ mod config;
 mod loggers;
 
 pub use self::config::Config;
-pub use self::loggers::{CombinedLogger, SimpleLogger, WriteLogger};
 #[cfg(feature = "test")]
 pub use self::loggers::TestLogger;
+pub use self::loggers::{CombinedLogger, SimpleLogger, WriteLogger};
 #[cfg(feature = "term")]
-pub use self::loggers::{TermLogError, TermLogger};
+pub use self::loggers::{TermLogError, TermLogger, TerminalMode};
 
 pub use log::{Level, LevelFilter};
 
@@ -119,7 +119,10 @@ mod tests {
 
                 //error
                 vec.push(SimpleLogger::new(LevelFilter::Error, conf) as Box<SharedLogger>);
-                vec.push(TermLogger::new(LevelFilter::Error, conf).unwrap() as Box<SharedLogger>);
+                vec.push(
+                    TermLogger::new(LevelFilter::Error, conf, TerminalMode::Mixed).unwrap()
+                        as Box<SharedLogger>,
+                );
                 vec.push(WriteLogger::new(
                     LevelFilter::Error,
                     conf,
@@ -128,7 +131,10 @@ mod tests {
 
                 //warn
                 vec.push(SimpleLogger::new(LevelFilter::Warn, conf) as Box<SharedLogger>);
-                vec.push(TermLogger::new(LevelFilter::Warn, conf).unwrap() as Box<SharedLogger>);
+                vec.push(
+                    TermLogger::new(LevelFilter::Warn, conf, TerminalMode::Mixed).unwrap()
+                        as Box<SharedLogger>,
+                );
                 vec.push(WriteLogger::new(
                     LevelFilter::Warn,
                     conf,
@@ -137,7 +143,10 @@ mod tests {
 
                 //info
                 vec.push(SimpleLogger::new(LevelFilter::Info, conf) as Box<SharedLogger>);
-                vec.push(TermLogger::new(LevelFilter::Info, conf).unwrap() as Box<SharedLogger>);
+                vec.push(
+                    TermLogger::new(LevelFilter::Info, conf, TerminalMode::Mixed).unwrap()
+                        as Box<SharedLogger>,
+                );
                 vec.push(WriteLogger::new(
                     LevelFilter::Info,
                     conf,
@@ -146,7 +155,10 @@ mod tests {
 
                 //debug
                 vec.push(SimpleLogger::new(LevelFilter::Debug, conf) as Box<SharedLogger>);
-                vec.push(TermLogger::new(LevelFilter::Debug, conf).unwrap() as Box<SharedLogger>);
+                vec.push(
+                    TermLogger::new(LevelFilter::Debug, conf, TerminalMode::Mixed).unwrap()
+                        as Box<SharedLogger>,
+                );
                 vec.push(WriteLogger::new(
                     LevelFilter::Debug,
                     conf,
@@ -155,7 +167,10 @@ mod tests {
 
                 //trace
                 vec.push(SimpleLogger::new(LevelFilter::Trace, conf) as Box<SharedLogger>);
-                vec.push(TermLogger::new(LevelFilter::Trace, conf).unwrap() as Box<SharedLogger>);
+                vec.push(
+                    TermLogger::new(LevelFilter::Trace, conf, TerminalMode::Mixed).unwrap()
+                        as Box<SharedLogger>,
+                );
                 vec.push(WriteLogger::new(
                     LevelFilter::Trace,
                     conf,

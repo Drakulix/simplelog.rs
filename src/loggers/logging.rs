@@ -1,4 +1,5 @@
 use chrono;
+use chrono::offset::Offset;
 use log::Record;
 use std::io::{Error, Write};
 use std::thread;
@@ -51,9 +52,18 @@ pub fn write_time<W>(write: &mut W, config: &Config) -> Result<(), Error>
 where
     W: Write + Sized,
 {
+    let offset = match config.offset {
+        Some(offset) => {
+            offset
+        },
+        None => {
+            chrono::offset::Utc.fix()
+        }
+    };
+
     let cur_time = chrono::Utc::now().with_timezone::<chrono::offset::FixedOffset>(
-        &chrono::TimeZone::from_offset(&config.offset),
-    );
+        &chrono::TimeZone::from_offset(&offset));
+
     write!(
         write,
         "{} ",

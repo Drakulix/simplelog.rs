@@ -31,7 +31,7 @@ pub struct Config {
     ///A chrono strftime string. See: https://docs.rs/chrono/0.4.0/chrono/format/strftime/index.html#specifiers
     pub time_format: Option<&'static str>,
     /// Chrono Offset used for logging time (default is UTC)
-    pub offset: FixedOffset,
+    pub offset: Option<FixedOffset>,
     /// Allowed module filters.
     /// If specified, only records from modules starting with one of these entries will be printed
     ///
@@ -53,7 +53,7 @@ impl Default for Config {
             target: Some(Level::Debug),
             location: Some(Level::Trace),
             time_format: None,
-            offset: Utc.fix(),
+            offset: Some(Utc.fix()),
             filter_allow: None,
             filter_ignore: None,
         }

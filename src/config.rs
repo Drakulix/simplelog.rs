@@ -11,7 +11,7 @@ use std::borrow::Cow;
 ///
 /// Pass this struct to your logger to change when these information shall
 /// be logged.
-/// 
+///
 /// Construct using `Default` or using `ConfigBuilder`
 #[derive(Debug, Clone)]
 pub struct Config {
@@ -22,6 +22,7 @@ pub struct Config {
     pub(crate) location: LevelFilter,
     pub(crate) time_format: Cow<'static, str>,
     pub(crate) time_offset: FixedOffset,
+    pub(crate) time_local: bool,
     pub(crate) filter_allow: Cow<'static, [Cow<'static, str>]>,
     pub(crate) filter_ignore: Cow<'static, [Cow<'static, str>]>,
 }
@@ -93,6 +94,12 @@ impl ConfigBuilder {
     /// Set offset used for logging time (default is 0)
     pub fn set_time_offset<'a>(&'a mut self, time_offset: FixedOffset) -> &'a mut ConfigBuilder {
         self.0.time_offset = time_offset;
+        self
+    }
+
+    /// set if you log in local timezone or UTC (default is UTC)
+    pub fn set_time_to_local<'a>(&'a mut self, local: bool) -> &'a mut ConfigBuilder {
+        self.0.time_local = local;
         self
     }
 
@@ -170,6 +177,7 @@ impl Default for Config {
             location: LevelFilter::Trace,
             time_format: Cow::Borrowed("%H:%M:%S"),
             time_offset: FixedOffset::east(0),
+            time_local: false,
             filter_allow: Cow::Borrowed(&[]),
             filter_ignore: Cow::Borrowed(&[]),
         }

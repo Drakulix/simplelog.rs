@@ -1,6 +1,6 @@
 [package]
 name = "simplelog"
-version = "0.6.0"
+version = "0.7.0"
 edition = "2018"
 authors = ["Drakulix <github@drakulix.de>"]
 description = "A simple and easy-to-use logging facility for Rust's log crate"
@@ -23,6 +23,6 @@ test = []
 default = ["term"]
 
 [dependencies]
-log = { version = "0.4.1", features = ["std"] }
+log = { version = "0.4.*", features = ["std"] }
 term = { version = ">=0.5.1, <0.7.0", optional = true }
-chrono = "0.4.1"
+chrono = "0.4.*"

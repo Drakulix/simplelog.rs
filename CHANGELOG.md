@@ -1,4 +1,4 @@
-## Unreleased
+## v0.7.0
     - Add local time zone option
     - Change config to builder pattern avoiding future major version bumps
     - Add further documentation about dealing with `TermLogger` failing

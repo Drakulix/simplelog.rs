@@ -198,36 +198,26 @@ impl TermLogger {
             Level::Trace => color::WHITE,
         };
 
-        if let Some(time) = self.config.time {
-            if time <= record.level() {
-                write_time(&mut *term_lock, &self.config)?;
-            }
+        if self.config.time <= record.level() {
+            write_time(&mut *term_lock, &self.config)?;
         }
 
-        if let Some(level) = self.config.level {
-            if level <= record.level() {
-                term_lock.fg(color)?;
-                write_level(record, &mut *term_lock)?;
-                term_lock.reset()?;
-            }
+        if self.config.level <= record.level() {
+            term_lock.fg(color)?;
+            write_level(record, &mut *term_lock)?;
+            term_lock.reset()?;
         }
 
-        if let Some(thread) = self.config.thread {
-            if thread <= record.level() {
-                write_thread_id(&mut *term_lock)?;
-            }
+        if self.config.thread <= record.level() {
+            write_thread_id(&mut *term_lock)?;
         }
 
-        if let Some(target) = self.config.target {
-            if target <= record.level() {
-                write_target(record, &mut *term_lock)?;
-            }
+        if self.config.target <= record.level() {
+            write_target(record, &mut *term_lock)?;
         }
 
-        if let Some(location) = self.config.location {
-            if location <= record.level() {
-                write_location(record, &mut *term_lock)?;
-            }
+        if self.config.location <= record.level() {
+            write_location(record, &mut *term_lock)?;
         }
 
         write_args(record, &mut *term_lock)

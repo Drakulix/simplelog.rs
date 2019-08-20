@@ -1,6 +1,7 @@
-use log::Level;
+use log::LevelFilter;
 
 pub use chrono::offset::{FixedOffset, Local, Offset, TimeZone, Utc};
+use std::borrow::Cow;
 
 /// Configuration for the Loggers
 ///
@@ -9,53 +10,168 @@ pub use chrono::offset::{FixedOffset, Local, Offset, TimeZone, Utc};
 /// Every space delimited part except the actual message is optional.
 ///
 /// Pass this struct to your logger to change when these information shall
+/// be logged.
+/// 
+/// Construct using `Default` or using `ConfigBuilder`
+#[derive(Debug, Clone)]
+pub struct Config {
+    pub(crate) time: LevelFilter,
+    pub(crate) level: LevelFilter,
+    pub(crate) thread: LevelFilter,
+    pub(crate) target: LevelFilter,
+    pub(crate) location: LevelFilter,
+    pub(crate) time_format: Cow<'static, str>,
+    pub(crate) time_offset: FixedOffset,
+    pub(crate) filter_allow: Cow<'static, [Cow<'static, str>]>,
+    pub(crate) filter_ignore: Cow<'static, [Cow<'static, str>]>,
+}
+
+/// Builder for the Logger Confogurations (`Config`)
+///
+/// All loggers print the message in the following form:
+/// `00:00:00 [LEVEL] crate::module: [lib.rs::100] your_message`
+/// Every space delimited part except the actual message is optional.
+///
+/// Use this struct to create a custom `Config` changing when these information shall
 /// be logged. Every part can be enabled for a specific Level and is then
 /// automatically enable for all lower levels as well.
 ///
 /// The Result is that the logging gets more detailed the more verbose it gets.
 /// E.g. to have one part shown always use `Level::Error`. But if you
 /// want to show the source line only on `Trace` use that.
-/// Passing `None` will completely disable the part.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct Config {
-    ///At which level and below the current time shall be logged
-    pub time: Option<Level>,
-    ///At which level and below the level itself shall be logged
-    pub level: Option<Level>,
-    ///At which level and below the thread id shall be logged. Default DEBUG
-    pub thread: Option<Level>,
-    ///At which level and below the target shall be logged
-    pub target: Option<Level>,
-    ///At which level and below a source code reference shall be logged
-    pub location: Option<Level>,
-    ///A chrono strftime string. See: https://docs.rs/chrono/0.4.0/chrono/format/strftime/index.html#specifiers
-    pub time_format: Option<&'static str>,
-    /// Chrono Offset used for logging time (default is UTC)
-    pub offset: FixedOffset,
-    /// Allowed module filters.
-    /// If specified, only records from modules starting with one of these entries will be printed
+#[derive(Debug, Clone)]
+pub struct ConfigBuilder(Config);
+
+impl ConfigBuilder {
+    /// Create a new default ConfigBuilder
+    pub fn new() -> ConfigBuilder {
+        ConfigBuilder(Config::default())
+    }
+
+    /// Set at which level and below the level itself shall be logged (default is Error)
+    pub fn set_max_level<'a>(&'a mut self, level: LevelFilter) -> &'a mut ConfigBuilder {
+        self.0.level = level;
+        self
+    }
+
+    /// Set at which level and below the current time shall be logged (default is Error)
+    pub fn set_time_level<'a>(&'a mut self, time: LevelFilter) -> &'a mut ConfigBuilder {
+        self.0.time = time;
+        self
+    }
+
+    /// Set at which level and below the thread id shall be logged. (default is Debug)
+    pub fn set_thread_level<'a>(&'a mut self, thread: LevelFilter) -> &'a mut ConfigBuilder {
+        self.0.thread = thread;
+        self
+    }
+
+    /// Set at which level and below the target shall be logged. (default is Debug)
+    pub fn set_target_level<'a>(&'a mut self, target: LevelFilter) -> &'a mut ConfigBuilder {
+        self.0.target = target;
+        self
+    }
+
+    /// Set at which level and below a source code reference shall be logged (default is Trace)
+    pub fn set_location_level<'a>(&'a mut self, location: LevelFilter) -> &'a mut ConfigBuilder {
+        self.0.location = location;
+        self
+    }
+    
+    /// Set time chrono strftime format string. See: https://docs.rs/chrono/0.4.0/chrono/format/strftime/index.html#specifiers
+    pub fn set_time_format_str<'a>(&'a mut self, time_format: &'static str) -> &'a mut ConfigBuilder {
+        self.0.time_format = Cow::Borrowed(time_format);
+        self
+    }
+
+    /// Set time chrono strftime format string. See: https://docs.rs/chrono/0.4.0/chrono/format/strftime/index.html#specifiers
+    pub fn set_time_format<'a>(&'a mut self, time_format: String) -> &'a mut ConfigBuilder {
+        self.0.time_format = Cow::Owned(time_format);
+        self
+    }
+
+    /// Set offset used for logging time (default is 0)
+    pub fn set_time_offset<'a>(&'a mut self, time_offset: FixedOffset) -> &'a mut ConfigBuilder {
+        self.0.time_offset = time_offset;
+        self
+    }
+
+    /// Add allowed module filters.
+    /// If any are specified, only records from modules starting with one of these entries will be printed
     ///
-    /// For example, `filter_allow: Some(&["tokio::uds"])` would allow only logging from the `tokio` crates `uds` module.
-    pub filter_allow: Option<&'static [&'static str]>,
-    /// Denied module filters.
-    /// If specified, records from modules starting with one of these entries will be ignored
+    /// For example, `add_filter_allow_str("tokio::uds")` would allow only logging from the `tokio` crates `uds` module.    
+    pub fn add_filter_allow_str<'a>(&'a mut self, time_format: &'static str) -> &'a mut ConfigBuilder {
+        let mut list = Vec::from(&*self.0.filter_allow);
+        list.push(Cow::Borrowed(time_format));
+        self.0.filter_allow = Cow::Owned(list);
+        self
+    }
+
+    /// Add allowed module filters.
+    /// If any are specified, only records from modules starting with one of these entries will be printed
     ///
-    /// For example, `filter_ignore: Some(&["tokio::uds"])` would deny logging from the `tokio` crates `uds` module.
-    pub filter_ignore: Option<&'static [&'static str]>,
+    /// For example, `add_filter_allow(format!("{}{}","tokio", "uds"))` would allow only logging from the `tokio` crates `uds` module.
+    pub fn add_filter_allow<'a>(&'a mut self, time_format: String) -> &'a mut ConfigBuilder {
+        let mut list = Vec::from(&*self.0.filter_allow);
+        list.push(Cow::Owned(time_format));
+        self.0.filter_allow = Cow::Owned(list);
+        self
+    }
+    
+    /// Clear allowed module filters.
+    /// If none are specified, nothing is filtered out
+    pub fn clear_filter_allow<'a>(&'a mut self) -> &'a mut ConfigBuilder {
+        self.0.filter_allow = Cow::Borrowed(&[]);
+        self
+    }
+
+    /// Add denied module filters.
+    /// If any are specified, records from modules starting with one of these entries will be ignored
+    ///
+    /// For example, `add_filter_ignore_str("tokio::uds")` would deny logging from the `tokio` crates `uds` module.
+    pub fn add_filter_ignore_str<'a>(&'a mut self, time_format: &'static str) -> &'a mut ConfigBuilder {
+        let mut list = Vec::from(&*self.0.filter_ignore);
+        list.push(Cow::Borrowed(time_format));
+        self.0.filter_ignore = Cow::Owned(list);
+        self
+    }
+    
+    /// Add denied module filters.
+    /// If any are specified, records from modules starting with one of these entries will be ignored
+    ///
+    /// For example, `add_filter_ignore(format!("{}{}","tokio", "uds"))` would deny logging from the `tokio` crates `uds` module.
+    pub fn add_filter_ignore<'a>(&'a mut self, time_format: String) -> &'a mut ConfigBuilder {
+        let mut list = Vec::from(&*self.0.filter_ignore);
+        list.push(Cow::Owned(time_format));
+        self.0.filter_ignore = Cow::Owned(list);
+        self
+    }
+    
+    /// Clear ignore module filters.
+    /// If none are specified, nothing is filtered
+    pub fn clear_filter_ignore<'a>(&'a mut self) -> &'a mut ConfigBuilder {
+        self.0.filter_ignore = Cow::Borrowed(&[]);
+        self
+    }
+
+    /// Build new `Config`
+    pub fn build(&mut self) -> Config {
+        self.0.clone()
+    }
 }
 
 impl Default for Config {
     fn default() -> Config {
         Config {
-            time: Some(Level::Error),
-            level: Some(Level::Error),
-            thread: Some(Level::Debug),
-            target: Some(Level::Debug),
-            location: Some(Level::Trace),
-            time_format: None,
-            offset: Utc.fix(),
-            filter_allow: None,
-            filter_ignore: None,
+            time: LevelFilter::Error,
+            level: LevelFilter::Error,
+            thread: LevelFilter::Debug,
+            target: LevelFilter::Debug,
+            location: LevelFilter::Trace,
+            time_format: Cow::Borrowed("%H:%M:%S"),
+            time_offset: FixedOffset::east(0),
+            filter_allow: Cow::Borrowed(&[]),
+            filter_ignore: Cow::Borrowed(&[]),
         }
     }
 }

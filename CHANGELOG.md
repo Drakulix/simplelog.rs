@@ -1,3 +1,7 @@
+## Unreleased
+    - Add local time zone option
+    - Change config to builder pattern avoiding future major version bumps
+
 ## v0.6.0
     - Add time offset parameter (defaults to UTC)
     - Add thread_id output (credits to @kurtlawrence)

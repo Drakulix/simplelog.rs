@@ -24,7 +24,7 @@
 mod config;
 mod loggers;
 
-pub use self::config::Config;
+pub use self::config::{ConfigBuilder, Config};
 #[cfg(feature = "test")]
 pub use self::loggers::TestLogger;
 pub use self::loggers::{CombinedLogger, SimpleLogger, WriteLogger};
@@ -90,79 +90,81 @@ mod tests {
 
         CombinedLogger::init({
             let mut vec = Vec::new();
-            let mut conf = Config::default();
+            let mut conf_builder = ConfigBuilder::new();
 
             for elem in vec![
-                None,
-                Some(Level::Trace),
-                Some(Level::Debug),
-                Some(Level::Info),
-                Some(Level::Warn),
-                Some(Level::Error),
+                LevelFilter::Off,
+                LevelFilter::Trace,
+                LevelFilter::Debug,
+                LevelFilter::Info,
+                LevelFilter::Warn,
+                LevelFilter::Error,
             ] {
-                conf.location = elem;
-                conf.target = elem;
-                conf.level = elem;
-                conf.time = elem;
+                let conf = conf_builder
+                    .set_location_level(elem)
+                    .set_target_level(elem)
+                    .set_max_level(elem)
+                    .set_time_level(elem)
+                    .build();
                 i += 1;
 
                 //error
-                vec.push(SimpleLogger::new(LevelFilter::Error, conf) as Box<dyn SharedLogger>);
+                vec.push(SimpleLogger::new(LevelFilter::Error, conf.clone()) as Box<dyn SharedLogger>);
                 vec.push(
-                    TermLogger::new(LevelFilter::Error, conf, TerminalMode::Mixed).unwrap()
+                    TermLogger::new(LevelFilter::Error, conf.clone(), TerminalMode::Mixed).unwrap()
                         as Box<dyn SharedLogger>,
                 );
                 vec.push(WriteLogger::new(
                     LevelFilter::Error,
-                    conf,
+                    conf.clone(),
                     File::create(&format!("error_{}.log", i)).unwrap(),
                 ) as Box<dyn SharedLogger>);
 
                 //warn
-                vec.push(SimpleLogger::new(LevelFilter::Warn, conf) as Box<dyn SharedLogger>);
+                vec.push(SimpleLogger::new(LevelFilter::Warn, conf.clone()) as Box<dyn SharedLogger>);
                 vec.push(
-                    TermLogger::new(LevelFilter::Warn, conf, TerminalMode::Mixed).unwrap()
+                    TermLogger::new(LevelFilter::Warn, conf.clone(), TerminalMode::Mixed).unwrap()
                         as Box<dyn SharedLogger>,
                 );
                 vec.push(WriteLogger::new(
                     LevelFilter::Warn,
-                    conf,
+                    conf.clone(),
                     File::create(&format!("warn_{}.log", i)).unwrap(),
                 ) as Box<dyn SharedLogger>);
 
                 //info
-                vec.push(SimpleLogger::new(LevelFilter::Info, conf) as Box<dyn SharedLogger>);
+                vec.push(SimpleLogger::new(LevelFilter::Info, conf.clone()) as Box<dyn SharedLogger>);
                 vec.push(
-                    TermLogger::new(LevelFilter::Info, conf, TerminalMode::Mixed).unwrap()
+                    TermLogger::new(LevelFilter::Info, conf.clone(), TerminalMode::Mixed).unwrap()
                         as Box<dyn SharedLogger>,
                 );
                 vec.push(WriteLogger::new(
                     LevelFilter::Info,
-                    conf,
+                    conf.clone(),
                     File::create(&format!("info_{}.log", i)).unwrap(),
                 ) as Box<dyn SharedLogger>);
 
                 //debug
-                vec.push(SimpleLogger::new(LevelFilter::Debug, conf) as Box<dyn SharedLogger>);
+                vec.push(SimpleLogger::new(LevelFilter::Debug, conf.clone()) as Box<dyn SharedLogger>);
                 vec.push(
-                    TermLogger::new(LevelFilter::Debug, conf, TerminalMode::Mixed).unwrap()
+                    TermLogger::new(LevelFilter::Debug, conf.clone(), TerminalMode::Mixed).unwrap()
                         as Box<dyn SharedLogger>,
                 );
                 vec.push(WriteLogger::new(
                     LevelFilter::Debug,
-                    conf,
+                    conf.clone(),
                     File::create(&format!("debug_{}.log", i)).unwrap(),
                 ) as Box<dyn SharedLogger>);
 
                 //trace
-                vec.push(SimpleLogger::new(LevelFilter::Trace, conf) as Box<dyn SharedLogger>);
+                vec.push(SimpleLogger::new(LevelFilter::Trace, conf.clone()) as Box<dyn SharedLogger>);
                 vec.push(
-                    TermLogger::new(LevelFilter::Trace, conf, TerminalMode::Mixed).unwrap()
+                    TermLogger::new(LevelFilter::Trace, conf.clone(), TerminalMode::Mixed).unwrap()
                         as Box<dyn SharedLogger>,
                 );
                 vec.push(WriteLogger::new(
                     LevelFilter::Trace,
-                    conf,
+                    conf.clone(),
                     File::create(&format!("trace_{}.log", i)).unwrap(),
                 ) as Box<dyn SharedLogger>);
             }

@@ -13,34 +13,24 @@ where
         return Ok(());
     }
 
-    if let Some(time) = config.time {
-        if time <= record.level() {
-            write_time(write, config)?;
-        }
+    if config.time <= record.level() {
+        write_time(write, config)?;
     }
 
-    if let Some(level) = config.level {
-        if level <= record.level() {
-            write_level(record, write)?;
-        }
+    if config.level <= record.level() {
+        write_level(record, write)?;
     }
 
-    if let Some(thread) = config.thread {
-        if thread <= record.level() {
-            write_thread_id(write)?;
-        }
+    if config.thread <= record.level() {
+        write_thread_id(write)?;
     }
 
-    if let Some(target) = config.target {
-        if target <= record.level() {
-            write_target(record, write)?;
-        }
+    if config.target <= record.level() {
+        write_target(record, write)?;
     }
 
-    if let Some(location) = config.location {
-        if location <= record.level() {
-            write_location(record, write)?;
-        }
+    if config.location <= record.level() {
+        write_location(record, write)?;
     }
 
     write_args(record, write)
@@ -57,7 +47,7 @@ where
     write!(
         write,
         "{} ",
-        cur_time.format(config.time_format.unwrap_or("%H:%M:%S"))
+        cur_time.format(&*config.time_format)
     )?;
     Ok(())
 }
@@ -117,21 +107,27 @@ where
 #[inline(always)]
 pub fn should_skip(config: &Config, record: &Record<'_>) -> bool {
     // If a module path and allowed list are available
-    if let (Some(path), Some(allowed)) = (record.module_path(), config.filter_allow) {
-        // Check that the module path matches at least one allow filter
-        if let None = allowed.iter().find(|v| path.starts_with(*v)) {
-            // If not, skip any further writing
-            return true;
+    match (record.module_path(), &*config.filter_allow) {
+        (Some(path), allowed) if allowed.len() > 0 => {
+            // Check that the module path matches at least one allow filter
+            if let None = allowed.iter().find(|v| path.starts_with(&***v)) {
+                // If not, skip any further writing
+                return true;
+            }
         }
+        _ => {}
     }
 
     // If a module path and ignore list are available
-    if let (Some(path), Some(ignore)) = (record.module_path(), config.filter_ignore) {
-        // Check that the module path does not match any ignore filters
-        if let Some(_) = ignore.iter().find(|v| path.starts_with(*v)) {
-            // If not, skip any further writing
-            return true;
+    match (record.module_path(), &*config.filter_ignore) {
+        (Some(path), ignore) if ignore.len() > 0 => {
+            // Check that the module path does not match any ignore filters
+            if let Some(_) = ignore.iter().find(|v| path.starts_with(&***v)) {
+                // If not, skip any further writing
+                return true;
+            }
         }
+        _ => {}
     }
 
     return false;

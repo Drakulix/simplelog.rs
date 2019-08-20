@@ -24,5 +24,5 @@ default = ["term"]
 
 [dependencies]
 log = { version = "0.4.1", features = ["std"] }
-term = { version = "0.5.1", optional = true }
+term = { version = ">=0.5.1, <0.7.0", optional = true }
 chrono = "0.4.1"

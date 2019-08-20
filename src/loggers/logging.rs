@@ -1,8 +1,8 @@
+use crate::Config;
 use chrono;
 use log::Record;
 use std::io::{Error, Write};
 use std::thread;
-use crate::Config;
 
 #[inline(always)]
 pub fn try_log<W>(config: &Config, record: &Record<'_>, write: &mut W) -> Result<(), Error>
@@ -41,14 +41,13 @@ pub fn write_time<W>(write: &mut W, config: &Config) -> Result<(), Error>
 where
     W: Write + Sized,
 {
-    let cur_time = chrono::Utc::now().with_timezone::<chrono::offset::FixedOffset>(
-        &chrono::TimeZone::from_offset(&config.offset),
-    );
-    write!(
-        write,
-        "{} ",
-        cur_time.format(&*config.time_format)
-    )?;
+    let cur_time = if config.time_local {
+        chrono::Local::now().naive_local() + config.time_offset
+    } else {
+        chrono::Utc::now().naive_utc() + config.time_offset
+    };
+
+    write!(write, "{} ", cur_time.format(&*config.time_format))?;
     Ok(())
 }
 

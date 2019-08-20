@@ -7,8 +7,8 @@
 
 //! Module providing the CombinedLogger Implementation
 
-use log::{set_boxed_logger, set_max_level, LevelFilter, Log, Metadata, Record, SetLoggerError};
 use crate::{Config, SharedLogger};
+use log::{set_boxed_logger, set_max_level, LevelFilter, Log, Metadata, Record, SetLoggerError};
 
 /// The CombinedLogger struct. Provides a Logger implementation that proxies multiple Loggers as one.
 ///

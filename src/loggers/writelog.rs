@@ -8,10 +8,10 @@
 //! Module providing the FileLogger Implementation
 
 use super::logging::try_log;
+use crate::{Config, SharedLogger};
 use log::{set_boxed_logger, set_max_level, LevelFilter, Log, Metadata, Record, SetLoggerError};
 use std::io::Write;
 use std::sync::Mutex;
-use crate::{Config, SharedLogger};
 
 /// The WriteLogger struct. Provides a Logger implementation for structs implementing `Write`, e.g. File
 pub struct WriteLogger<W: Write + Send + 'static> {

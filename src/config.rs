@@ -78,9 +78,12 @@ impl ConfigBuilder {
         self.0.location = location;
         self
     }
-    
+
     /// Set time chrono strftime format string. See: https://docs.rs/chrono/0.4.0/chrono/format/strftime/index.html#specifiers
-    pub fn set_time_format_str<'a>(&'a mut self, time_format: &'static str) -> &'a mut ConfigBuilder {
+    pub fn set_time_format_str<'a>(
+        &'a mut self,
+        time_format: &'static str,
+    ) -> &'a mut ConfigBuilder {
         self.0.time_format = Cow::Borrowed(time_format);
         self
     }
@@ -107,7 +110,10 @@ impl ConfigBuilder {
     /// If any are specified, only records from modules starting with one of these entries will be printed
     ///
     /// For example, `add_filter_allow_str("tokio::uds")` would allow only logging from the `tokio` crates `uds` module.    
-    pub fn add_filter_allow_str<'a>(&'a mut self, time_format: &'static str) -> &'a mut ConfigBuilder {
+    pub fn add_filter_allow_str<'a>(
+        &'a mut self,
+        time_format: &'static str,
+    ) -> &'a mut ConfigBuilder {
         let mut list = Vec::from(&*self.0.filter_allow);
         list.push(Cow::Borrowed(time_format));
         self.0.filter_allow = Cow::Owned(list);
@@ -124,7 +130,7 @@ impl ConfigBuilder {
         self.0.filter_allow = Cow::Owned(list);
         self
     }
-    
+
     /// Clear allowed module filters.
     /// If none are specified, nothing is filtered out
     pub fn clear_filter_allow<'a>(&'a mut self) -> &'a mut ConfigBuilder {
@@ -136,13 +142,16 @@ impl ConfigBuilder {
     /// If any are specified, records from modules starting with one of these entries will be ignored
     ///
     /// For example, `add_filter_ignore_str("tokio::uds")` would deny logging from the `tokio` crates `uds` module.
-    pub fn add_filter_ignore_str<'a>(&'a mut self, time_format: &'static str) -> &'a mut ConfigBuilder {
+    pub fn add_filter_ignore_str<'a>(
+        &'a mut self,
+        time_format: &'static str,
+    ) -> &'a mut ConfigBuilder {
         let mut list = Vec::from(&*self.0.filter_ignore);
         list.push(Cow::Borrowed(time_format));
         self.0.filter_ignore = Cow::Owned(list);
         self
     }
-    
+
     /// Add denied module filters.
     /// If any are specified, records from modules starting with one of these entries will be ignored
     ///
@@ -153,7 +162,7 @@ impl ConfigBuilder {
         self.0.filter_ignore = Cow::Owned(list);
         self
     }
-    
+
     /// Clear ignore module filters.
     /// If none are specified, nothing is filtered
     pub fn clear_filter_ignore<'a>(&'a mut self) -> &'a mut ConfigBuilder {

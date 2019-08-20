@@ -8,12 +8,12 @@
 //! Module providing the SimpleLogger Implementation
 
 use super::logging::try_log;
+use crate::{Config, SharedLogger};
 use log::{
     set_boxed_logger, set_max_level, Level, LevelFilter, Log, Metadata, Record, SetLoggerError,
 };
 use std::io::{stderr, stdout};
 use std::sync::Mutex;
-use crate::{Config, SharedLogger};
 
 /// The SimpleLogger struct. Provides a very basic Logger implementation
 pub struct SimpleLogger {

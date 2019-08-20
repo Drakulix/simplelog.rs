@@ -105,14 +105,28 @@ impl TermLogger {
     /// init function. Globally initializes the TermLogger as the one and only used log facility.
     ///
     /// Takes the desired `Level` and `Config` as arguments. They cannot be changed later on.
-    /// Fails if another Logger was already initialized.
-    ///
+    /// Fails if another Logger was already initialized or if a terminal couldn't be opened.
+    /// 
+    /// Workaround the latter by either
+    /// - panic'ing (not recommended). e.g. `TermLogger::init(LevelFilter::Warn, Config::default(), TerminalMode::Mixed).unwrap()`
+    /// - silently ignoring (little better). e.g. `let _ = TermLogger::init(LevelFilter::Warn, Config::default(), TerminalMode::Mixed);`
+    /// - falling back:
+    /// ```
+    /// # extern crate simplelog;
+    /// # use simplelog::*;
+    /// # fn main() {
+    /// if let Err(_) = TermLogger::init(LevelFilter::Warn, Config::default(), TerminalMode::Mixed) {
+    ///     SimpleLogger::init(LevelFilter::Warn, Config::default()).expect("No logger should be already set")
+    /// }
+    /// # }
+    /// ```
+    /// 
     /// # Examples
     /// ```
     /// # extern crate simplelog;
     /// # use simplelog::*;
     /// # fn main() {
-    /// let _ = TermLogger::init(LevelFilter::Info, Config::default(), TerminalMode::Mixed);
+    /// TermLogger::init(LevelFilter::Info, Config::default(), TerminalMode::Mixed).expect("No interactive terminal");
     /// # }
     /// ```
     pub fn init(
@@ -134,13 +148,29 @@ impl TermLogger {
     /// Takes the desired `Level` and `Config` as arguments. They cannot be changed later on.
     ///
     /// Returns a `Box`ed TermLogger, or None if a terminal couldn't be opened.
+    /// Workaround this by either
+    /// - panic'ing (not recommended). e.g. `TermLogger::new(LevelFilter::Warn, Config::default(), TerminalMode::Mixed).unwrap()`
+    /// - silently ignoring (little better). e.g. `if let Some(logger) = TermLogger::new(LevelFilter::Warn, Config::default(), TerminalMode::Mixed) { /*...*/ }`
+    /// - falling back:
+    /// ```
+    /// # extern crate simplelog;
+    /// # use simplelog::*;
+    /// # fn main() {
+    /// let mut multiple = vec![];
+    /// match TermLogger::new(LevelFilter::Warn, Config::default(), TerminalMode::Mixed) {
+    ///     Some(logger) => multiple.push(logger as Box<dyn SharedLogger>),
+    ///     None => multiple.push(SimpleLogger::new(LevelFilter::Warn, Config::default())),
+    /// }
+    /// // Add more ...
+    /// # }
+    /// ```
     ///
     /// # Examples
     /// ```
     /// # extern crate simplelog;
     /// # use simplelog::*;
     /// # fn main() {
-    /// let term_logger = TermLogger::new(LevelFilter::Info, Config::default(), TerminalMode::Mixed).unwrap();
+    /// let term_logger = TermLogger::new(LevelFilter::Info, Config::default(), TerminalMode::Mixed).expect("No interactive terminal");
     /// # }
     /// ```
     pub fn new(

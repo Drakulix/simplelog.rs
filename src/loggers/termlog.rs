@@ -106,7 +106,7 @@ impl TermLogger {
     ///
     /// Takes the desired `Level` and `Config` as arguments. They cannot be changed later on.
     /// Fails if another Logger was already initialized or if a terminal couldn't be opened.
-    /// 
+    ///
     /// Workaround the latter by either
     /// - panic'ing (not recommended). e.g. `TermLogger::init(LevelFilter::Warn, Config::default(), TerminalMode::Mixed).unwrap()`
     /// - silently ignoring (little better). e.g. `let _ = TermLogger::init(LevelFilter::Warn, Config::default(), TerminalMode::Mixed);`
@@ -120,7 +120,7 @@ impl TermLogger {
     /// }
     /// # }
     /// ```
-    /// 
+    ///
     /// # Examples
     /// ```
     /// # extern crate simplelog;

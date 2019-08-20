@@ -1,6 +1,7 @@
 ## Unreleased
     - Add local time zone option
     - Change config to builder pattern avoiding future major version bumps
+    - Add further documentation about dealing with `TermLogger` failing
 
 ## v0.6.0
     - Add time offset parameter (defaults to UTC)

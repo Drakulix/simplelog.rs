@@ -133,6 +133,8 @@ impl TermLogger {
     ///
     /// Takes the desired `Level` and `Config` as arguments. They cannot be changed later on.
     ///
+    /// Returns a `Box`ed TermLogger, or None if a terminal couldn't be opened.
+    ///
     /// # Examples
     /// ```
     /// # extern crate simplelog;

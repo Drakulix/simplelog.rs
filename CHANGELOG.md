@@ -1,3 +1,6 @@
+## v0.7.1
+    - Fix `LevelFilter:Off` not turning off parts of the log messages
+
 ## v0.7.0
     - Add local time zone option
     - Change config to builder pattern avoiding future major version bumps

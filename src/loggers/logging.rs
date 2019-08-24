@@ -1,6 +1,6 @@
 use crate::Config;
 use chrono;
-use log::Record;
+use log::{LevelFilter, Record};
 use std::io::{Error, Write};
 use std::thread;
 
@@ -13,23 +13,23 @@ where
         return Ok(());
     }
 
-    if config.time <= record.level() {
+    if config.time <= record.level() && config.time != LevelFilter::Off {
         write_time(write, config)?;
     }
 
-    if config.level <= record.level() {
+    if config.level <= record.level() && config.level != LevelFilter::Off {
         write_level(record, write)?;
     }
 
-    if config.thread <= record.level() {
+    if config.thread <= record.level() && config.thread != LevelFilter::Off {
         write_thread_id(write)?;
     }
 
-    if config.target <= record.level() {
+    if config.target <= record.level() && config.target != LevelFilter::Off {
         write_target(record, write)?;
     }
 
-    if config.location <= record.level() {
+    if config.location <= record.level() && config.location != LevelFilter::Off {
         write_location(record, write)?;
     }
 

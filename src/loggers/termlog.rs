@@ -230,25 +230,25 @@ impl TermLogger {
             Level::Trace => color::WHITE,
         };
 
-        if self.config.time <= record.level() {
+        if self.config.time <= record.level() && self.config.time != LevelFilter::Off {
             write_time(&mut *term_lock, &self.config)?;
         }
 
-        if self.config.level <= record.level() {
+        if self.config.level <= record.level() && self.config.level != LevelFilter::Off {
             term_lock.fg(color)?;
             write_level(record, &mut *term_lock)?;
             term_lock.reset()?;
         }
 
-        if self.config.thread <= record.level() {
+        if self.config.thread <= record.level() && self.config.thread != LevelFilter::Off {
             write_thread_id(&mut *term_lock)?;
         }
 
-        if self.config.target <= record.level() {
+        if self.config.target <= record.level() && self.config.target != LevelFilter::Off {
             write_target(record, &mut *term_lock)?;
         }
 
-        if self.config.location <= record.level() {
+        if self.config.location <= record.level() && self.config.location != LevelFilter::Off {
             write_location(record, &mut *term_lock)?;
         }
 

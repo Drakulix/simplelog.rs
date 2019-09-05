@@ -49,7 +49,7 @@ $ cargo run --example usage
 and my_rust_binary.log
 ```
 11:13:03 [ERROR] usage: Bright red error
-11:13:03 [INFO] usage: This only appears in the log file
+11:13:03 [ INFO] usage: This only appears in the log file
 ```
 
 ## Getting Started

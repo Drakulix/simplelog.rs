@@ -1,4 +1,4 @@
-## Unreleased
+## v0.7.2
     - Allow Level Padding to be configured
 
 ## v0.7.1

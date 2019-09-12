@@ -3,6 +3,17 @@ use log::LevelFilter;
 pub use chrono::offset::{FixedOffset, Local, Offset, TimeZone, Utc};
 use std::borrow::Cow;
 
+#[derive(Debug, Clone, Copy)]
+/// Padding to be used for logging the level
+pub enum LevelPadding {
+    /// Add spaces on the left side
+    Left,
+    /// Add spaces on the right side
+    Right,
+    /// Do not pad the level
+    Off,
+}
+
 /// Configuration for the Loggers
 ///
 /// All loggers print the message in the following form:
@@ -17,6 +28,7 @@ use std::borrow::Cow;
 pub struct Config {
     pub(crate) time: LevelFilter,
     pub(crate) level: LevelFilter,
+    pub(crate) level_padding: LevelPadding,
     pub(crate) thread: LevelFilter,
     pub(crate) target: LevelFilter,
     pub(crate) location: LevelFilter,
@@ -76,6 +88,12 @@ impl ConfigBuilder {
     /// Set at which level and below a source code reference shall be logged (default is Trace)
     pub fn set_location_level<'a>(&'a mut self, location: LevelFilter) -> &'a mut ConfigBuilder {
         self.0.location = location;
+        self
+    }
+
+    /// Set how the levels should be padded, when logging (default is Left)
+    pub fn set_level_padding<'a>(&'a mut self, padding: LevelPadding) -> &'a mut ConfigBuilder {
+        self.0.level_padding = padding;
         self
     }
 
@@ -181,6 +199,7 @@ impl Default for Config {
         Config {
             time: LevelFilter::Error,
             level: LevelFilter::Error,
+            level_padding: LevelPadding::Left,
             thread: LevelFilter::Debug,
             target: LevelFilter::Debug,
             location: LevelFilter::Trace,

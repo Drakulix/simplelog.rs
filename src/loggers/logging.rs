@@ -1,4 +1,4 @@
-use crate::Config;
+use crate::{Config, LevelPadding};
 use chrono;
 use log::{LevelFilter, Record};
 use std::io::{Error, Write};
@@ -18,7 +18,7 @@ where
     }
 
     if config.level <= record.level() && config.level != LevelFilter::Off {
-        write_level(record, write)?;
+        write_level(record, write, config)?;
     }
 
     if config.thread <= record.level() && config.thread != LevelFilter::Off {
@@ -52,11 +52,15 @@ where
 }
 
 #[inline(always)]
-pub fn write_level<W>(record: &Record<'_>, write: &mut W) -> Result<(), Error>
+pub fn write_level<W>(record: &Record<'_>, write: &mut W, config: &Config) -> Result<(), Error>
 where
     W: Write + Sized,
 {
-    write!(write, "[{: >5}] ", record.level())?;
+    match config.level_padding {
+        LevelPadding::Left => write!(write, "[{: >5}] ", record.level())?,
+        LevelPadding::Right => write!(write, "[{: <5}] ", record.level())?,
+        LevelPadding::Off => write!(write, "[{}] ", record.level())?,
+    };
     Ok(())
 }
 

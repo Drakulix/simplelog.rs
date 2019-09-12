@@ -1,3 +1,6 @@
+## Unreleased
+    - Allow Level Padding to be configured
+
 ## v0.7.1
     - Fix `LevelFilter:Off` not turning off parts of the log messages
 

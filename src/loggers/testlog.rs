@@ -8,7 +8,7 @@
 //! Module providing the TestLogger Implementation
 
 use super::logging::should_skip;
-use crate::{Config, SharedLogger};
+use crate::{Config, SharedLogger, LevelPadding};
 use log::{set_boxed_logger, set_max_level, LevelFilter, Log, Metadata, Record, SetLoggerError};
 
 use std::thread;
@@ -103,34 +103,24 @@ pub fn log(config: &Config, record: &Record<'_>) {
         return;
     }
 
-    if let Some(time) = config.time {
-        if time <= record.level() {
-            write_time(config);
-        }
+    if config.time <= record.level() && config.time != LevelFilter::Off {
+        write_time(config);
     }
 
-    if let Some(level) = config.level {
-        if level <= record.level() {
-            write_level(record);
-        }
+    if config.level <= record.level() && config.level != LevelFilter::Off {
+        write_level(record, config);
     }
 
-    if let Some(thread) = config.thread {
-        if thread < record.level() {
-            write_thread_id();
-        }
+    if config.thread < record.level() && config.thread != LevelFilter::Off {
+        write_thread_id();
     }
 
-    if let Some(target) = config.target {
-        if target <= record.level() {
-            write_target(record);
-        }
+    if config.target <= record.level() && config.target != LevelFilter::Off {
+        write_target(record);
     }
 
-    if let Some(location) = config.location {
-        if location <= record.level() {
-            write_location(record);
-        }
+    if config.location <= record.level() && config.location != LevelFilter::Off {
+        write_location(record);
     }
 
     write_args(record);
@@ -138,16 +128,24 @@ pub fn log(config: &Config, record: &Record<'_>) {
 
 #[inline(always)]
 pub fn write_time(config: &Config) {
-    let cur_time = chrono::Utc::now();
+    let cur_time = if config.time_local {
+        chrono::Local::now().naive_local() + config.time_offset
+    } else {
+        chrono::Utc::now().naive_utc() + config.time_offset
+    };
     print!(
         "{} ",
-        cur_time.format(config.time_format.unwrap_or("%H:%M:%S"))
+        cur_time.format(&*config.time_format)
     );
 }
 
 #[inline(always)]
-pub fn write_level(record: &Record<'_>) {
-    print!("[{}] ", record.level());
+pub fn write_level(record: &Record<'_>, config: &Config) {
+    match config.level_padding {
+        LevelPadding::Left => print!("[{: >5}] ", record.level()),
+        LevelPadding::Right => print!("[{: <5}] ", record.level()),
+        LevelPadding::Off => print!("[{}] ", record.level()),
+    };
 }
 
 #[inline(always)]

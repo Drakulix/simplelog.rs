@@ -121,6 +121,7 @@ mod tests {
                     conf.clone(),
                     File::create(&format!("error_{}.log", i)).unwrap(),
                 ) as Box<dyn SharedLogger>);
+                vec.push(TestLogger::new(LevelFilter::Error, conf.clone()));
 
                 //warn
                 vec.push(
@@ -135,6 +136,7 @@ mod tests {
                     conf.clone(),
                     File::create(&format!("warn_{}.log", i)).unwrap(),
                 ) as Box<dyn SharedLogger>);
+                vec.push(TestLogger::new(LevelFilter::Warn, conf.clone()));
 
                 //info
                 vec.push(
@@ -149,6 +151,7 @@ mod tests {
                     conf.clone(),
                     File::create(&format!("info_{}.log", i)).unwrap(),
                 ) as Box<dyn SharedLogger>);
+                vec.push(TestLogger::new(LevelFilter::Info, conf.clone()));
 
                 //debug
                 vec.push(
@@ -163,6 +166,7 @@ mod tests {
                     conf.clone(),
                     File::create(&format!("debug_{}.log", i)).unwrap(),
                 ) as Box<dyn SharedLogger>);
+                vec.push(TestLogger::new(LevelFilter::Debug, conf.clone()));
 
                 //trace
                 vec.push(
@@ -177,6 +181,7 @@ mod tests {
                     conf.clone(),
                     File::create(&format!("trace_{}.log", i)).unwrap(),
                 ) as Box<dyn SharedLogger>);
+                vec.push(TestLogger::new(LevelFilter::Trace, conf.clone()));
             }
 
             vec

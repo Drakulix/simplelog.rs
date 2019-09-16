@@ -22,7 +22,7 @@ before_cache: |
   fi
 
 script: |
-  cargo test --all
+  cargo test --all --all-features
 
 after_success: |
   if [[ "$TRAVIS_RUST_VERSION" == nightly ]]; then

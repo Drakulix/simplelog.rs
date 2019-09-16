@@ -1,3 +1,6 @@
+## v0.7.3
+    - Fixed `test` feature
+
 ## v0.7.2
     - Allow Level Padding to be configured
 

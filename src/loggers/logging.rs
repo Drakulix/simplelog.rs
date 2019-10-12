@@ -42,12 +42,12 @@ where
     W: Write + Sized,
 {
     let cur_time = if config.time_local {
-        chrono::Local::now().naive_local() + config.time_offset
+        (chrono::Local::now() + config.time_offset).format(&*config.time_format)
     } else {
-        chrono::Utc::now().naive_utc() + config.time_offset
+        (chrono::Utc::now() + config.time_offset).format(&*config.time_format)
     };
 
-    write!(write, "{} ", cur_time.format(&*config.time_format))?;
+    write!(write, "{} ", cur_time)?;
     Ok(())
 }
 

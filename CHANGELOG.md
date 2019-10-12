@@ -1,3 +1,6 @@
+## v0.7.4
+    - Fixed time formats with 
+
 ## v0.7.3
     - Fixed `test` feature
 

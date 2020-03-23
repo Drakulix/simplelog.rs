@@ -110,8 +110,8 @@ where
 #[inline(always)]
 pub fn should_skip(config: &Config, record: &Record<'_>) -> bool {
     // If a module path and allowed list are available
-    match (record.module_path(), &*config.filter_allow) {
-        (Some(path), allowed) if allowed.len() > 0 => {
+    match (record.target(), &*config.filter_allow) {
+        (path, allowed) if allowed.len() > 0 => {
             // Check that the module path matches at least one allow filter
             if let None = allowed.iter().find(|v| path.starts_with(&***v)) {
                 // If not, skip any further writing
@@ -122,8 +122,8 @@ pub fn should_skip(config: &Config, record: &Record<'_>) -> bool {
     }
 
     // If a module path and ignore list are available
-    match (record.module_path(), &*config.filter_ignore) {
-        (Some(path), ignore) if ignore.len() > 0 => {
+    match (record.target(), &*config.filter_ignore) {
+        (path, ignore) if ignore.len() > 0 => {
             // Check that the module path does not match any ignore filters
             if let Some(_) = ignore.iter().find(|v| path.starts_with(&***v)) {
                 // If not, skip any further writing

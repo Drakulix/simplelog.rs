@@ -241,7 +241,7 @@ impl TermLogger {
         }
 
         if self.config.thread <= record.level() && self.config.thread != LevelFilter::Off {
-            write_thread_id(&mut *term_lock)?;
+            write_thread_id(&mut *term_lock, &self.config)?;
         }
 
         if self.config.target <= record.level() && self.config.target != LevelFilter::Off {

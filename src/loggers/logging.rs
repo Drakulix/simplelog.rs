@@ -1,4 +1,4 @@
-use crate::{Config, LevelPadding};
+use crate::{Config, LevelPadding, ThreadPadding, ThreadLogMode};
 use chrono;
 use log::{LevelFilter, Record};
 use std::io::{Error, Write};
@@ -22,7 +22,14 @@ where
     }
 
     if config.thread <= record.level() && config.thread != LevelFilter::Off {
-        write_thread_id(write)?;
+        match config.thread_log_mode {
+            ThreadLogMode::IDs => {
+                write_thread_id(write, config)?;
+            }
+            ThreadLogMode::Names | ThreadLogMode::Both => {
+                write_thread_name(write, config)?;
+            }
+        }
     }
 
     if config.target <= record.level() && config.target != LevelFilter::Off {
@@ -87,14 +94,47 @@ where
     Ok(())
 }
 
-pub fn write_thread_id<W>(write: &mut W) -> Result<(), Error>
+pub fn write_thread_name<W>(write: &mut W, config: &Config) -> Result<(), Error>
+where
+    W: Write + Sized,
+{
+    if let Some(name) = thread::current().name() {
+        match config.thread_padding {
+            ThreadPadding::Left{0: qty} => {
+                write!(write, "({name:>0$}) ", qty, name=name)?;
+            }
+            ThreadPadding::Right{0: qty} => {
+                write!(write, "({name:<0$}) ", qty, name=name)?;
+            }
+            ThreadPadding::Off => {
+                write!(write, "({}) ", name)?;
+            }
+        }
+    } else if config.thread_log_mode == ThreadLogMode::Both {
+        write_thread_id(write, config)?;
+    }
+
+    Ok(())
+}
+
+pub fn write_thread_id<W>(write: &mut W, config: &Config) -> Result<(), Error>
 where
     W: Write + Sized,
 {
     let id = format!("{:?}", thread::current().id());
     let id = id.replace("ThreadId(", "");
     let id = id.replace(")", "");
-    write!(write, "({}) ", id)?;
+    match config.thread_padding {
+        ThreadPadding::Left{0: qty} => {
+            write!(write, "({id:>0$}) ", qty, id=id)?;
+        }
+        ThreadPadding::Right{0: qty} => {
+            write!(write, "({id:<0$}) ", qty, id=id)?;
+        }
+        ThreadPadding::Off => {
+            write!(write, "({}) ", id)?;
+        }
+    }
     Ok(())
 }
 

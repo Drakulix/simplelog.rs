@@ -1,3 +1,7 @@
+## v0.7.5
+    - Use `target()` instead of `module_path()` for filtering as suggested by `log`s docs. (PR #52, credits to @tsidea)
+    - Allow logging thread names and pad thread ids (defaults match the old behaviour). (PR #53, credits to @mulark)
+
 ## v0.7.4
     - Fixed time formats with 
 

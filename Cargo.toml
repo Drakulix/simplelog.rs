@@ -1,6 +1,6 @@
 [package]
 name = "simplelog"
-version = "0.7.4"
+version = "0.7.5"
 edition = "2018"
 authors = ["Drakulix <github@drakulix.de>"]
 description = "A simple and easy-to-use logging facility for Rust's log crate"

@@ -24,7 +24,7 @@
 mod config;
 mod loggers;
 
-pub use self::config::{Config, ConfigBuilder, LevelPadding};
+pub use self::config::{Config, ConfigBuilder, LevelPadding, ThreadPadding, ThreadLogMode};
 #[cfg(feature = "test")]
 pub use self::loggers::TestLogger;
 pub use self::loggers::{CombinedLogger, SimpleLogger, WriteLogger};
@@ -91,6 +91,16 @@ mod tests {
         CombinedLogger::init({
             let mut vec = Vec::new();
             let mut conf_builder = ConfigBuilder::new();
+
+            let conf_thread_name = ConfigBuilder::new()
+                .set_time_level(LevelFilter::Off)
+                .set_thread_level(LevelFilter::Error)
+                .set_thread_mode(ThreadLogMode::Names)
+                .build();
+
+            vec.push(
+                WriteLogger::new(LevelFilter::Error, conf_thread_name, File::create("thread_naming.log").unwrap()) as Box<dyn SharedLogger>
+            );
 
             for elem in vec![
                 LevelFilter::Off,
@@ -203,6 +213,13 @@ mod tests {
         info!("Test Information");
         debug!("Test Debug");
         trace!("Test Trace");
+
+        let mut thread_naming = String::new();
+        File::open("thread_naming.log").unwrap().read_to_string(&mut thread_naming).unwrap();
+
+        if let Some(name) = std::thread::current().name() {
+            assert!(thread_naming.contains(&format!("({})", name)));
+        }
 
         for j in 1..i {
             let mut error = String::new();

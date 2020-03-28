@@ -14,6 +14,28 @@ pub enum LevelPadding {
     Off,
 }
 
+#[derive(Debug, Clone, Copy)]
+/// Padding to be used for logging the thread id/name
+pub enum ThreadPadding {
+    /// Add spaces on the left side, up to usize many
+    Left(usize),
+    /// Add spaces on the right side, up to usize many
+    Right(usize),
+    /// Do not pad the thread id/name
+    Off,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+/// Mode for logging the thread name or id or both.
+pub enum ThreadLogMode {
+    /// Log thread ids only
+    IDs,
+    /// Log the thread names only
+    Names,
+    /// If this thread is named, log the name. Otherwise, log the thread id.
+    Both,
+}
+
 /// Configuration for the Loggers
 ///
 /// All loggers print the message in the following form:
@@ -30,6 +52,8 @@ pub struct Config {
     pub(crate) level: LevelFilter,
     pub(crate) level_padding: LevelPadding,
     pub(crate) thread: LevelFilter,
+    pub(crate) thread_log_mode: ThreadLogMode,
+    pub(crate) thread_padding: ThreadPadding,
     pub(crate) target: LevelFilter,
     pub(crate) location: LevelFilter,
     pub(crate) time_format: Cow<'static, str>,
@@ -97,6 +121,18 @@ impl ConfigBuilder {
         self
     }
 
+    /// Set how the thread should be padded
+    pub fn set_thread_padding<'a>(&'a mut self, padding: ThreadPadding) -> &'a mut ConfigBuilder {
+        self.0.thread_padding = padding;
+        self
+    }
+
+    /// Set the mode for logging the thread
+    pub fn set_thread_mode<'a>(&'a mut self, mode: ThreadLogMode) -> &'a mut ConfigBuilder {
+        self.0.thread_log_mode = mode;
+        self
+    }
+
     /// Set time chrono strftime format string. See: https://docs.rs/chrono/0.4.0/chrono/format/strftime/index.html#specifiers
     pub fn set_time_format_str<'a>(
         &'a mut self,
@@ -127,7 +163,7 @@ impl ConfigBuilder {
     /// Add allowed module filters.
     /// If any are specified, only records from modules starting with one of these entries will be printed
     ///
-    /// For example, `add_filter_allow_str("tokio::uds")` would allow only logging from the `tokio` crates `uds` module.    
+    /// For example, `add_filter_allow_str("tokio::uds")` would allow only logging from the `tokio` crates `uds` module.
     pub fn add_filter_allow_str<'a>(
         &'a mut self,
         time_format: &'static str,
@@ -201,6 +237,8 @@ impl Default for Config {
             level: LevelFilter::Error,
             level_padding: LevelPadding::Left,
             thread: LevelFilter::Debug,
+            thread_log_mode: ThreadLogMode::IDs,
+            thread_padding: ThreadPadding::Off,
             target: LevelFilter::Debug,
             location: LevelFilter::Trace,
             time_format: Cow::Borrowed("%H:%M:%S"),

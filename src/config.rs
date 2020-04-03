@@ -133,7 +133,9 @@ impl ConfigBuilder {
         self
     }
 
-    /// Set time chrono strftime format string. See: https://docs.rs/chrono/0.4.0/chrono/format/strftime/index.html#specifiers
+    /// Set time chrono [strftime] format string.
+    ///
+    /// [strftime]: https://docs.rs/chrono/0.4.0/chrono/format/strftime/index.html#specifiers
     pub fn set_time_format_str<'a>(
         &'a mut self,
         time_format: &'static str,
@@ -142,7 +144,9 @@ impl ConfigBuilder {
         self
     }
 
-    /// Set time chrono strftime format string. See: https://docs.rs/chrono/0.4.0/chrono/format/strftime/index.html#specifiers
+    /// Set time chrono [strftime] format string.
+    ///
+    /// [strftime]: https://docs.rs/chrono/0.4.0/chrono/format/strftime/index.html#specifiers
     pub fn set_time_format<'a>(&'a mut self, time_format: String) -> &'a mut ConfigBuilder {
         self.0.time_format = Cow::Owned(time_format);
         self

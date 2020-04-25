@@ -77,6 +77,7 @@ struct OutputStreams {
 }
 
 /// Specifies which streams should be used when logging
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
 pub enum TerminalMode {
     /// Only use Stdout
     Stdout,

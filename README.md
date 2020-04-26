@@ -42,7 +42,7 @@ fn main() {
 ### Results in
 ```
 $ cargo run --example usage
-   Compiling simplelog v0.7.4 (file:///home/drakulix/Projects/simplelog)
+   Compiling simplelog v0.7.6 (file:///home/drakulix/Projects/simplelog)
      Running `target/debug/examples/usage`
 [ERROR] Bright red error
 ```
@@ -57,7 +57,7 @@ and my_rust_binary.log
 Just add
 ```
 [dependencies]
-simplelog = "^0.7.4"
+simplelog = "^0.7.6"
 ```
 to your `Cargo.toml`
 

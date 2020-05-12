@@ -63,7 +63,7 @@ pub struct Config {
     pub(crate) filter_ignore: Cow<'static, [Cow<'static, str>]>,
 }
 
-/// Builder for the Logger Confogurations (`Config`)
+/// Builder for the Logger Configurations (`Config`)
 ///
 /// All loggers print the message in the following form:
 /// `00:00:00 [LEVEL] crate::module: [lib.rs::100] your_message`

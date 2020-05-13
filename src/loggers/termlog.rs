@@ -7,8 +7,6 @@ use std::error;
 use std::fmt;
 use std::io::{Error, Write};
 use std::sync::Mutex;
-// use term;
-// use term::{color, StderrTerminal, StdoutTerminal, Terminal};
 use termcolor;
 use termcolor::{StandardStream, ColorChoice, Color, WriteColor, ColorSpec};
 
@@ -220,9 +218,7 @@ impl TermLogger {
         }
 
         if self.config.level <= record.level() && self.config.level != LevelFilter::Off {
-            let mut color_spec = ColorSpec::new();
-            color_spec.set_fg(Some(color));
-            term_lock.set_color(&color_spec)?;
+            term_lock.set_color(ColorSpec::new().set_fg(Some(color)))?;
             write_level(record, &mut *term_lock, &self.config)?;
             term_lock.reset()?;
         }

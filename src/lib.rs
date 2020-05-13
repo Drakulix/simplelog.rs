@@ -124,7 +124,7 @@ mod tests {
                 );
                 #[cfg(feature = "term")]
                 vec.push(
-                    TermLogger::new(LevelFilter::Error, conf.clone(), TerminalMode::Mixed).unwrap()
+                    TermLogger::new(LevelFilter::Error, conf.clone(), TerminalMode::Mixed)
                         as Box<dyn SharedLogger>,
                 );
                 vec.push(WriteLogger::new(
@@ -141,7 +141,7 @@ mod tests {
                 );
                 #[cfg(feature = "term")]
                 vec.push(
-                    TermLogger::new(LevelFilter::Warn, conf.clone(), TerminalMode::Mixed).unwrap()
+                    TermLogger::new(LevelFilter::Warn, conf.clone(), TerminalMode::Mixed)
                         as Box<dyn SharedLogger>,
                 );
                 vec.push(WriteLogger::new(
@@ -158,7 +158,7 @@ mod tests {
                 );
                 #[cfg(feature = "term")]
                 vec.push(
-                    TermLogger::new(LevelFilter::Info, conf.clone(), TerminalMode::Mixed).unwrap()
+                    TermLogger::new(LevelFilter::Info, conf.clone(), TerminalMode::Mixed)
                         as Box<dyn SharedLogger>,
                 );
                 vec.push(WriteLogger::new(
@@ -175,7 +175,7 @@ mod tests {
                 );
                 #[cfg(feature = "term")]
                 vec.push(
-                    TermLogger::new(LevelFilter::Debug, conf.clone(), TerminalMode::Mixed).unwrap()
+                    TermLogger::new(LevelFilter::Debug, conf.clone(), TerminalMode::Mixed)
                         as Box<dyn SharedLogger>,
                 );
                 vec.push(WriteLogger::new(
@@ -192,7 +192,7 @@ mod tests {
                 );
                 #[cfg(feature = "term")]
                 vec.push(
-                    TermLogger::new(LevelFilter::Trace, conf.clone(), TerminalMode::Mixed).unwrap()
+                    TermLogger::new(LevelFilter::Trace, conf.clone(), TerminalMode::Mixed)
                         as Box<dyn SharedLogger>,
                 );
                 vec.push(WriteLogger::new(

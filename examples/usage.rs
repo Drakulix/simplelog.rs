@@ -5,9 +5,9 @@ use std::fs::File;
 
 fn main() {
     CombinedLogger::init(vec![
-        #[cfg(feature = "term")]
+        #[cfg(feature = "termcolor")]
         TermLogger::new(LevelFilter::Warn, Config::default(), TerminalMode::Mixed),
-        #[cfg(not(feature = "term"))]
+        #[cfg(not(feature = "termcolor"))]
         SimpleLogger::new(LevelFilter::Warn, Config::default()),
         WriteLogger::new(
             LevelFilter::Info,

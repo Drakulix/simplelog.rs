@@ -21,7 +21,7 @@ env:
   matrix:
     - FEATURES=""
     - FEATURES="test"
-    - FEATURES="term"
+    - FEATURES="termcolor"
     - FEATURES="default"
     - FEATURES="all"
 

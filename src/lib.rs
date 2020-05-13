@@ -28,7 +28,7 @@ pub use self::config::{Config, ConfigBuilder, LevelPadding, ThreadPadding, Threa
 #[cfg(feature = "test")]
 pub use self::loggers::TestLogger;
 pub use self::loggers::{CombinedLogger, SimpleLogger, WriteLogger};
-#[cfg(feature = "term")]
+#[cfg(feature = "termcolor")]
 pub use self::loggers::{TermLogError, TermLogger, TerminalMode};
 
 pub use log::{Level, LevelFilter};
@@ -122,7 +122,7 @@ mod tests {
                 vec.push(
                     SimpleLogger::new(LevelFilter::Error, conf.clone()) as Box<dyn SharedLogger>
                 );
-                #[cfg(feature = "term")]
+                #[cfg(feature = "termcolor")]
                 vec.push(
                     TermLogger::new(LevelFilter::Error, conf.clone(), TerminalMode::Mixed)
                         as Box<dyn SharedLogger>,
@@ -139,7 +139,7 @@ mod tests {
                 vec.push(
                     SimpleLogger::new(LevelFilter::Warn, conf.clone()) as Box<dyn SharedLogger>
                 );
-                #[cfg(feature = "term")]
+                #[cfg(feature = "termcolor")]
                 vec.push(
                     TermLogger::new(LevelFilter::Warn, conf.clone(), TerminalMode::Mixed)
                         as Box<dyn SharedLogger>,
@@ -156,7 +156,7 @@ mod tests {
                 vec.push(
                     SimpleLogger::new(LevelFilter::Info, conf.clone()) as Box<dyn SharedLogger>
                 );
-                #[cfg(feature = "term")]
+                #[cfg(feature = "termcolor")]
                 vec.push(
                     TermLogger::new(LevelFilter::Info, conf.clone(), TerminalMode::Mixed)
                         as Box<dyn SharedLogger>,
@@ -173,7 +173,7 @@ mod tests {
                 vec.push(
                     SimpleLogger::new(LevelFilter::Debug, conf.clone()) as Box<dyn SharedLogger>
                 );
-                #[cfg(feature = "term")]
+                #[cfg(feature = "termcolor")]
                 vec.push(
                     TermLogger::new(LevelFilter::Debug, conf.clone(), TerminalMode::Mixed)
                         as Box<dyn SharedLogger>,
@@ -190,7 +190,7 @@ mod tests {
                 vec.push(
                     SimpleLogger::new(LevelFilter::Trace, conf.clone()) as Box<dyn SharedLogger>
                 );
-                #[cfg(feature = "term")]
+                #[cfg(feature = "termcolor")]
                 vec.push(
                     TermLogger::new(LevelFilter::Trace, conf.clone(), TerminalMode::Mixed)
                         as Box<dyn SharedLogger>,

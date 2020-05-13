@@ -10,7 +10,7 @@ use std::sync::Mutex;
 use termcolor;
 use termcolor::{StandardStream, ColorChoice, Color, WriteColor, ColorSpec};
 
-use self::TermLogError::{SetLogger, Term};
+use self::TermLogError::{SetLogger};
 use super::logging::*;
 
 use crate::{Config, SharedLogger};
@@ -19,12 +19,7 @@ use crate::{Config, SharedLogger};
 #[derive(Debug)]
 pub enum TermLogError {
     ///The type returned by set_logger if set_logger has already been called.
-    SetLogger(SetLoggerError),
-
-    ///TermLogger initialization might also fail if stdout or stderr could not be opened,
-    ///e.g. when no tty is attached to the process, it runs detached in the background, etc
-    /// This is represented by the `Term` Kind
-    Term,
+    SetLogger(SetLoggerError)
 }
 
 impl fmt::Display for TermLogError {
@@ -39,14 +34,12 @@ impl error::Error for TermLogError {
     fn description(&self) -> &str {
         match *self {
             SetLogger(ref err) => err.description(),
-            Term => "A terminal could not be opened",
         }
     }
 
     fn cause(&self) -> Option<&dyn error::Error> {
         match *self {
             SetLogger(ref err) => Some(err),
-            Term => None,
         }
     }
 }
@@ -106,28 +99,14 @@ impl TermLogger {
     /// init function. Globally initializes the TermLogger as the one and only used log facility.
     ///
     /// Takes the desired `Level` and `Config` as arguments. They cannot be changed later on.
-    /// Fails if another Logger was already initialized or if a terminal couldn't be opened.
-    ///
-    /// Workaround the latter by either
-    /// - panic'ing (not recommended). e.g. `TermLogger::init(LevelFilter::Warn, Config::default(), TerminalMode::Mixed).unwrap()`
-    /// - silently ignoring (little better). e.g. `let _ = TermLogger::init(LevelFilter::Warn, Config::default(), TerminalMode::Mixed);`
-    /// - falling back:
-    /// ```
-    /// # extern crate simplelog;
-    /// # use simplelog::*;
-    /// # fn main() {
-    /// if let Err(_) = TermLogger::init(LevelFilter::Warn, Config::default(), TerminalMode::Mixed) {
-    ///     SimpleLogger::init(LevelFilter::Warn, Config::default()).expect("No logger should be already set")
-    /// }
-    /// # }
-    /// ```
+    /// Fails if another Logger was already initialized
     ///
     /// # Examples
     /// ```
     /// # extern crate simplelog;
     /// # use simplelog::*;
     /// # fn main() {
-    /// TermLogger::init(LevelFilter::Info, Config::default(), TerminalMode::Mixed);
+    ///     TermLogger::init(LevelFilter::Info, Config::default(), TerminalMode::Mixed);
     /// # }
     /// ```
     pub fn init(
@@ -148,21 +127,7 @@ impl TermLogger {
     ///
     /// Takes the desired `Level` and `Config` as arguments. They cannot be changed later on.
     ///
-    /// Returns a `Box`ed TermLogger, or None if a terminal couldn't be opened.
-    /// Workaround this by either
-    /// - panic'ing (not recommended). e.g. `TermLogger::new(LevelFilter::Warn, Config::default(), TerminalMode::Mixed).unwrap()`
-    /// - silently ignoring (little better). e.g. `if let Some(logger) = TermLogger::new(LevelFilter::Warn, Config::default(), TerminalMode::Mixed) { /*...*/ }`
-    /// - falling back:
-    /// ```
-    /// # extern crate simplelog;
-    /// # use simplelog::*;
-    /// # fn main() {
-    /// let mut multiple = vec![];
-    /// let term = TermLogger::new(LevelFilter::Warn, Config::default(), TerminalMode::Mixed);
-    /// multiple.push(term as Box<dyn SharedLogger>);
-    /// // Add more ...
-    /// # }
-    /// ```
+    /// Returns a `Box`ed TermLogger
     ///
     /// # Examples
     /// ```
@@ -179,16 +144,16 @@ impl TermLogger {
     ) -> Box<TermLogger> {
         let streams = match mode {
             TerminalMode::Stdout => OutputStreams {
-                err: StdTerminal::Stdout(Box::new(StandardStream::stdout(ColorChoice::Auto))),
-                out: StdTerminal::Stdout(Box::new(StandardStream::stdout(ColorChoice::Auto)))
+                err: StdTerminal::Stdout(Box::new(StandardStream::stdout(ColorChoice::Always))),
+                out: StdTerminal::Stdout(Box::new(StandardStream::stdout(ColorChoice::Always)))
             },
             TerminalMode::Stderr => OutputStreams {
-                err: StdTerminal::Stderr(Box::new(StandardStream::stderr(ColorChoice::Auto))),
-                out: StdTerminal::Stderr(Box::new(StandardStream::stderr(ColorChoice::Auto)))
+                err: StdTerminal::Stderr(Box::new(StandardStream::stderr(ColorChoice::Always))),
+                out: StdTerminal::Stderr(Box::new(StandardStream::stderr(ColorChoice::Always)))
             },
             TerminalMode::Mixed => OutputStreams {
-                err: StdTerminal::Stderr(Box::new(StandardStream::stderr(ColorChoice::Auto))),
-                out: StdTerminal::Stdout(Box::new(StandardStream::stdout(ColorChoice::Auto)))
+                err: StdTerminal::Stderr(Box::new(StandardStream::stderr(ColorChoice::Always))),
+                out: StdTerminal::Stdout(Box::new(StandardStream::stdout(ColorChoice::Always)))
             },
         };
 

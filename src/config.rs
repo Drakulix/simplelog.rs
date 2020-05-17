@@ -239,7 +239,7 @@ impl Default for Config {
         Config {
             time: LevelFilter::Error,
             level: LevelFilter::Error,
-            level_padding: LevelPadding::Left,
+            level_padding: LevelPadding::Off,
             thread: LevelFilter::Debug,
             thread_log_mode: ThreadLogMode::IDs,
             thread_padding: ThreadPadding::Off,

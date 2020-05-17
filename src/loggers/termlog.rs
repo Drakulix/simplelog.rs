@@ -7,10 +7,10 @@ use std::error;
 use std::fmt;
 use std::io::{Error, Write};
 use std::sync::Mutex;
-use term;
-use term::{color, StderrTerminal, StdoutTerminal, Terminal};
+use termcolor;
+use termcolor::{StandardStream, ColorChoice, Color, WriteColor, ColorSpec};
 
-use self::TermLogError::{SetLogger, Term};
+use self::TermLogError::{SetLogger};
 use super::logging::*;
 
 use crate::{Config, SharedLogger};
@@ -19,12 +19,7 @@ use crate::{Config, SharedLogger};
 #[derive(Debug)]
 pub enum TermLogError {
     ///The type returned by set_logger if set_logger has already been called.
-    SetLogger(SetLoggerError),
-
-    ///TermLogger initialization might also fail if stdout or stderr could not be opened,
-    ///e.g. when no tty is attached to the process, it runs detached in the background, etc
-    /// This is represented by the `Term` Kind
-    Term,
+    SetLogger(SetLoggerError)
 }
 
 impl fmt::Display for TermLogError {
@@ -39,14 +34,12 @@ impl error::Error for TermLogError {
     fn description(&self) -> &str {
         match *self {
             SetLogger(ref err) => err.description(),
-            Term => "A terminal could not be opened",
         }
     }
 
     fn cause(&self) -> Option<&dyn error::Error> {
         match *self {
             SetLogger(ref err) => Some(err),
-            Term => None,
         }
     }
 }
@@ -58,8 +51,8 @@ impl From<SetLoggerError> for TermLogError {
 }
 
 enum StdTerminal {
-    Stderr(Box<StderrTerminal>),
-    Stdout(Box<StdoutTerminal>),
+    Stderr(Box<dyn WriteColor + Send>),
+    Stdout(Box<dyn WriteColor + Send>),
 }
 
 impl StdTerminal {
@@ -106,28 +99,14 @@ impl TermLogger {
     /// init function. Globally initializes the TermLogger as the one and only used log facility.
     ///
     /// Takes the desired `Level` and `Config` as arguments. They cannot be changed later on.
-    /// Fails if another Logger was already initialized or if a terminal couldn't be opened.
-    ///
-    /// Workaround the latter by either
-    /// - panic'ing (not recommended). e.g. `TermLogger::init(LevelFilter::Warn, Config::default(), TerminalMode::Mixed).unwrap()`
-    /// - silently ignoring (little better). e.g. `let _ = TermLogger::init(LevelFilter::Warn, Config::default(), TerminalMode::Mixed);`
-    /// - falling back:
-    /// ```
-    /// # extern crate simplelog;
-    /// # use simplelog::*;
-    /// # fn main() {
-    /// if let Err(_) = TermLogger::init(LevelFilter::Warn, Config::default(), TerminalMode::Mixed) {
-    ///     SimpleLogger::init(LevelFilter::Warn, Config::default()).expect("No logger should be already set")
-    /// }
-    /// # }
-    /// ```
+    /// Fails if another Logger was already initialized
     ///
     /// # Examples
     /// ```
     /// # extern crate simplelog;
     /// # use simplelog::*;
     /// # fn main() {
-    /// TermLogger::init(LevelFilter::Info, Config::default(), TerminalMode::Mixed).expect("No interactive terminal");
+    ///     TermLogger::init(LevelFilter::Info, Config::default(), TerminalMode::Mixed);
     /// # }
     /// ```
     pub fn init(
@@ -135,7 +114,7 @@ impl TermLogger {
         config: Config,
         mode: TerminalMode,
     ) -> Result<(), TermLogError> {
-        let logger = TermLogger::new(log_level, config, mode).ok_or(Term)?;
+        let logger = TermLogger::new(log_level, config, mode);
         set_max_level(log_level.clone());
         set_boxed_logger(logger)?;
         Ok(())
@@ -148,87 +127,55 @@ impl TermLogger {
     ///
     /// Takes the desired `Level` and `Config` as arguments. They cannot be changed later on.
     ///
-    /// Returns a `Box`ed TermLogger, or None if a terminal couldn't be opened.
-    /// Workaround this by either
-    /// - panic'ing (not recommended). e.g. `TermLogger::new(LevelFilter::Warn, Config::default(), TerminalMode::Mixed).unwrap()`
-    /// - silently ignoring (little better). e.g. `if let Some(logger) = TermLogger::new(LevelFilter::Warn, Config::default(), TerminalMode::Mixed) { /*...*/ }`
-    /// - falling back:
-    /// ```
-    /// # extern crate simplelog;
-    /// # use simplelog::*;
-    /// # fn main() {
-    /// let mut multiple = vec![];
-    /// match TermLogger::new(LevelFilter::Warn, Config::default(), TerminalMode::Mixed) {
-    ///     Some(logger) => multiple.push(logger as Box<dyn SharedLogger>),
-    ///     None => multiple.push(SimpleLogger::new(LevelFilter::Warn, Config::default())),
-    /// }
-    /// // Add more ...
-    /// # }
-    /// ```
+    /// Returns a `Box`ed TermLogger
     ///
     /// # Examples
     /// ```
     /// # extern crate simplelog;
     /// # use simplelog::*;
     /// # fn main() {
-    /// let term_logger = TermLogger::new(LevelFilter::Info, Config::default(), TerminalMode::Mixed).expect("No interactive terminal");
+    /// let term_logger = TermLogger::new(LevelFilter::Info, Config::default(), TerminalMode::Mixed);
     /// # }
     /// ```
     pub fn new(
         log_level: LevelFilter,
         config: Config,
         mode: TerminalMode,
-    ) -> Option<Box<TermLogger>> {
+    ) -> Box<TermLogger> {
         let streams = match mode {
-            TerminalMode::Stdout => term::stdout().and_then(|stdout| {
-                term::stdout().map(|stdout2| {
-                    Mutex::new(OutputStreams {
-                        err: StdTerminal::Stdout(stdout),
-                        out: StdTerminal::Stdout(stdout2),
-                    })
-                })
-            }),
-            TerminalMode::Stderr => term::stderr().and_then(|stderr| {
-                term::stderr().map(|stderr2| {
-                    Mutex::new(OutputStreams {
-                        err: StdTerminal::Stderr(stderr),
-                        out: StdTerminal::Stderr(stderr2),
-                    })
-                })
-            }),
-            TerminalMode::Mixed => term::stderr().and_then(|stderr| {
-                term::stdout().map(|stdout| {
-                    Mutex::new(OutputStreams {
-                        err: StdTerminal::Stderr(stderr),
-                        out: StdTerminal::Stdout(stdout),
-                    })
-                })
-            }),
+            TerminalMode::Stdout => OutputStreams {
+                err: StdTerminal::Stdout(Box::new(StandardStream::stdout(ColorChoice::Always))),
+                out: StdTerminal::Stdout(Box::new(StandardStream::stdout(ColorChoice::Always)))
+            },
+            TerminalMode::Stderr => OutputStreams {
+                err: StdTerminal::Stderr(Box::new(StandardStream::stderr(ColorChoice::Always))),
+                out: StdTerminal::Stderr(Box::new(StandardStream::stderr(ColorChoice::Always)))
+            },
+            TerminalMode::Mixed => OutputStreams {
+                err: StdTerminal::Stderr(Box::new(StandardStream::stderr(ColorChoice::Always))),
+                out: StdTerminal::Stdout(Box::new(StandardStream::stdout(ColorChoice::Always)))
+            },
         };
 
-        streams.map(|streams| {
-            Box::new(TermLogger {
-                level: log_level,
-                config: config,
-                streams: streams,
-            })
+
+        Box::new(TermLogger {
+            level: log_level,
+            config: config,
+            streams: Mutex::new(streams),
         })
     }
 
-    fn try_log_term<W>(
+    fn try_log_term(
         &self,
         record: &Record<'_>,
-        term_lock: &mut Box<dyn Terminal<Output = W> + Send>,
-    ) -> Result<(), Error>
-    where
-        W: Write + Sized,
-    {
+        term_lock: &mut Box<dyn WriteColor + Send>,
+    ) -> Result<(), Error> {
         let color = match record.level() {
-            Level::Error => color::RED,
-            Level::Warn => color::YELLOW,
-            Level::Info => color::BLUE,
-            Level::Debug => color::CYAN,
-            Level::Trace => color::WHITE,
+            Level::Error => Color::Red,
+            Level::Warn => Color::Yellow,
+            Level::Info => Color::Blue,
+            Level::Debug => Color::Cyan,
+            Level::Trace => Color::White,
         };
 
         if self.config.time <= record.level() && self.config.time != LevelFilter::Off {
@@ -236,7 +183,7 @@ impl TermLogger {
         }
 
         if self.config.level <= record.level() && self.config.level != LevelFilter::Off {
-            term_lock.fg(color)?;
+            term_lock.set_color(ColorSpec::new().set_fg(Some(color)))?;
             write_level(record, &mut *term_lock, &self.config)?;
             term_lock.reset()?;
         }

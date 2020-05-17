@@ -1,5 +1,10 @@
-## v0.7.5
-    - Derive `Clone`,`Copy`,`PartialEq`,`Eq`,`Debug` and `Hash` for `TerminalMode`.
+## v0.8.0
+    - Switch from `term` to `termcolor` (PR #59. credits to @raybritton)
+    - Fix typo in docs (PR #58, credits to @anthonyjmartinez)
+    - Switch default padding to `Off`. Padding is annoyingly controversal, just set it to whatever you prefer, if you want it.
+
+## v0.7.6
+    - Derive `Clone`,`Copy`,`PartialEq`,`Eq`,`Debug` and `Hash` for `TerminalMode`. (PR #56, credits to @panhania)
 
 ## v0.7.5
     - Use `target()` instead of `module_path()` for filtering as suggested by `log`s docs. (PR #52, credits to @tsidea)

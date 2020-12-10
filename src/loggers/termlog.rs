@@ -8,7 +8,7 @@ use std::fmt;
 use std::io::{Error, Write};
 use std::sync::Mutex;
 use termcolor;
-use termcolor::{StandardStream, ColorChoice, Color, WriteColor, ColorSpec};
+use termcolor::{StandardStream, ColorChoice, WriteColor, ColorSpec};
 
 use self::TermLogError::{SetLogger};
 use super::logging::*;
@@ -170,13 +170,7 @@ impl TermLogger {
         record: &Record<'_>,
         term_lock: &mut Box<dyn WriteColor + Send>,
     ) -> Result<(), Error> {
-        let color = match record.level() {
-            Level::Error => Color::Red,
-            Level::Warn => Color::Yellow,
-            Level::Info => Color::Blue,
-            Level::Debug => Color::Cyan,
-            Level::Trace => Color::White,
-        };
+        let color = self.config.level_color[record.level() as usize];
 
         if self.config.time <= record.level() && self.config.time != LevelFilter::Off {
             write_time(&mut *term_lock, &self.config)?;

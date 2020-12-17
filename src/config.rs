@@ -81,6 +81,7 @@ pub struct Config {
 /// E.g. to have one part shown always use `Level::Error`. But if you
 /// want to show the source line only on `Trace` use that.
 #[derive(Debug, Clone)]
+#[non_exhaustive]
 pub struct ConfigBuilder(Config);
 
 impl ConfigBuilder {

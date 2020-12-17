@@ -30,6 +30,8 @@ pub use self::loggers::TestLogger;
 pub use self::loggers::{CombinedLogger, SimpleLogger, WriteLogger};
 #[cfg(feature = "termcolor")]
 pub use self::loggers::{TermLogError, TermLogger, TerminalMode};
+#[cfg(feature = "termcolor")]
+pub use termcolor::Color;
 
 pub use log::{Level, LevelFilter};
 

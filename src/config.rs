@@ -1,6 +1,8 @@
-use log::LevelFilter;
+use log::{Level, LevelFilter};
 
 pub use chrono::offset::{FixedOffset, Local, Offset, TimeZone, Utc};
+#[cfg(feature = "termcolor")]
+use termcolor::Color;
 use std::borrow::Cow;
 
 #[derive(Debug, Clone, Copy)]
@@ -61,6 +63,8 @@ pub struct Config {
     pub(crate) time_local: bool,
     pub(crate) filter_allow: Cow<'static, [Cow<'static, str>]>,
     pub(crate) filter_ignore: Cow<'static, [Cow<'static, str>]>,
+    #[cfg(feature = "termcolor")]
+    pub(crate) level_color: [Color; 6],
 }
 
 /// Builder for the Logger Configurations (`Config`)
@@ -130,6 +134,13 @@ impl ConfigBuilder {
     /// Set the mode for logging the thread
     pub fn set_thread_mode<'a>(&'a mut self, mode: ThreadLogMode) -> &'a mut ConfigBuilder {
         self.0.thread_log_mode = mode;
+        self
+    }
+
+    /// Set the color used for printing the level (if the logger supports it)
+    #[cfg(feature = "termcolor")]
+    pub fn set_level_color<'a>(&'a mut self, level: Level, color: Color) -> &'a mut ConfigBuilder {
+        self.0.level_color[level as usize] = color;
         self
     }
 
@@ -250,6 +261,16 @@ impl Default for Config {
             time_local: false,
             filter_allow: Cow::Borrowed(&[]),
             filter_ignore: Cow::Borrowed(&[]),
+
+            #[cfg(feature = "termcolor")]
+            level_color: [
+                Color::White,  // (dummy)
+                Color::Red,    // Error
+                Color::Yellow, // Warn
+                Color::Blue,   // Info
+                Color::Cyan,   // Debug
+                Color::White,  // Trace
+            ],
         }
     }
 }

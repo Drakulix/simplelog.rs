@@ -3,52 +3,14 @@
 use log::{
     set_boxed_logger, set_max_level, Level, LevelFilter, Log, Metadata, Record, SetLoggerError,
 };
-use std::error;
-use std::fmt;
 use std::io::{Error, Write};
 use std::sync::Mutex;
 use termcolor;
 use termcolor::{StandardStream, ColorChoice, WriteColor, ColorSpec};
 
-use self::TermLogError::{SetLogger};
 use super::logging::*;
 
 use crate::{Config, SharedLogger};
-
-/// TermLogger error type.
-#[derive(Debug)]
-pub enum TermLogError {
-    ///The type returned by set_logger if set_logger has already been called.
-    SetLogger(SetLoggerError)
-}
-
-impl fmt::Display for TermLogError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        use std::error::Error as FmtError;
-
-        write!(f, "{}", self.description())
-    }
-}
-
-impl error::Error for TermLogError {
-    fn description(&self) -> &str {
-        match *self {
-            SetLogger(ref err) => err.description(),
-        }
-    }
-
-    fn cause(&self) -> Option<&dyn error::Error> {
-        match *self {
-            SetLogger(ref err) => Some(err),
-        }
-    }
-}
-
-impl From<SetLoggerError> for TermLogError {
-    fn from(error: SetLoggerError) -> Self {
-        SetLogger(error)
-    }
-}
 
 enum StdTerminal {
     Stderr(Box<dyn WriteColor + Send>),
@@ -113,7 +75,7 @@ impl TermLogger {
         log_level: LevelFilter,
         config: Config,
         mode: TerminalMode,
-    ) -> Result<(), TermLogError> {
+    ) -> Result<(), SetLoggerError> {
         let logger = TermLogger::new(log_level, config, mode);
         set_max_level(log_level.clone());
         set_boxed_logger(logger)?;

@@ -29,7 +29,7 @@ pub use self::config::{Config, ConfigBuilder, LevelPadding, ThreadPadding, Threa
 pub use self::loggers::TestLogger;
 pub use self::loggers::{CombinedLogger, SimpleLogger, WriteLogger};
 #[cfg(feature = "termcolor")]
-pub use self::loggers::{TermLogError, TermLogger, TerminalMode};
+pub use self::loggers::{TermLogger, TerminalMode};
 #[cfg(feature = "termcolor")]
 pub use termcolor::Color;
 

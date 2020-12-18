@@ -1,3 +1,9 @@
+## v0.9.0
+    - Add customizable level label colors (PR #69. credits to @JarrettBillingsley)
+    - Remove unneeded TermLogError
+    - Future-proof config by adding `#[non_exhaustive]`
+    - Fix compiling with minimal-versions
+
 ## v0.8.0
     - Switch from `term` to `termcolor` (PR #59. credits to @raybritton)
     - Fix typo in docs (PR #58, credits to @anthonyjmartinez)

@@ -139,7 +139,7 @@ impl TermLogger {
         }
 
         if self.config.level <= record.level() && self.config.level != LevelFilter::Off {
-            term_lock.set_color(ColorSpec::new().set_fg(Some(color)))?;
+            term_lock.set_color(ColorSpec::new().set_fg(color))?;
             write_level(record, &mut *term_lock, &self.config)?;
             term_lock.reset()?;
         }

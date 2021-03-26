@@ -64,7 +64,7 @@ pub struct Config {
     pub(crate) filter_allow: Cow<'static, [Cow<'static, str>]>,
     pub(crate) filter_ignore: Cow<'static, [Cow<'static, str>]>,
     #[cfg(feature = "termcolor")]
-    pub(crate) level_color: [Color; 6],
+    pub(crate) level_color: [Option<Color>; 6],
 }
 
 /// Builder for the Logger Configurations (`Config`)
@@ -138,9 +138,10 @@ impl ConfigBuilder {
         self
     }
 
-    /// Set the color used for printing the level (if the logger supports it)
+    /// Set the color used for printing the level (if the logger supports it),
+    /// or None to use the default foreground color
     #[cfg(feature = "termcolor")]
-    pub fn set_level_color<'a>(&'a mut self, level: Level, color: Color) -> &'a mut ConfigBuilder {
+    pub fn set_level_color<'a>(&'a mut self, level: Level, color: Option<Color>) -> &'a mut ConfigBuilder {
         self.0.level_color[level as usize] = color;
         self
     }
@@ -265,12 +266,12 @@ impl Default for Config {
 
             #[cfg(feature = "termcolor")]
             level_color: [
-                Color::White,  // (dummy)
-                Color::Red,    // Error
-                Color::Yellow, // Warn
-                Color::Blue,   // Info
-                Color::Cyan,   // Debug
-                Color::White,  // Trace
+                None,                // Default foreground
+                Some(Color::Red),    // Error
+                Some(Color::Yellow), // Warn
+                Some(Color::Blue),   // Info
+                Some(Color::Cyan),   // Debug
+                Some(Color::White),  // Trace
             ],
         }
     }

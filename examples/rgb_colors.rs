@@ -11,7 +11,12 @@ fn main() {
         .set_level_color(Level::Trace, Some(Color::Rgb(127, 127, 255)))
         .build();
 
-    TermLogger::init(LevelFilter::Trace, config, TerminalMode::Stdout).unwrap();
+    TermLogger::init(
+        LevelFilter::Trace,
+        config,
+        TerminalMode::Stdout,
+        ColorChoice::Auto
+    ).unwrap();
     error!("Red error");
     warn!("Orange warning");
     info!("Yellow info");

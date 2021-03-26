@@ -8,7 +8,7 @@ fn main() {
         .set_level_color(Level::Trace, Some(Color::Green))
         .build();
 
-    TermLogger::init(LevelFilter::Trace, config, TerminalMode::Stdout).unwrap();
+    TermLogger::init(LevelFilter::Trace, config, TerminalMode::Stdout, ColorChoice::Auto).unwrap();
     error!("Magenta error");
     warn!("Yellow warning");
     info!("Blue info");

@@ -31,7 +31,7 @@ pub use self::loggers::{CombinedLogger, SimpleLogger, WriteLogger};
 #[cfg(feature = "termcolor")]
 pub use self::loggers::{TermLogger, TerminalMode};
 #[cfg(feature = "termcolor")]
-pub use termcolor::Color;
+pub use termcolor::{Color, ColorChoice};
 
 pub use log::{Level, LevelFilter};
 
@@ -126,7 +126,7 @@ mod tests {
                 );
                 #[cfg(feature = "termcolor")]
                 vec.push(
-                    TermLogger::new(LevelFilter::Error, conf.clone(), TerminalMode::Mixed)
+                    TermLogger::new(LevelFilter::Error, conf.clone(), TerminalMode::Mixed, ColorChoice::Auto)
                         as Box<dyn SharedLogger>,
                 );
                 vec.push(WriteLogger::new(
@@ -143,7 +143,7 @@ mod tests {
                 );
                 #[cfg(feature = "termcolor")]
                 vec.push(
-                    TermLogger::new(LevelFilter::Warn, conf.clone(), TerminalMode::Mixed)
+                    TermLogger::new(LevelFilter::Warn, conf.clone(), TerminalMode::Mixed, ColorChoice::Auto)
                         as Box<dyn SharedLogger>,
                 );
                 vec.push(WriteLogger::new(
@@ -160,7 +160,7 @@ mod tests {
                 );
                 #[cfg(feature = "termcolor")]
                 vec.push(
-                    TermLogger::new(LevelFilter::Info, conf.clone(), TerminalMode::Mixed)
+                    TermLogger::new(LevelFilter::Info, conf.clone(), TerminalMode::Mixed, ColorChoice::Auto)
                         as Box<dyn SharedLogger>,
                 );
                 vec.push(WriteLogger::new(
@@ -177,7 +177,7 @@ mod tests {
                 );
                 #[cfg(feature = "termcolor")]
                 vec.push(
-                    TermLogger::new(LevelFilter::Debug, conf.clone(), TerminalMode::Mixed)
+                    TermLogger::new(LevelFilter::Debug, conf.clone(), TerminalMode::Mixed, ColorChoice::Auto)
                         as Box<dyn SharedLogger>,
                 );
                 vec.push(WriteLogger::new(
@@ -194,7 +194,7 @@ mod tests {
                 );
                 #[cfg(feature = "termcolor")]
                 vec.push(
-                    TermLogger::new(LevelFilter::Trace, conf.clone(), TerminalMode::Mixed)
+                    TermLogger::new(LevelFilter::Trace, conf.clone(), TerminalMode::Mixed, ColorChoice::Auto)
                         as Box<dyn SharedLogger>,
                 );
                 vec.push(WriteLogger::new(

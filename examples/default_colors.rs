@@ -1,4 +1,6 @@
+#[cfg(feature = "termcolor")]
 use log::*;
+#[cfg(feature = "termcolor")]
 use simplelog::*;
 
 #[cfg(feature = "termcolor")]

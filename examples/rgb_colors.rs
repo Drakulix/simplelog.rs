@@ -1,4 +1,6 @@
+#[cfg(all(not(target_family = "windows"), feature = "termcolor"))]
 use log::*;
+#[cfg(all(not(target_family = "windows"), feature = "termcolor"))]
 use simplelog::*;
 
 #[cfg(all(not(target_family = "windows"), feature = "termcolor"))]

@@ -84,7 +84,7 @@ impl CombinedLogger {
 
         Box::new(CombinedLogger {
             level: log_level,
-            logger: logger,
+            logger,
         })
     }
 }

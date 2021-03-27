@@ -5,7 +5,6 @@ use log::{
 };
 use std::io::{Error, Write};
 use std::sync::Mutex;
-use termcolor;
 use termcolor::{ColorChoice, ColorSpec, StandardStream, WriteColor};
 
 use super::logging::*;
@@ -83,7 +82,7 @@ impl TermLogger {
         color_choice: ColorChoice,
     ) -> Result<(), SetLoggerError> {
         let logger = TermLogger::new(log_level, config, mode, color_choice);
-        set_max_level(log_level.clone());
+        set_max_level(log_level);
         set_boxed_logger(logger)?;
         Ok(())
     }
@@ -133,7 +132,7 @@ impl TermLogger {
 
         Box::new(TermLogger {
             level: log_level,
-            config: config,
+            config,
             streams: Mutex::new(streams),
         })
     }

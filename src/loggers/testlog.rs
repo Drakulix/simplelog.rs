@@ -38,7 +38,7 @@ impl TestLogger {
     /// # }
     /// ```
     pub fn init(log_level: LevelFilter, config: Config) -> Result<(), SetLoggerError> {
-        set_max_level(log_level.clone());
+        set_max_level(log_level);
         set_boxed_logger(TestLogger::new(log_level, config))
     }
 

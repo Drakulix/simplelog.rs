@@ -36,7 +36,7 @@ impl<W: Write + Send + 'static> WriteLogger<W> {
     /// # }
     /// ```
     pub fn init(log_level: LevelFilter, config: Config, writable: W) -> Result<(), SetLoggerError> {
-        set_max_level(log_level.clone());
+        set_max_level(log_level);
         set_boxed_logger(WriteLogger::new(log_level, config, writable))
     }
 
@@ -59,7 +59,7 @@ impl<W: Write + Send + 'static> WriteLogger<W> {
     pub fn new(log_level: LevelFilter, config: Config, writable: W) -> Box<WriteLogger<W>> {
         Box::new(WriteLogger {
             level: log_level,
-            config: config,
+            config,
             writable: Mutex::new(writable),
         })
     }

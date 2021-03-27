@@ -37,7 +37,7 @@ impl SimpleLogger {
     /// # }
     /// ```
     pub fn init(log_level: LevelFilter, config: Config) -> Result<(), SetLoggerError> {
-        set_max_level(log_level.clone());
+        set_max_level(log_level);
         set_boxed_logger(SimpleLogger::new(log_level, config))
     }
 
@@ -59,7 +59,7 @@ impl SimpleLogger {
     pub fn new(log_level: LevelFilter, config: Config) -> Box<SimpleLogger> {
         Box::new(SimpleLogger {
             level: log_level,
-            config: config,
+            config,
             output_lock: Mutex::new(()),
         })
     }

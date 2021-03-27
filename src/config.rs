@@ -90,31 +90,31 @@ impl ConfigBuilder {
         ConfigBuilder(Config::default())
     }
 
-    /// Set at which level and below the level itself shall be logged (default is Error)
+    /// Set at which level and above (more verbose) the level itself shall be logged (default is Error)
     pub fn set_max_level<'a>(&'a mut self, level: LevelFilter) -> &'a mut ConfigBuilder {
         self.0.level = level;
         self
     }
 
-    /// Set at which level and below the current time shall be logged (default is Error)
+    /// Set at which level and  above (more verbose) the current time shall be logged (default is Error)
     pub fn set_time_level<'a>(&'a mut self, time: LevelFilter) -> &'a mut ConfigBuilder {
         self.0.time = time;
         self
     }
 
-    /// Set at which level and below the thread id shall be logged. (default is Debug)
+    /// Set at which level and above (more verbose) the thread id shall be logged. (default is Debug)
     pub fn set_thread_level<'a>(&'a mut self, thread: LevelFilter) -> &'a mut ConfigBuilder {
         self.0.thread = thread;
         self
     }
 
-    /// Set at which level and below the target shall be logged. (default is Debug)
+    /// Set at which level and above (more verbose) the target shall be logged. (default is Debug)
     pub fn set_target_level<'a>(&'a mut self, target: LevelFilter) -> &'a mut ConfigBuilder {
         self.0.target = target;
         self
     }
 
-    /// Set at which level and below a source code reference shall be logged (default is Trace)
+    /// Set at which level and above (more verbose) a source code reference shall be logged (default is Trace)
     pub fn set_location_level<'a>(&'a mut self, location: LevelFilter) -> &'a mut ConfigBuilder {
         self.0.location = location;
         self

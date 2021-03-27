@@ -1,3 +1,8 @@
+## v0.10.0
+    - Fix wrong argument naming (PR #70, credits to @scvalex)
+    - *Breaking*: More color customization options (PR #72, credits to @mrkline)
+    - Clarify docs on config levels
+
 ## v0.9.0
     - Add customizable level label colors (PR #69. credits to @JarrettBillingsley)
     - Remove unneeded TermLogError

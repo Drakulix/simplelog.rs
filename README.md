@@ -1,4 +1,4 @@
-# simplelog [![Build Status](https://travis-ci.org/Drakulix/simplelog.rs.svg?branch=master)](https://travis-ci.org/Drakulix/simplelog.rs) [![Coverage Status](https://coveralls.io/repos/github/Drakulix/simplelog.rs/badge.svg?branch=master)](https://coveralls.io/github/Drakulix/simplelog.rs?branch=master) [![Crates.io](https://img.shields.io/crates/v/simplelog.svg)](https://crates.io/crates/simplelog) [![Crates.io](https://img.shields.io/crates/l/simplelog.svg)](https://crates.io/crates/simplelog)
+# simplelog [![Build Status](https://github.com/drakulix/simplelog.rs/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/Drakulix/simplelog.rs/actions) [![Coverage Status](https://coveralls.io/repos/github/Drakulix/simplelog.rs/badge.svg?branch=master)](https://coveralls.io/github/Drakulix/simplelog.rs?branch=master) [![Crates.io](https://img.shields.io/crates/v/simplelog.svg)](https://crates.io/crates/simplelog) [![Crates.io](https://img.shields.io/crates/l/simplelog.svg)](https://crates.io/crates/simplelog)
 ## A simple and easy-to-use logging facility for Rust's [log](https://crates.io/crates/log) crate
 
 `simplelog` does not aim to provide a rich set of features, nor to provide the
@@ -42,7 +42,7 @@ fn main() {
 ### Results in
 ```
 $ cargo run --example usage
-   Compiling simplelog v0.7.6 (file:///home/drakulix/Projects/simplelog)
+   Compiling simplelog v0.10.0 (file:///home/drakulix/Projects/simplelog)
      Running `target/debug/examples/usage`
 [ERROR] Bright red error
 ```
@@ -57,7 +57,7 @@ and my_rust_binary.log
 Just add
 ```
 [dependencies]
-simplelog = "^0.7.6"
+simplelog = "^0.10.0"
 ```
 to your `Cargo.toml`
 

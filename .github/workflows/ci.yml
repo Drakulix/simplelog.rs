@@ -120,7 +120,7 @@ jobs:
           key: ${{ runner.os }}-build-rust_nightly-check-minimal-${{ hashFiles('**/Cargo.toml') }}
       - uses: actions-rs/cargo@v1
         with:
-          cmd: check
+          command: check
           args: --all --all-features -Z minimal-versions
 
   test:

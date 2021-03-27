@@ -7,8 +7,9 @@ fn main() {
         LevelFilter::Trace,
         Config::default(),
         TerminalMode::Stdout,
-        ColorChoice::Auto
-    ).unwrap();
+        ColorChoice::Auto,
+    )
+    .unwrap();
     error!("Red error");
     warn!("Yellow warning");
     info!("Blue info");

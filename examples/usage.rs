@@ -10,7 +10,7 @@ fn main() {
             LevelFilter::Warn,
             Config::default(),
             TerminalMode::Mixed,
-            ColorChoice::Auto
+            ColorChoice::Auto,
         ),
         #[cfg(not(feature = "termcolor"))]
         SimpleLogger::new(LevelFilter::Warn, Config::default()),

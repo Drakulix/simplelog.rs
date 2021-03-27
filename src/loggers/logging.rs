@@ -1,4 +1,4 @@
-use crate::{Config, LevelPadding, ThreadPadding, ThreadLogMode};
+use crate::{Config, LevelPadding, ThreadLogMode, ThreadPadding};
 use chrono;
 use log::{LevelFilter, Record};
 use std::io::{Error, Write};
@@ -100,11 +100,11 @@ where
 {
     if let Some(name) = thread::current().name() {
         match config.thread_padding {
-            ThreadPadding::Left{0: qty} => {
-                write!(write, "({name:>0$}) ", qty, name=name)?;
+            ThreadPadding::Left { 0: qty } => {
+                write!(write, "({name:>0$}) ", qty, name = name)?;
             }
-            ThreadPadding::Right{0: qty} => {
-                write!(write, "({name:<0$}) ", qty, name=name)?;
+            ThreadPadding::Right { 0: qty } => {
+                write!(write, "({name:<0$}) ", qty, name = name)?;
             }
             ThreadPadding::Off => {
                 write!(write, "({}) ", name)?;
@@ -125,11 +125,11 @@ where
     let id = id.replace("ThreadId(", "");
     let id = id.replace(")", "");
     match config.thread_padding {
-        ThreadPadding::Left{0: qty} => {
-            write!(write, "({id:>0$}) ", qty, id=id)?;
+        ThreadPadding::Left { 0: qty } => {
+            write!(write, "({id:>0$}) ", qty, id = id)?;
         }
-        ThreadPadding::Right{0: qty} => {
-            write!(write, "({id:<0$}) ", qty, id=id)?;
+        ThreadPadding::Right { 0: qty } => {
+            write!(write, "({id:<0$}) ", qty, id = id)?;
         }
         ThreadPadding::Off => {
             write!(write, "({}) ", id)?;

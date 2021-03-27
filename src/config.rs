@@ -141,7 +141,11 @@ impl ConfigBuilder {
     /// Set the color used for printing the level (if the logger supports it),
     /// or None to use the default foreground color
     #[cfg(feature = "termcolor")]
-    pub fn set_level_color<'a>(&'a mut self, level: Level, color: Option<Color>) -> &'a mut ConfigBuilder {
+    pub fn set_level_color<'a>(
+        &'a mut self,
+        level: Level,
+        color: Option<Color>,
+    ) -> &'a mut ConfigBuilder {
         self.0.level_color[level as usize] = color;
         self
     }

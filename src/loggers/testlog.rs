@@ -8,7 +8,7 @@
 //! Module providing the TestLogger Implementation
 
 use super::logging::should_skip;
-use crate::{Config, SharedLogger, LevelPadding};
+use crate::{Config, LevelPadding, SharedLogger};
 use log::{set_boxed_logger, set_max_level, LevelFilter, Log, Metadata, Record, SetLoggerError};
 
 use std::thread;
@@ -133,10 +133,7 @@ pub fn write_time(config: &Config) {
     } else {
         chrono::Utc::now().naive_utc() + config.time_offset
     };
-    print!(
-        "{} ",
-        cur_time.format(&*config.time_format)
-    );
+    print!("{} ", cur_time.format(&*config.time_format));
 }
 
 #[inline(always)]

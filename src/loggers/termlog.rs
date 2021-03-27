@@ -6,7 +6,7 @@ use log::{
 use std::io::{Error, Write};
 use std::sync::Mutex;
 use termcolor;
-use termcolor::{StandardStream, ColorChoice, WriteColor, ColorSpec};
+use termcolor::{ColorChoice, ColorSpec, StandardStream, WriteColor};
 
 use super::logging::*;
 
@@ -80,7 +80,7 @@ impl TermLogger {
         log_level: LevelFilter,
         config: Config,
         mode: TerminalMode,
-        color_choice: ColorChoice
+        color_choice: ColorChoice,
     ) -> Result<(), SetLoggerError> {
         let logger = TermLogger::new(log_level, config, mode, color_choice);
         set_max_level(log_level.clone());
@@ -114,23 +114,22 @@ impl TermLogger {
         log_level: LevelFilter,
         config: Config,
         mode: TerminalMode,
-        color_choice: ColorChoice
+        color_choice: ColorChoice,
     ) -> Box<TermLogger> {
         let streams = match mode {
             TerminalMode::Stdout => OutputStreams {
                 err: StdTerminal::Stdout(Box::new(StandardStream::stdout(color_choice))),
-                out: StdTerminal::Stdout(Box::new(StandardStream::stdout(color_choice)))
+                out: StdTerminal::Stdout(Box::new(StandardStream::stdout(color_choice))),
             },
             TerminalMode::Stderr => OutputStreams {
                 err: StdTerminal::Stderr(Box::new(StandardStream::stderr(color_choice))),
-                out: StdTerminal::Stderr(Box::new(StandardStream::stderr(color_choice)))
+                out: StdTerminal::Stderr(Box::new(StandardStream::stderr(color_choice))),
             },
             TerminalMode::Mixed => OutputStreams {
                 err: StdTerminal::Stderr(Box::new(StandardStream::stderr(color_choice))),
-                out: StdTerminal::Stdout(Box::new(StandardStream::stdout(color_choice)))
+                out: StdTerminal::Stdout(Box::new(StandardStream::stdout(color_choice))),
             },
         };
-
 
         Box::new(TermLogger {
             level: log_level,

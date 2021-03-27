@@ -1,9 +1,9 @@
 use log::{Level, LevelFilter};
 
 pub use chrono::offset::{FixedOffset, Local, Offset, TimeZone, Utc};
+use std::borrow::Cow;
 #[cfg(feature = "termcolor")]
 use termcolor::Color;
-use std::borrow::Cow;
 
 #[derive(Debug, Clone, Copy)]
 /// Padding to be used for logging the level
@@ -182,10 +182,10 @@ impl ConfigBuilder {
     /// For example, `add_filter_allow_str("tokio::uds")` would allow only logging from the `tokio` crates `uds` module.
     pub fn add_filter_allow_str<'a>(
         &'a mut self,
-        time_format: &'static str,
+        filter_allow: &'static str,
     ) -> &'a mut ConfigBuilder {
         let mut list = Vec::from(&*self.0.filter_allow);
-        list.push(Cow::Borrowed(time_format));
+        list.push(Cow::Borrowed(filter_allow));
         self.0.filter_allow = Cow::Owned(list);
         self
     }
@@ -194,9 +194,9 @@ impl ConfigBuilder {
     /// If any are specified, only records from modules starting with one of these entries will be printed
     ///
     /// For example, `add_filter_allow(format!("{}{}","tokio", "uds"))` would allow only logging from the `tokio` crates `uds` module.
-    pub fn add_filter_allow<'a>(&'a mut self, time_format: String) -> &'a mut ConfigBuilder {
+    pub fn add_filter_allow<'a>(&'a mut self, filter_allow: String) -> &'a mut ConfigBuilder {
         let mut list = Vec::from(&*self.0.filter_allow);
-        list.push(Cow::Owned(time_format));
+        list.push(Cow::Owned(filter_allow));
         self.0.filter_allow = Cow::Owned(list);
         self
     }
@@ -214,10 +214,10 @@ impl ConfigBuilder {
     /// For example, `add_filter_ignore_str("tokio::uds")` would deny logging from the `tokio` crates `uds` module.
     pub fn add_filter_ignore_str<'a>(
         &'a mut self,
-        time_format: &'static str,
+        filter_ignore: &'static str,
     ) -> &'a mut ConfigBuilder {
         let mut list = Vec::from(&*self.0.filter_ignore);
-        list.push(Cow::Borrowed(time_format));
+        list.push(Cow::Borrowed(filter_ignore));
         self.0.filter_ignore = Cow::Owned(list);
         self
     }
@@ -226,9 +226,9 @@ impl ConfigBuilder {
     /// If any are specified, records from modules starting with one of these entries will be ignored
     ///
     /// For example, `add_filter_ignore(format!("{}{}","tokio", "uds"))` would deny logging from the `tokio` crates `uds` module.
-    pub fn add_filter_ignore<'a>(&'a mut self, time_format: String) -> &'a mut ConfigBuilder {
+    pub fn add_filter_ignore<'a>(&'a mut self, filter_ignore: String) -> &'a mut ConfigBuilder {
         let mut list = Vec::from(&*self.0.filter_ignore);
-        list.push(Cow::Owned(time_format));
+        list.push(Cow::Owned(filter_ignore));
         self.0.filter_ignore = Cow::Owned(list);
         self
     }

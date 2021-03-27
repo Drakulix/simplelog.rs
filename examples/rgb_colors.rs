@@ -4,14 +4,19 @@ use simplelog::*;
 #[cfg(all(not(target_family = "windows"), feature = "termcolor"))]
 fn main() {
     let config = ConfigBuilder::new()
-        .set_level_color(Level::Error, Color::Rgb(191, 0, 0))
-        .set_level_color(Level::Warn,  Color::Rgb(255, 127, 0))
-        .set_level_color(Level::Info,  Color::Rgb(192, 192, 0))
-        .set_level_color(Level::Debug, Color::Rgb(63, 127, 0))
-        .set_level_color(Level::Trace, Color::Rgb(127, 127, 255))
+        .set_level_color(Level::Error, Some(Color::Rgb(191, 0, 0)))
+        .set_level_color(Level::Warn,  Some(Color::Rgb(255, 127, 0)))
+        .set_level_color(Level::Info,  Some(Color::Rgb(192, 192, 0)))
+        .set_level_color(Level::Debug, Some(Color::Rgb(63, 127, 0)))
+        .set_level_color(Level::Trace, Some(Color::Rgb(127, 127, 255)))
         .build();
 
-    TermLogger::init(LevelFilter::Trace, config, TerminalMode::Stdout).unwrap();
+    TermLogger::init(
+        LevelFilter::Trace,
+        config,
+        TerminalMode::Stdout,
+        ColorChoice::Auto
+    ).unwrap();
     error!("Red error");
     warn!("Orange warning");
     info!("Yellow info");

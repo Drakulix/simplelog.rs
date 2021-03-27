@@ -68,15 +68,21 @@ impl TermLogger {
     /// # extern crate simplelog;
     /// # use simplelog::*;
     /// # fn main() {
-    ///     TermLogger::init(LevelFilter::Info, Config::default(), TerminalMode::Mixed);
+    ///     TermLogger::init(
+    ///         LevelFilter::Info,
+    ///         Config::default(),
+    ///         TerminalMode::Mixed,
+    ///         ColorChoice::Auto
+    ///     );
     /// # }
     /// ```
     pub fn init(
         log_level: LevelFilter,
         config: Config,
         mode: TerminalMode,
+        color_choice: ColorChoice
     ) -> Result<(), SetLoggerError> {
-        let logger = TermLogger::new(log_level, config, mode);
+        let logger = TermLogger::new(log_level, config, mode, color_choice);
         set_max_level(log_level.clone());
         set_boxed_logger(logger)?;
         Ok(())
@@ -96,26 +102,32 @@ impl TermLogger {
     /// # extern crate simplelog;
     /// # use simplelog::*;
     /// # fn main() {
-    /// let term_logger = TermLogger::new(LevelFilter::Info, Config::default(), TerminalMode::Mixed);
+    /// let term_logger = TermLogger::new(
+    ///     LevelFilter::Info,
+    ///     Config::default(),
+    ///     TerminalMode::Mixed,
+    ///     ColorChoice::Auto
+    /// );
     /// # }
     /// ```
     pub fn new(
         log_level: LevelFilter,
         config: Config,
         mode: TerminalMode,
+        color_choice: ColorChoice
     ) -> Box<TermLogger> {
         let streams = match mode {
             TerminalMode::Stdout => OutputStreams {
-                err: StdTerminal::Stdout(Box::new(StandardStream::stdout(ColorChoice::Always))),
-                out: StdTerminal::Stdout(Box::new(StandardStream::stdout(ColorChoice::Always)))
+                err: StdTerminal::Stdout(Box::new(StandardStream::stdout(color_choice))),
+                out: StdTerminal::Stdout(Box::new(StandardStream::stdout(color_choice)))
             },
             TerminalMode::Stderr => OutputStreams {
-                err: StdTerminal::Stderr(Box::new(StandardStream::stderr(ColorChoice::Always))),
-                out: StdTerminal::Stderr(Box::new(StandardStream::stderr(ColorChoice::Always)))
+                err: StdTerminal::Stderr(Box::new(StandardStream::stderr(color_choice))),
+                out: StdTerminal::Stderr(Box::new(StandardStream::stderr(color_choice)))
             },
             TerminalMode::Mixed => OutputStreams {
-                err: StdTerminal::Stderr(Box::new(StandardStream::stderr(ColorChoice::Always))),
-                out: StdTerminal::Stdout(Box::new(StandardStream::stdout(ColorChoice::Always)))
+                err: StdTerminal::Stderr(Box::new(StandardStream::stderr(color_choice))),
+                out: StdTerminal::Stdout(Box::new(StandardStream::stdout(color_choice)))
             },
         };
 
@@ -139,7 +151,7 @@ impl TermLogger {
         }
 
         if self.config.level <= record.level() && self.config.level != LevelFilter::Off {
-            term_lock.set_color(ColorSpec::new().set_fg(Some(color)))?;
+            term_lock.set_color(ColorSpec::new().set_fg(color))?;
             write_level(record, &mut *term_lock, &self.config)?;
             term_lock.reset()?;
         }

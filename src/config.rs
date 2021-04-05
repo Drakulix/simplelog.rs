@@ -122,7 +122,7 @@ impl ConfigBuilder {
         self
     }
 
-    /// Set how the levels should be padded, when logging (default is Left)
+    /// Set how the levels should be padded, when logging (default is Off)
     pub fn set_level_padding(&mut self, padding: LevelPadding) -> &mut ConfigBuilder {
         self.0.level_padding = padding;
         self

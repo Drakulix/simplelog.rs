@@ -9,7 +9,7 @@ use termcolor::{ColorChoice, ColorSpec, StandardStream, WriteColor};
 
 use super::logging::*;
 
-use crate::{Config, SharedLogger};
+use crate::{Config, SharedLogger, ThreadLogMode};
 
 enum StdTerminal {
     Stderr(Box<dyn WriteColor + Send>),
@@ -155,7 +155,14 @@ impl TermLogger {
         }
 
         if self.config.thread <= record.level() && self.config.thread != LevelFilter::Off {
-            write_thread_id(&mut *term_lock, &self.config)?;
+            match self.config.thread_log_mode {
+                ThreadLogMode::IDs => {
+                    write_thread_id(&mut *term_lock, &self.config)?;
+                }
+                ThreadLogMode::Names | ThreadLogMode::Both => {
+                    write_thread_name(&mut *term_lock, &self.config)?;
+                }
+            }
         }
 
         if self.config.target <= record.level() && self.config.target != LevelFilter::Off {

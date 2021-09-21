@@ -5,29 +5,15 @@ use log::{
 };
 use std::io::{Error, Write};
 use std::sync::Mutex;
-use termcolor::{ColorChoice, ColorSpec, StandardStream, WriteColor};
+use termcolor::{BufferedStandardStream, ColorChoice, ColorSpec, WriteColor};
 
 use super::logging::*;
 
 use crate::{Config, SharedLogger, ThreadLogMode};
 
-enum StdTerminal {
-    Stderr(Box<dyn WriteColor + Send>),
-    Stdout(Box<dyn WriteColor + Send>),
-}
-
-impl StdTerminal {
-    fn flush(&mut self) -> Result<(), Error> {
-        match self {
-            StdTerminal::Stderr(term) => term.flush(),
-            StdTerminal::Stdout(term) => term.flush(),
-        }
-    }
-}
-
 struct OutputStreams {
-    err: StdTerminal,
-    out: StdTerminal,
+    err: BufferedStandardStream,
+    out: BufferedStandardStream,
 }
 
 /// Specifies which streams should be used when logging
@@ -117,16 +103,16 @@ impl TermLogger {
     ) -> Box<TermLogger> {
         let streams = match mode {
             TerminalMode::Stdout => OutputStreams {
-                err: StdTerminal::Stdout(Box::new(StandardStream::stdout(color_choice))),
-                out: StdTerminal::Stdout(Box::new(StandardStream::stdout(color_choice))),
+                err: BufferedStandardStream::stdout(color_choice),
+                out: BufferedStandardStream::stdout(color_choice),
             },
             TerminalMode::Stderr => OutputStreams {
-                err: StdTerminal::Stderr(Box::new(StandardStream::stderr(color_choice))),
-                out: StdTerminal::Stderr(Box::new(StandardStream::stderr(color_choice))),
+                err: BufferedStandardStream::stderr(color_choice),
+                out: BufferedStandardStream::stderr(color_choice),
             },
             TerminalMode::Mixed => OutputStreams {
-                err: StdTerminal::Stderr(Box::new(StandardStream::stderr(color_choice))),
-                out: StdTerminal::Stdout(Box::new(StandardStream::stdout(color_choice))),
+                err: BufferedStandardStream::stderr(color_choice),
+                out: BufferedStandardStream::stdout(color_choice),
             },
         };
 
@@ -140,40 +126,40 @@ impl TermLogger {
     fn try_log_term(
         &self,
         record: &Record<'_>,
-        term_lock: &mut Box<dyn WriteColor + Send>,
+        term_lock: &mut BufferedStandardStream,
     ) -> Result<(), Error> {
         let color = self.config.level_color[record.level() as usize];
 
         if self.config.time <= record.level() && self.config.time != LevelFilter::Off {
-            write_time(&mut *term_lock, &self.config)?;
+            write_time(term_lock, &self.config)?;
         }
 
         if self.config.level <= record.level() && self.config.level != LevelFilter::Off {
             term_lock.set_color(ColorSpec::new().set_fg(color))?;
-            write_level(record, &mut *term_lock, &self.config)?;
+            write_level(record, term_lock, &self.config)?;
             term_lock.reset()?;
         }
 
         if self.config.thread <= record.level() && self.config.thread != LevelFilter::Off {
             match self.config.thread_log_mode {
                 ThreadLogMode::IDs => {
-                    write_thread_id(&mut *term_lock, &self.config)?;
+                    write_thread_id(term_lock, &self.config)?;
                 }
                 ThreadLogMode::Names | ThreadLogMode::Both => {
-                    write_thread_name(&mut *term_lock, &self.config)?;
+                    write_thread_name(term_lock, &self.config)?;
                 }
             }
         }
 
         if self.config.target <= record.level() && self.config.target != LevelFilter::Off {
-            write_target(record, &mut *term_lock)?;
+            write_target(record, term_lock)?;
         }
 
         if self.config.location <= record.level() && self.config.location != LevelFilter::Off {
-            write_location(record, &mut *term_lock)?;
+            write_location(record, term_lock)?;
         }
 
-        write_args(record, &mut *term_lock)
+        write_args(record, term_lock)
     }
 
     fn try_log(&self, record: &Record<'_>) -> Result<(), Error> {
@@ -185,15 +171,9 @@ impl TermLogger {
             let mut streams = self.streams.lock().unwrap();
 
             if record.level() == Level::Error {
-                match streams.err {
-                    StdTerminal::Stderr(ref mut term) => self.try_log_term(record, term),
-                    StdTerminal::Stdout(ref mut term) => self.try_log_term(record, term),
-                }
+                self.try_log_term(record, &mut streams.err)
             } else {
-                match streams.out {
-                    StdTerminal::Stderr(ref mut term) => self.try_log_term(record, term),
-                    StdTerminal::Stdout(ref mut term) => self.try_log_term(record, term),
-                }
+                self.try_log_term(record, &mut streams.out)
             }
         } else {
             Ok(())

@@ -159,7 +159,14 @@ impl TermLogger {
             write_location(record, term_lock)?;
         }
 
-        write_args(record, term_lock)
+        write_args(record, term_lock)?;
+
+        // The log crate holds the logger as a `static mut`, which isn't dropped
+        // at program exit: https://doc.rust-lang.org/reference/items/static-items.html
+        // Sadly, this means we can't rely on the BufferedStandardStreams flushing
+        // themselves on the way out, so to avoid the Case of the Missing 8k,
+        // flush each entry.
+        term_lock.flush()
     }
 
     fn try_log(&self, record: &Record<'_>) -> Result<(), Error> {

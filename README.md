@@ -61,6 +61,25 @@ simplelog = "^0.10.0"
 ```
 to your `Cargo.toml`
 
+## ANSI color and style support
+
+This crate can internally depend on a [paris](https://github.com/0x20F/paris) crate to provide support for ANSI color and styles.
+To use this feature you need to set a _paris_ feature, like this:
+```
+[dependencies]
+simplelog = { version = "^0.10.0", features = ["paris"] }
+```
+in your `Cargo.toml`
+
+After this you can use e.g. the following call:
+```rust
+info!("I can write <b>bold</b> text or use tags to <red>color it</>");
+```
+
+This will automatically generates terminal control sequences for desired styles.
+
+More formatting info: [paris crate documentation](https://github.com/0x20F/paris)
+
 ## [Documentation](https://docs.rs/simplelog/)
 
 ## Contributing

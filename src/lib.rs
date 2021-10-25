@@ -39,6 +39,9 @@ use log::Log;
 #[cfg(test)]
 use log::*;
 
+#[cfg(feature = "paris")]
+mod paris;
+
 /// Trait to have a common interface to obtain the Level of Loggers
 ///
 /// Necessary for CombinedLogger to calculate

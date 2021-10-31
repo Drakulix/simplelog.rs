@@ -152,7 +152,7 @@ impl TermLogger {
         }
 
         if self.config.target <= record.level() && self.config.target != LevelFilter::Off {
-            write_target(record, term_lock)?;
+            write_target(record, term_lock, &self.config)?;
         }
 
         if self.config.location <= record.level() && self.config.location != LevelFilter::Off {

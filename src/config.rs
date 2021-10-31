@@ -29,6 +29,18 @@ pub enum ThreadPadding {
     Off,
 }
 
+#[derive(Debug, Clone, Copy)]
+/// Padding to be used for logging the thread id/name
+pub enum TargetPadding {
+    /// Add spaces on the left side, up to usize many
+    Left(usize),
+    /// Add spaces on the right side, up to usize many
+    Right(usize),
+    /// Do not pad the thread id/name
+    Off,
+}
+
+
 #[derive(Debug, Clone, Copy, PartialEq)]
 /// Mode for logging the thread name or id or both.
 pub enum ThreadLogMode {
@@ -59,6 +71,7 @@ pub struct Config {
     pub(crate) thread_log_mode: ThreadLogMode,
     pub(crate) thread_padding: ThreadPadding,
     pub(crate) target: LevelFilter,
+    pub(crate) target_padding: TargetPadding,
     pub(crate) location: LevelFilter,
     pub(crate) time_format: Cow<'static, str>,
     pub(crate) time_offset: FixedOffset,
@@ -113,6 +126,12 @@ impl ConfigBuilder {
     /// Set at which level and above (more verbose) the target shall be logged. (default is Debug)
     pub fn set_target_level(&mut self, target: LevelFilter) -> &mut ConfigBuilder {
         self.0.target = target;
+        self
+    }
+
+    /// Set how the thread should be padded
+    pub fn set_target_padding(&mut self, padding: TargetPadding) -> &mut ConfigBuilder {
+        self.0.target_padding = padding;
         self
     }
 
@@ -256,6 +275,7 @@ impl Default for Config {
             thread_log_mode: ThreadLogMode::IDs,
             thread_padding: ThreadPadding::Off,
             target: LevelFilter::Debug,
+            target_padding: TargetPadding::Off,
             location: LevelFilter::Trace,
             time_format: Cow::Borrowed("%H:%M:%S"),
             time_offset: FixedOffset::east(0),

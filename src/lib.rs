@@ -40,7 +40,7 @@ use log::Log;
 use log::*;
 
 #[cfg(feature = "paris")]
-mod paris;
+mod paris_macros;
 
 /// Trait to have a common interface to obtain the Level of Loggers
 ///

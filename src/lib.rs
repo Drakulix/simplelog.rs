@@ -41,6 +41,8 @@ use log::*;
 
 #[cfg(feature = "paris")]
 mod paris_macros;
+#[cfg(feature = "paris")]
+pub extern crate paris;
 
 /// Trait to have a common interface to obtain the Level of Loggers
 ///

@@ -1,5 +1,9 @@
 /// Logs a message at the info level.
 ///
+/// Passed data uses a colorize_string formatter from a `paris` crate, so it can
+/// contains special tags for controlling ANSI colors and styles
+/// More info: https://docs.rs/paris/1.5.7/paris/formatter/fn.colorize_string.html
+///
 /// # Examples
 ///
 /// ```edition2018
@@ -23,6 +27,10 @@ macro_rules! info {
 
 /// Logs a message at the debug level.
 ///
+/// Passed data uses a colorize_string formatter from a `paris` crate, so it can
+/// contains special tags for controlling ANSI colors and styles
+/// More info: https://docs.rs/paris/1.5.7/paris/formatter/fn.colorize_string.html
+///
 /// # Examples
 ///
 /// ```edition2018
@@ -44,6 +52,10 @@ macro_rules! debug {
 }
 
 /// Logs a message at the trace level.
+///
+/// Passed data uses a colorize_string formatter from a `paris` crate, so it can
+/// contains special tags for controlling ANSI colors and styles
+/// More info: https://docs.rs/paris/1.5.7/paris/formatter/fn.colorize_string.html
 ///
 /// # Examples
 ///
@@ -69,6 +81,10 @@ macro_rules! trace {
 
 /// Logs a message at the warn level.
 ///
+/// Passed data uses a colorize_string formatter from a `paris` crate, so it can
+/// contains special tags for controlling ANSI colors and styles
+/// More info: https://docs.rs/paris/1.5.7/paris/formatter/fn.colorize_string.html
+///
 /// # Examples
 ///
 /// ```edition2018
@@ -89,6 +105,10 @@ macro_rules! warn {
 }
 
 /// Logs a message at the error level.
+///
+/// Passed data uses a colorize_string formatter from a `paris` crate, so it can
+/// contains special tags for controlling ANSI colors and styles
+/// More info: https://docs.rs/paris/1.5.7/paris/formatter/fn.colorize_string.html
 ///
 /// # Examples
 ///

@@ -40,7 +40,7 @@ use log::Log;
 use log::*;
 
 #[cfg(feature = "paris")]
-mod paris_macros;
+pub(crate) mod paris_macros;
 #[cfg(feature = "paris")]
 pub extern crate paris;
 

@@ -1,4 +1,4 @@
-#[cfg(feature = "termcolor")]
+#[cfg(all(feature = "termcolor", not(feature = "paris")))]
 use log::*;
 #[cfg(feature = "termcolor")]
 use simplelog::*;

@@ -36,7 +36,7 @@ pub use termcolor::{Color, ColorChoice};
 pub use log::{Level, LevelFilter};
 
 use log::Log;
-#[cfg(test)]
+#[cfg(all(test, not(feature = "paris")))]
 use log::*;
 
 #[cfg(feature = "paris")]

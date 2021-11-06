@@ -1,3 +1,4 @@
+#[cfg(not(feature = "paris"))]
 use log::*;
 use simplelog::*;
 

@@ -36,8 +36,13 @@ pub use termcolor::{Color, ColorChoice};
 pub use log::{Level, LevelFilter};
 
 use log::Log;
-#[cfg(test)]
+#[cfg(all(test, not(feature = "paris")))]
 use log::*;
+
+#[cfg(feature = "paris")]
+pub(crate) mod paris_macros;
+#[cfg(feature = "paris")]
+pub extern crate paris;
 
 /// Trait to have a common interface to obtain the Level of Loggers
 ///

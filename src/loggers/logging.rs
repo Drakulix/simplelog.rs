@@ -79,10 +79,20 @@ where
     // dbg!(&config.target_padding);
     match config.target_padding {
         TargetPadding::Left(pad) => {
-            write!(write, "{target:>pad$}: ", pad = pad, target = record.target())?;
+            write!(
+                write,
+                "{target:>pad$}: ",
+                pad = pad,
+                target = record.target()
+            )?;
         }
         TargetPadding::Right(pad) => {
-            write!(write, "{target:<pad$}: ", pad = pad, target = record.target())?;
+            write!(
+                write,
+                "{target:<pad$}: ",
+                pad = pad,
+                target = record.target()
+            )?;
         }
         TargetPadding::Off => {
             write!(write, "{}: ", record.target())?;

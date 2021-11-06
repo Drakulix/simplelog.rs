@@ -40,7 +40,6 @@ pub enum TargetPadding {
     Off,
 }
 
-
 #[derive(Debug, Clone, Copy, PartialEq)]
 /// Mode for logging the thread name or id or both.
 pub enum ThreadLogMode {

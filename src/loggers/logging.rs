@@ -2,6 +2,23 @@ use crate::{Config, LevelPadding, ThreadLogMode, ThreadPadding};
 use log::{LevelFilter, Record};
 use std::io::{Error, Write};
 use std::thread;
+#[cfg(all(feature = "termcolor", feature = "paris"))]
+use termcolor::Color;
+
+#[cfg(all(feature = "termcolor", feature = "paris"))]
+pub fn termcolor_to_paris(color: &Color) -> &'static str {
+    match color {
+        Color::Black => "<black>",
+        Color::Red => "<red>",
+        Color::Green => "<green>",
+        Color::Yellow => "<yellow>",
+        Color::Blue => "<blue>",
+        Color::Magenta => "<magenta>",
+        Color::Cyan => "<cyan>",
+        Color::White => "<white>",
+        _ => "",
+    }
+}
 
 #[inline(always)]
 pub fn try_log<W>(config: &Config, record: &Record<'_>, write: &mut W) -> Result<(), Error>
@@ -62,11 +79,34 @@ pub fn write_level<W>(record: &Record<'_>, write: &mut W, config: &Config) -> Re
 where
     W: Write + Sized,
 {
-    match config.level_padding {
-        LevelPadding::Left => write!(write, "[{: >5}] ", record.level())?,
-        LevelPadding::Right => write!(write, "[{: <5}] ", record.level())?,
-        LevelPadding::Off => write!(write, "[{}] ", record.level())?,
+    #[cfg(all(feature = "termcolor", feature = "paris"))]
+    let colorize = match &config.level_color[record.level() as usize] {
+        Some(termcolor) => {
+            let color = termcolor_to_paris(termcolor);
+            if !color.is_empty() {
+                //set foreground color
+                write!(write, "{}", paris::formatter::colorize_string(color))?;
+            };
+            true
+        }
+        None => false,
     };
+
+    match config.level_padding {
+        LevelPadding::Left => write!(write, "[{: >5}]", record.level())?,
+        LevelPadding::Right => write!(write, "[{: <5}]", record.level())?,
+        LevelPadding::Off => write!(write, "[{}]", record.level())?,
+    };
+
+    #[cfg(all(feature = "termcolor", feature = "paris"))]
+    if colorize {
+        //reset foreground color
+        write!(write, "{}", paris::formatter::colorize_string("</>"))?;
+    }
+
+    //add a trailing space before next block
+    write!(write, " ")?;
+
     Ok(())
 }
 

@@ -1,3 +1,4 @@
+use crate::config::TargetPadding;
 use crate::{Config, LevelPadding, ThreadLogMode, ThreadPadding};
 use log::{LevelFilter, Record};
 use std::io::{Error, Write};
@@ -32,7 +33,7 @@ where
     }
 
     if config.target <= record.level() && config.target != LevelFilter::Off {
-        write_target(record, write)?;
+        write_target(record, write, config)?;
     }
 
     if config.location <= record.level() && config.location != LevelFilter::Off {
@@ -71,11 +72,33 @@ where
 }
 
 #[inline(always)]
-pub fn write_target<W>(record: &Record<'_>, write: &mut W) -> Result<(), Error>
+pub fn write_target<W>(record: &Record<'_>, write: &mut W, config: &Config) -> Result<(), Error>
 where
     W: Write + Sized,
 {
-    write!(write, "{}: ", record.target())?;
+    // dbg!(&config.target_padding);
+    match config.target_padding {
+        TargetPadding::Left(pad) => {
+            write!(
+                write,
+                "{target:>pad$}: ",
+                pad = pad,
+                target = record.target()
+            )?;
+        }
+        TargetPadding::Right(pad) => {
+            write!(
+                write,
+                "{target:<pad$}: ",
+                pad = pad,
+                target = record.target()
+            )?;
+        }
+        TargetPadding::Off => {
+            write!(write, "{}: ", record.target())?;
+        }
+    }
+
     Ok(())
 }
 

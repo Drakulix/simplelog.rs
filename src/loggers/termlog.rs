@@ -139,12 +139,16 @@ impl TermLogger {
 
         if self.config.level <= record.level() && self.config.level != LevelFilter::Off {
             #[cfg(not(feature = "ansi_term"))]
-            term_lock.set_color(ColorSpec::new().set_fg(color))?;
+            if !self.config.write_log_enable_colors {
+                term_lock.set_color(ColorSpec::new().set_fg(color))?;
+            }
 
             write_level(record, term_lock, &self.config)?;
 
             #[cfg(not(feature = "ansi_term"))]
-            term_lock.reset()?;
+            if !self.config.write_log_enable_colors {
+                term_lock.reset()?;
+            }
         }
 
         if self.config.thread <= record.level() && self.config.thread != LevelFilter::Off {

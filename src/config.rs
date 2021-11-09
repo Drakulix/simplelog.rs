@@ -79,6 +79,7 @@ pub struct Config {
     pub(crate) filter_ignore: Cow<'static, [Cow<'static, str>]>,
     #[cfg(feature = "termcolor")]
     pub(crate) level_color: [Option<Color>; 6],
+    pub(crate) write_log_enable_colors: bool,
 }
 
 /// Builder for the Logger Configurations (`Config`)
@@ -194,6 +195,12 @@ impl ConfigBuilder {
         self
     }
 
+    /// set if you want to write colors in the logfile (default is Off)
+    pub fn set_write_log_enable_colors(&mut self, local: bool) -> &mut ConfigBuilder {
+        self.0.write_log_enable_colors = local;
+        self
+    }
+
     /// Add allowed module filters.
     /// If any are specified, only records from modules starting with one of these entries will be printed
     ///
@@ -281,6 +288,7 @@ impl Default for Config {
             time_local: false,
             filter_allow: Cow::Borrowed(&[]),
             filter_ignore: Cow::Borrowed(&[]),
+            write_log_enable_colors: false,
 
             #[cfg(feature = "termcolor")]
             level_color: [

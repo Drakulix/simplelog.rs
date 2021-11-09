@@ -82,7 +82,13 @@ where
 {
     #[cfg(all(feature = "termcolor", feature = "ansi_term"))]
     let color = match &config.level_color[record.level() as usize] {
-        Some(termcolor) => termcolor_to_ansiterm(termcolor),
+        Some(termcolor) => {
+            if config.write_log_enable_colors {
+                termcolor_to_ansiterm(termcolor)
+            } else {
+                None
+            }
+        }
         None => None,
     };
 

@@ -2,7 +2,7 @@
 ///
 /// Passed data uses a colorize_string formatter from a `paris` crate, so it can
 /// contains special tags for controlling ANSI colors and styles
-/// More info: https://docs.rs/paris/1.5.7/paris/formatter/fn.colorize_string.html
+/// More info: <https://docs.rs/paris/1.5.7/paris/formatter/fn.colorize_string.html>
 ///
 /// # Examples
 ///
@@ -29,7 +29,7 @@ macro_rules! info {
 ///
 /// Passed data uses a colorize_string formatter from a `paris` crate, so it can
 /// contains special tags for controlling ANSI colors and styles
-/// More info: https://docs.rs/paris/1.5.7/paris/formatter/fn.colorize_string.html
+/// More info: <https://docs.rs/paris/1.5.7/paris/formatter/fn.colorize_string.html>
 ///
 /// # Examples
 ///
@@ -55,7 +55,7 @@ macro_rules! debug {
 ///
 /// Passed data uses a colorize_string formatter from a `paris` crate, so it can
 /// contains special tags for controlling ANSI colors and styles
-/// More info: https://docs.rs/paris/1.5.7/paris/formatter/fn.colorize_string.html
+/// More info: <https://docs.rs/paris/1.5.7/paris/formatter/fn.colorize_string.html>
 ///
 /// # Examples
 ///
@@ -83,7 +83,7 @@ macro_rules! trace {
 ///
 /// Passed data uses a colorize_string formatter from a `paris` crate, so it can
 /// contains special tags for controlling ANSI colors and styles
-/// More info: https://docs.rs/paris/1.5.7/paris/formatter/fn.colorize_string.html
+/// More info: <https://docs.rs/paris/1.5.7/paris/formatter/fn.colorize_string.html>
 ///
 /// # Examples
 ///
@@ -108,7 +108,7 @@ macro_rules! warn {
 ///
 /// Passed data uses a colorize_string formatter from a `paris` crate, so it can
 /// contains special tags for controlling ANSI colors and styles
-/// More info: https://docs.rs/paris/1.5.7/paris/formatter/fn.colorize_string.html
+/// More info: <https://docs.rs/paris/1.5.7/paris/formatter/fn.colorize_string.html>
 ///
 /// # Examples
 ///

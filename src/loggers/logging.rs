@@ -3,6 +3,23 @@ use crate::{Config, LevelPadding, ThreadLogMode, ThreadPadding};
 use log::{LevelFilter, Record};
 use std::io::{Error, Write};
 use std::thread;
+#[cfg(all(feature = "termcolor", feature = "ansi_term"))]
+use termcolor::Color;
+
+#[cfg(all(feature = "termcolor", feature = "ansi_term"))]
+pub fn termcolor_to_ansiterm(color: &Color) -> Option<ansi_term::Color> {
+    match color {
+        Color::Black => Some(ansi_term::Color::Black),
+        Color::Red => Some(ansi_term::Color::Red),
+        Color::Green => Some(ansi_term::Color::Green),
+        Color::Yellow => Some(ansi_term::Color::Yellow),
+        Color::Blue => Some(ansi_term::Color::Blue),
+        Color::Magenta => Some(ansi_term::Color::Purple),
+        Color::Cyan => Some(ansi_term::Color::Cyan),
+        Color::White => Some(ansi_term::Color::White),
+        _ => None,
+    }
+}
 
 #[inline(always)]
 pub fn try_log<W>(config: &Config, record: &Record<'_>, write: &mut W) -> Result<(), Error>
@@ -63,11 +80,33 @@ pub fn write_level<W>(record: &Record<'_>, write: &mut W, config: &Config) -> Re
 where
     W: Write + Sized,
 {
-    match config.level_padding {
-        LevelPadding::Left => write!(write, "[{: >5}] ", record.level())?,
-        LevelPadding::Right => write!(write, "[{: <5}] ", record.level())?,
-        LevelPadding::Off => write!(write, "[{}] ", record.level())?,
+    #[cfg(all(feature = "termcolor", feature = "ansi_term"))]
+    let color = match &config.level_color[record.level() as usize] {
+        Some(termcolor) => {
+            if config.write_log_enable_colors {
+                termcolor_to_ansiterm(termcolor)
+            } else {
+                None
+            }
+        }
+        None => None,
     };
+
+    let level = match config.level_padding {
+        LevelPadding::Left => format!("[{: >5}]", record.level()),
+        LevelPadding::Right => format!("[{: <5}]", record.level()),
+        LevelPadding::Off => format!("[{}]", record.level()),
+    };
+
+    #[cfg(all(feature = "termcolor", feature = "ansi_term"))]
+    match color {
+        Some(c) => write!(write, "{} ", c.paint(level))?,
+        None => write!(write, "{} ", level)?,
+    };
+
+    #[cfg(not(feature = "ansi_term"))]
+    write!(write, "{} ", level)?;
+
     Ok(())
 }
 

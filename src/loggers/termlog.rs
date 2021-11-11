@@ -5,7 +5,9 @@ use log::{
 };
 use std::io::{Error, Write};
 use std::sync::Mutex;
-use termcolor::{BufferedStandardStream, ColorChoice, ColorSpec, WriteColor};
+use termcolor::{BufferedStandardStream, ColorChoice};
+#[cfg(not(feature = "ansi_term"))]
+use termcolor::{ColorSpec, WriteColor};
 
 use super::logging::*;
 
@@ -128,6 +130,7 @@ impl TermLogger {
         record: &Record<'_>,
         term_lock: &mut BufferedStandardStream,
     ) -> Result<(), Error> {
+        #[cfg(not(feature = "ansi_term"))]
         let color = self.config.level_color[record.level() as usize];
 
         if self.config.time <= record.level() && self.config.time != LevelFilter::Off {
@@ -135,9 +138,17 @@ impl TermLogger {
         }
 
         if self.config.level <= record.level() && self.config.level != LevelFilter::Off {
-            term_lock.set_color(ColorSpec::new().set_fg(color))?;
+            #[cfg(not(feature = "ansi_term"))]
+            if !self.config.write_log_enable_colors {
+                term_lock.set_color(ColorSpec::new().set_fg(color))?;
+            }
+
             write_level(record, term_lock, &self.config)?;
-            term_lock.reset()?;
+
+            #[cfg(not(feature = "ansi_term"))]
+            if !self.config.write_log_enable_colors {
+                term_lock.reset()?;
+            }
         }
 
         if self.config.thread <= record.level() && self.config.thread != LevelFilter::Off {

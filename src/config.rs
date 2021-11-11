@@ -196,6 +196,7 @@ impl ConfigBuilder {
     }
 
     /// set if you want to write colors in the logfile (default is Off)
+    #[cfg(feature = "ansi_term")]
     pub fn set_write_log_enable_colors(&mut self, local: bool) -> &mut ConfigBuilder {
         self.0.write_log_enable_colors = local;
         self

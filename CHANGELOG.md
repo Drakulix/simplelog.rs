@@ -1,3 +1,15 @@
+## v0.11.0
+    - Add colored log levels using `ansi_term` (PR #88, credits to @manio)
+    - Add target padding (PR #85, credits to @bytebeamio)
+    - Add optional color and style support using `paris` crate (PR #84, credits to @manio)
+
+## v0.10.2
+    - Fix flushing with `BufferedStandardStreams` (PR #82, credits to @mrkline)
+
+## v0.10.1
+    - Fix TermLogger performance using `termcolor::BufferedStandardStream` (PR #80, credits to @mrkline)
+    - Add write thread name support for `termlog` (PR #76, credits to @zeroflaw)
+
 ## v0.10.0
     - Fix wrong argument naming (PR #70, credits to @scvalex)
     - *Breaking*: More color customization options (PR #72, credits to @mrkline)

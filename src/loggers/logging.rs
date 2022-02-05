@@ -1,4 +1,4 @@
-use crate::config::TargetPadding;
+use crate::config::{TargetPadding, TimeFormat};
 use crate::{Config, LevelPadding, ThreadLogMode, ThreadPadding};
 use log::{LevelFilter, Record};
 use std::io::{Error, Write};
@@ -65,13 +65,22 @@ pub fn write_time<W>(write: &mut W, config: &Config) -> Result<(), Error>
 where
     W: Write + Sized,
 {
-    let cur_time = if config.time_local {
-        (chrono::Local::now() + config.time_offset).format(&*config.time_format)
-    } else {
-        (chrono::Utc::now() + config.time_offset).format(&*config.time_format)
+    use time::error::Format;
+    use time::format_description::well_known::*;
+
+    let time = time::OffsetDateTime::now_utc().to_offset(config.time_offset);
+    let res = match config.time_format {
+        TimeFormat::Rfc2822 => time.format_into(write, &Rfc2822),
+        TimeFormat::Rfc3339 => time.format_into(write, &Rfc3339),
+        TimeFormat::Custom(format) => time.format_into(write, &format),
+    };
+    match res {
+        Err(Format::StdIo(err)) => return Err(err),
+        Err(err) => panic!("Invalid time format: {}", err),
+        _ => {}
     };
 
-    write!(write, "{} ", cur_time)?;
+    write!(write, " ")?;
     Ok(())
 }
 

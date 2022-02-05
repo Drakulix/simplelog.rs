@@ -1,3 +1,22 @@
+## v0.12.0
+    - Replaces the semingly unmainted chrono library with the time crate.
+    - Addresses through this update 
+        - RUSTSEC-2020-0159 (chrono)
+        - RUSTSEC-2020-0071 (time)
+    - `ConfigBuilder::set_time_to_local` is replaced by `ConfigBuilder::set_time_offset_to_local`.
+        - This function requires the new (and by default activated) `local-offset` feature.
+        - This function may fail, for more information read the docs.
+        - simplelog will not determine the local offset dynamically anymore, but only once, when this config option is set.
+            - Due to safety reasons there is no way to provide this property currently.
+    - `ConfigBuilder::set_time_offset` now takes a `time::UtcOffset` instead of a `chrono::FixedOffset`.
+    - `ConfigBuilder::set_time_format` has been replaced by three new variants
+        - `ConfigBuilder::set_time_format_rfc2822` sets the time format to use the format described by rfc2822.
+        - `ConfigBuilder::set_time_format_rfc3339` sets the time format to use the format described by rfc3339.
+        - `ConfigBuilder::set_time_format_custom` sets the time format to a custom time format best created using `time::macros::format_description`.
+            - Runtime provided time format configuration is possible, but difficult due to lifetime constraints.
+            - Fixing this will require a solution to https://github.com/time-rs/time/issues/429
+        - *Note*: The default format is unchanged "[hour]:[minute]:[second]"
+
 ## v0.11.0
     - Add colored log levels using `ansi_term` (PR #88, credits to @manio)
     - Add target padding (PR #85, credits to @bytebeamio)

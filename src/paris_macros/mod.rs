@@ -21,7 +21,7 @@
 #[macro_export]
 macro_rules! info {
     ($($args:tt)+) => {
-        log::info!("{}", paris::formatter::colorize_string(format!($($args)*)));
+        $crate::__private::log::info!("{}", $crate::__private::paris::formatter::colorize_string(format!($($args)*)));
     };
 }
 
@@ -47,7 +47,7 @@ macro_rules! info {
 #[macro_export]
 macro_rules! debug {
     ($($args:tt)+) => {
-        log::debug!("{}", paris::formatter::colorize_string(format!($($args)*)));
+        $crate::__private::log::debug!("{}", $crate::__private::paris::formatter::colorize_string(format!($($args)*)));
     };
 }
 
@@ -75,7 +75,7 @@ macro_rules! debug {
 #[macro_export]
 macro_rules! trace {
     ($($args:tt)+) => {
-        log::trace!("{}", paris::formatter::colorize_string(format!($($args)*)));
+        $crate::__private::log::trace!("{}", $crate::__private::paris::formatter::colorize_string(format!($($args)*)));
     };
 }
 
@@ -100,7 +100,7 @@ macro_rules! trace {
 #[macro_export]
 macro_rules! warn {
     ($($args:tt)+) => {
-        log::warn!("{}", paris::formatter::colorize_string(format!($($args)*)));
+        $crate::__private::log::warn!("{}", $crate::__private::paris::formatter::colorize_string(format!($($args)*)));
     };
 }
 
@@ -125,6 +125,6 @@ macro_rules! warn {
 #[macro_export]
 macro_rules! error {
     ($($args:tt)+) => {
-        log::error!("{}", paris::formatter::colorize_string(format!($($args)*)));
+        $crate::__private::log::error!("{}", $crate::__private::paris::formatter::colorize_string(format!($($args)*)));
     };
 }

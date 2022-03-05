@@ -44,7 +44,11 @@ use log::*;
 #[cfg(feature = "paris")]
 pub(crate) mod paris_macros;
 #[cfg(feature = "paris")]
-pub extern crate paris;
+#[doc(hidden)]
+pub mod __private {
+    pub use log;
+    pub use paris;
+}
 
 /// Trait to have a common interface to obtain the Level of Loggers
 ///

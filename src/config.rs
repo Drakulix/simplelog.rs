@@ -60,7 +60,7 @@ pub enum ThreadLogMode {
 /// Pass this struct to your logger to change when these information shall
 /// be logged.
 ///
-/// Construct using `Default` or using `ConfigBuilder`
+/// Construct using [`Default`](Config::default) or using [`ConfigBuilder`]
 #[derive(Debug, Clone)]
 pub struct Config {
     pub(crate) time: LevelFilter,

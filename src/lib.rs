@@ -25,7 +25,8 @@ mod config;
 mod loggers;
 
 pub use self::config::{
-    Config, ConfigBuilder, LevelPadding, TargetPadding, ThreadLogMode, ThreadPadding,
+    format_description, Config, ConfigBuilder, FormatItem, LevelPadding, TargetPadding,
+    ThreadLogMode, ThreadPadding,
 };
 #[cfg(feature = "test")]
 pub use self::loggers::TestLogger;

@@ -1,6 +1,6 @@
 [package]
 name = "simplelog"
-version = "0.11.2"
+version = "0.12.0-alpha1"
 edition = "2018"
 authors = ["Drakulix <github@drakulix.de>"]
 description = "A simple and easy-to-use logging facility for Rust's log crate"
@@ -20,11 +20,12 @@ include = [
 
 [features]
 test = []
-default = ["termcolor"]
+default = ["termcolor", "local-offset"]
+local-offset = ["time/local-offset"]
 
 [dependencies]
 log = { version = "0.4.*", features = ["std"] }
 termcolor = { version = "1.1.*", optional = true }
 paris = { version = "~1.5", optional = true }
 ansi_term = { version = "0.12", optional = true }
-chrono = "0.4.1"
+time = { version = "0.3.7", features = ["formatting", "macros"] }

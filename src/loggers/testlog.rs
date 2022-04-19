@@ -8,7 +8,7 @@
 //! Module providing the TestLogger Implementation
 
 use super::logging::should_skip;
-use crate::{Config, LevelPadding, SharedLogger};
+use crate::{config::TimeFormat, Config, LevelPadding, SharedLogger};
 use log::{set_boxed_logger, set_max_level, LevelFilter, Log, Metadata, Record, SetLoggerError};
 
 use std::thread;
@@ -128,12 +128,18 @@ pub fn log(config: &Config, record: &Record<'_>) {
 
 #[inline(always)]
 pub fn write_time(config: &Config) {
-    let cur_time = if config.time_local {
-        chrono::Local::now().naive_local() + config.time_offset
-    } else {
-        chrono::Utc::now().naive_utc() + config.time_offset
+    use time::format_description::well_known::*;
+
+    let time = time::OffsetDateTime::now_utc().to_offset(config.time_offset);
+    let res = match config.time_format {
+        TimeFormat::Rfc2822 => time.format(&Rfc2822),
+        TimeFormat::Rfc3339 => time.format(&Rfc3339),
+        TimeFormat::Custom(format) => time.format(&format),
     };
-    print!("{} ", cur_time.format(&*config.time_format));
+    match res {
+        Ok(time) => println!("{} ", time),
+        Err(err) => panic!("Invalid time format: {}", err),
+    };
 }
 
 #[inline(always)]

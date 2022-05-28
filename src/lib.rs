@@ -104,7 +104,6 @@ mod tests {
 
         CombinedLogger::init({
             let mut vec = Vec::new();
-            let mut conf_builder = ConfigBuilder::new();
 
             let conf_thread_name = ConfigBuilder::new()
                 .set_time_level(LevelFilter::Off)
@@ -126,7 +125,7 @@ mod tests {
                 LevelFilter::Warn,
                 LevelFilter::Error,
             ] {
-                let conf = conf_builder
+                let conf = ConfigBuilder::new()
                     .set_location_level(elem)
                     .set_target_level(elem)
                     .set_max_level(elem)

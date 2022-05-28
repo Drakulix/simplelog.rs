@@ -112,55 +112,55 @@ impl ConfigBuilder {
     }
 
     /// Set at which level and above (more verbose) the level itself shall be logged (default is Error)
-    pub fn set_max_level(&mut self, level: LevelFilter) -> &mut ConfigBuilder {
+    pub fn set_max_level(mut self, level: LevelFilter) -> Self {
         self.0.level = level;
         self
     }
 
     /// Set at which level and  above (more verbose) the current time shall be logged (default is Error)
-    pub fn set_time_level(&mut self, time: LevelFilter) -> &mut ConfigBuilder {
+    pub fn set_time_level(mut self, time: LevelFilter) -> Self {
         self.0.time = time;
         self
     }
 
     /// Set at which level and above (more verbose) the thread id shall be logged. (default is Debug)
-    pub fn set_thread_level(&mut self, thread: LevelFilter) -> &mut ConfigBuilder {
+    pub fn set_thread_level(mut self, thread: LevelFilter) -> Self {
         self.0.thread = thread;
         self
     }
 
     /// Set at which level and above (more verbose) the target shall be logged. (default is Debug)
-    pub fn set_target_level(&mut self, target: LevelFilter) -> &mut ConfigBuilder {
+    pub fn set_target_level(mut self, target: LevelFilter) -> Self {
         self.0.target = target;
         self
     }
 
     /// Set how the thread should be padded
-    pub fn set_target_padding(&mut self, padding: TargetPadding) -> &mut ConfigBuilder {
+    pub fn set_target_padding(mut self, padding: TargetPadding) -> Self {
         self.0.target_padding = padding;
         self
     }
 
     /// Set at which level and above (more verbose) a source code reference shall be logged (default is Trace)
-    pub fn set_location_level(&mut self, location: LevelFilter) -> &mut ConfigBuilder {
+    pub fn set_location_level(mut self, location: LevelFilter) -> Self {
         self.0.location = location;
         self
     }
 
     /// Set how the levels should be padded, when logging (default is Off)
-    pub fn set_level_padding(&mut self, padding: LevelPadding) -> &mut ConfigBuilder {
+    pub fn set_level_padding(mut self, padding: LevelPadding) -> Self {
         self.0.level_padding = padding;
         self
     }
 
     /// Set how the thread should be padded
-    pub fn set_thread_padding(&mut self, padding: ThreadPadding) -> &mut ConfigBuilder {
+    pub fn set_thread_padding(mut self, padding: ThreadPadding) -> Self {
         self.0.thread_padding = padding;
         self
     }
 
     /// Set the mode for logging the thread
-    pub fn set_thread_mode(&mut self, mode: ThreadLogMode) -> &mut ConfigBuilder {
+    pub fn set_thread_mode(mut self, mode: ThreadLogMode) -> Self {
         self.0.thread_log_mode = mode;
         self
     }
@@ -168,7 +168,7 @@ impl ConfigBuilder {
     /// Set the color used for printing the level (if the logger supports it),
     /// or None to use the default foreground color
     #[cfg(feature = "termcolor")]
-    pub fn set_level_color(&mut self, level: Level, color: Option<Color>) -> &mut ConfigBuilder {
+    pub fn set_level_color(mut self, level: Level, color: Option<Color>) -> Self {
         self.0.level_color[level as usize] = color;
         self
     }
@@ -192,27 +192,27 @@ impl ConfigBuilder {
     ///     .build();
     /// ```
     pub fn set_time_format_custom(
-        &mut self,
+        mut self,
         time_format: &'static [FormatItem<'static>],
-    ) -> &mut ConfigBuilder {
+    ) -> Self {
         self.0.time_format = TimeFormat::Custom(time_format);
         self
     }
 
     /// Set time format string to use rfc2822.
-    pub fn set_time_format_rfc2822(&mut self) -> &mut ConfigBuilder {
+    pub fn set_time_format_rfc2822(mut self) -> Self {
         self.0.time_format = TimeFormat::Rfc2822;
         self
     }
 
     /// Set time format string to use rfc3339.
-    pub fn set_time_format_rfc3339(&mut self) -> &mut ConfigBuilder {
+    pub fn set_time_format_rfc3339(mut self) -> Self {
         self.0.time_format = TimeFormat::Rfc3339;
         self
     }
 
     /// Set offset used for logging time (default is UTC)
-    pub fn set_time_offset(&mut self, offset: UtcOffset) -> &mut ConfigBuilder {
+    pub fn set_time_offset(mut self, offset: UtcOffset) -> Self {
         self.0.time_offset = offset;
         self
     }
@@ -225,7 +225,7 @@ impl ConfigBuilder {
     /// One can opt-out of this behavior by setting `RUSTFLAGS="--cfg unsound_local_offset"`.
     /// Doing so is not recommended, completely untested and may cause unexpected segfaults.
     #[cfg(feature = "local-offset")]
-    pub fn set_time_offset_to_local(&mut self) -> Result<&mut ConfigBuilder, &mut ConfigBuilder> {
+    pub fn set_time_offset_to_local(mut self) -> Result<Self, Self> {
         match UtcOffset::current_local_offset() {
             Ok(offset) => {
                 self.0.time_offset = offset;
@@ -237,7 +237,7 @@ impl ConfigBuilder {
 
     /// set if you want to write colors in the logfile (default is Off)
     #[cfg(feature = "ansi_term")]
-    pub fn set_write_log_enable_colors(&mut self, local: bool) -> &mut ConfigBuilder {
+    pub fn set_write_log_enable_colors(mut self, local: bool) -> Self {
         self.0.write_log_enable_colors = local;
         self
     }
@@ -246,7 +246,7 @@ impl ConfigBuilder {
     /// If any are specified, only records from modules starting with one of these entries will be printed
     ///
     /// For example, `add_filter_allow_str("tokio::uds")` would allow only logging from the `tokio` crates `uds` module.
-    pub fn add_filter_allow_str(&mut self, filter_allow: &'static str) -> &mut ConfigBuilder {
+    pub fn add_filter_allow_str(mut self, filter_allow: &'static str) -> Self {
         let mut list = Vec::from(&*self.0.filter_allow);
         list.push(Cow::Borrowed(filter_allow));
         self.0.filter_allow = Cow::Owned(list);
@@ -257,7 +257,7 @@ impl ConfigBuilder {
     /// If any are specified, only records from modules starting with one of these entries will be printed
     ///
     /// For example, `add_filter_allow(format!("{}{}","tokio", "uds"))` would allow only logging from the `tokio` crates `uds` module.
-    pub fn add_filter_allow(&mut self, filter_allow: String) -> &mut ConfigBuilder {
+    pub fn add_filter_allow(mut self, filter_allow: String) -> Self {
         let mut list = Vec::from(&*self.0.filter_allow);
         list.push(Cow::Owned(filter_allow));
         self.0.filter_allow = Cow::Owned(list);
@@ -266,7 +266,7 @@ impl ConfigBuilder {
 
     /// Clear allowed module filters.
     /// If none are specified, nothing is filtered out
-    pub fn clear_filter_allow(&mut self) -> &mut ConfigBuilder {
+    pub fn clear_filter_allow(mut self) -> Self {
         self.0.filter_allow = Cow::Borrowed(&[]);
         self
     }
@@ -275,7 +275,7 @@ impl ConfigBuilder {
     /// If any are specified, records from modules starting with one of these entries will be ignored
     ///
     /// For example, `add_filter_ignore_str("tokio::uds")` would deny logging from the `tokio` crates `uds` module.
-    pub fn add_filter_ignore_str(&mut self, filter_ignore: &'static str) -> &mut ConfigBuilder {
+    pub fn add_filter_ignore_str(mut self, filter_ignore: &'static str) -> Self {
         let mut list = Vec::from(&*self.0.filter_ignore);
         list.push(Cow::Borrowed(filter_ignore));
         self.0.filter_ignore = Cow::Owned(list);
@@ -286,7 +286,7 @@ impl ConfigBuilder {
     /// If any are specified, records from modules starting with one of these entries will be ignored
     ///
     /// For example, `add_filter_ignore(format!("{}{}","tokio", "uds"))` would deny logging from the `tokio` crates `uds` module.
-    pub fn add_filter_ignore(&mut self, filter_ignore: String) -> &mut ConfigBuilder {
+    pub fn add_filter_ignore(mut self, filter_ignore: String) -> Self {
         let mut list = Vec::from(&*self.0.filter_ignore);
         list.push(Cow::Owned(filter_ignore));
         self.0.filter_ignore = Cow::Owned(list);
@@ -295,14 +295,14 @@ impl ConfigBuilder {
 
     /// Clear ignore module filters.
     /// If none are specified, nothing is filtered
-    pub fn clear_filter_ignore(&mut self) -> &mut ConfigBuilder {
+    pub fn clear_filter_ignore(mut self) -> Self {
         self.0.filter_ignore = Cow::Borrowed(&[]);
         self
     }
 
     /// Build new `Config`
-    pub fn build(&mut self) -> Config {
-        self.0.clone()
+    pub fn build(self) -> Config {
+        self.0
     }
 }
 

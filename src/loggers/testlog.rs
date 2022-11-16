@@ -137,7 +137,7 @@ pub fn write_time(config: &Config) {
         TimeFormat::Custom(format) => time.format(&format),
     };
     match res {
-        Ok(time) => println!("{} ", time),
+        Ok(time) => print!("{} ", time),
         Err(err) => panic!("Invalid time format: {}", err),
     };
 }

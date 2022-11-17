@@ -1,4 +1,6 @@
-use crate::config::{TargetPadding, TimeFormat};
+use crate::config::TargetPadding;
+#[cfg(feature = "time")]
+use crate::config::TimeFormat;
 use crate::{Config, LevelPadding, ThreadLogMode, ThreadPadding};
 use log::{LevelFilter, Record};
 use std::io::{Error, Write};
@@ -30,6 +32,7 @@ where
         return Ok(());
     }
 
+    #[cfg(feature = "time")]
     if config.time <= record.level() && config.time != LevelFilter::Off {
         write_time(write, config)?;
     }
@@ -61,6 +64,7 @@ where
 }
 
 #[inline(always)]
+#[cfg(feature = "time")]
 pub fn write_time<W>(write: &mut W, config: &Config) -> Result<(), Error>
 where
     W: Write + Sized,

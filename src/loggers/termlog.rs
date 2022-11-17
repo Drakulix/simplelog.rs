@@ -133,6 +133,7 @@ impl TermLogger {
         #[cfg(not(feature = "ansi_term"))]
         let color = self.config.level_color[record.level() as usize];
 
+        #[cfg(feature = "time")]
         if self.config.time <= record.level() && self.config.time != LevelFilter::Off {
             write_time(term_lock, &self.config)?;
         }

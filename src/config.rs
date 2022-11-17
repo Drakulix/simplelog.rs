@@ -5,6 +5,8 @@ use log::LevelFilter;
 use std::borrow::Cow;
 #[cfg(feature = "termcolor")]
 use termcolor::Color;
+
+#[cfg(feature = "time")]
 pub use time::{format_description::FormatItem, macros::format_description, UtcOffset};
 
 #[derive(Debug, Clone, Copy)]
@@ -52,6 +54,7 @@ pub enum ThreadLogMode {
 }
 
 #[derive(Debug, Clone)]
+#[cfg(feature = "time")]
 pub(crate) enum TimeFormat {
     Rfc2822,
     Rfc3339,
@@ -70,6 +73,7 @@ pub(crate) enum TimeFormat {
 /// Construct using [`Default`](Config::default) or using [`ConfigBuilder`]
 #[derive(Debug, Clone)]
 pub struct Config {
+    #[cfg(feature = "time")]
     pub(crate) time: LevelFilter,
     pub(crate) level: LevelFilter,
     pub(crate) level_padding: LevelPadding,
@@ -79,7 +83,9 @@ pub struct Config {
     pub(crate) target: LevelFilter,
     pub(crate) target_padding: TargetPadding,
     pub(crate) location: LevelFilter,
+    #[cfg(feature = "time")]
     pub(crate) time_format: TimeFormat,
+    #[cfg(feature = "time")]
     pub(crate) time_offset: UtcOffset,
     pub(crate) filter_allow: Cow<'static, [Cow<'static, str>]>,
     pub(crate) filter_ignore: Cow<'static, [Cow<'static, str>]>,
@@ -118,6 +124,7 @@ impl ConfigBuilder {
     }
 
     /// Set at which level and  above (more verbose) the current time shall be logged (default is Error)
+    #[cfg(feature = "time")]
     pub fn set_time_level(&mut self, time: LevelFilter) -> &mut ConfigBuilder {
         self.0.time = time;
         self
@@ -191,6 +198,7 @@ impl ConfigBuilder {
     ///     .set_time_format_custom(format_description!("[hour]:[minute]:[second].[subsecond]"))
     ///     .build();
     /// ```
+    #[cfg(feature = "time")]
     pub fn set_time_format_custom(
         &mut self,
         time_format: &'static [FormatItem<'static>],
@@ -200,18 +208,21 @@ impl ConfigBuilder {
     }
 
     /// Set time format string to use rfc2822.
+    #[cfg(feature = "time")]
     pub fn set_time_format_rfc2822(&mut self) -> &mut ConfigBuilder {
         self.0.time_format = TimeFormat::Rfc2822;
         self
     }
 
     /// Set time format string to use rfc3339.
+    #[cfg(feature = "time")]
     pub fn set_time_format_rfc3339(&mut self) -> &mut ConfigBuilder {
         self.0.time_format = TimeFormat::Rfc3339;
         self
     }
 
     /// Set offset used for logging time (default is UTC)
+    #[cfg(feature = "time")]
     pub fn set_time_offset(&mut self, offset: UtcOffset) -> &mut ConfigBuilder {
         self.0.time_offset = offset;
         self
@@ -224,7 +235,7 @@ impl ConfigBuilder {
     /// This may be the case, when the program is multi-threaded by the time of calling this function.
     /// One can opt-out of this behavior by setting `RUSTFLAGS="--cfg unsound_local_offset"`.
     /// Doing so is not recommended, completely untested and may cause unexpected segfaults.
-    #[cfg(feature = "local-offset")]
+    #[cfg(all(feature = "time", feature = "local-offset"))]
     pub fn set_time_offset_to_local(&mut self) -> Result<&mut ConfigBuilder, &mut ConfigBuilder> {
         match UtcOffset::current_local_offset() {
             Ok(offset) => {
@@ -315,6 +326,7 @@ impl Default for ConfigBuilder {
 impl Default for Config {
     fn default() -> Config {
         Config {
+            #[cfg(feature = "time")]
             time: LevelFilter::Error,
             level: LevelFilter::Error,
             level_padding: LevelPadding::Off,
@@ -324,7 +336,9 @@ impl Default for Config {
             target: LevelFilter::Debug,
             target_padding: TargetPadding::Off,
             location: LevelFilter::Trace,
+            #[cfg(feature = "time")]
             time_format: TimeFormat::Custom(format_description!("[hour]:[minute]:[second]")),
+            #[cfg(feature = "time")]
             time_offset: UtcOffset::UTC,
             filter_allow: Cow::Borrowed(&[]),
             filter_ignore: Cow::Borrowed(&[]),

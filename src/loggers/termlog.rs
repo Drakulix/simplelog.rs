@@ -97,6 +97,7 @@ impl TermLogger {
     /// );
     /// # }
     /// ```
+    #[must_use]
     pub fn new(
         log_level: LevelFilter,
         config: Config,

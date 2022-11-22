@@ -61,6 +61,7 @@ impl TestLogger {
     /// let test_logger = TestLogger::new(LevelFilter::Info, Config::default());
     /// # }
     /// ```
+    #[must_use]
     pub fn new(log_level: LevelFilter, config: Config) -> Box<TestLogger> {
         Box::new(TestLogger {
             level: log_level,

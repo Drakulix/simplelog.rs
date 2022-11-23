@@ -56,6 +56,7 @@ impl<W: Write + Send + 'static> WriteLogger<W> {
     /// let file_logger = WriteLogger::new(LevelFilter::Info, Config::default(), File::create("my_rust_bin.log").unwrap());
     /// # }
     /// ```
+    #[must_use]
     pub fn new(log_level: LevelFilter, config: Config, writable: W) -> Box<WriteLogger<W>> {
         Box::new(WriteLogger {
             level: log_level,

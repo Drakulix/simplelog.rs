@@ -56,6 +56,7 @@ impl SimpleLogger {
     /// let simple_logger = SimpleLogger::new(LevelFilter::Info, Config::default());
     /// # }
     /// ```
+    #[must_use]
     pub fn new(log_level: LevelFilter, config: Config) -> Box<SimpleLogger> {
         Box::new(SimpleLogger {
             level: log_level,

@@ -1,3 +1,5 @@
+## Unreleased
+ - The `new` method of loggers are now `#[must_use]` to prevent confusion when `new` is used called instead of `init`
 ## v0.12.0
  - Replaces the semingly unmainted chrono library with the time crate.
  - Addresses through this update 

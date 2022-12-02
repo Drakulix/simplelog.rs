@@ -61,6 +61,7 @@ impl TestLogger {
     /// let test_logger = TestLogger::new(LevelFilter::Info, Config::default());
     /// # }
     /// ```
+    #[must_use]
     pub fn new(log_level: LevelFilter, config: Config) -> Box<TestLogger> {
         Box::new(TestLogger {
             level: log_level,
@@ -137,7 +138,7 @@ pub fn write_time(config: &Config) {
         TimeFormat::Custom(format) => time.format(&format),
     };
     match res {
-        Ok(time) => println!("{} ", time),
+        Ok(time) => print!("{} ", time),
         Err(err) => panic!("Invalid time format: {}", err),
     };
 }

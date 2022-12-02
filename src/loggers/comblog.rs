@@ -74,6 +74,7 @@ impl CombinedLogger {
     ///         );
     /// # }
     /// ```
+    #[must_use]
     pub fn new(logger: Vec<Box<dyn SharedLogger>>) -> Box<CombinedLogger> {
         let mut log_level = LevelFilter::Off;
         for log in &logger {

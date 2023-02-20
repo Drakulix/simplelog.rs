@@ -1,7 +1,7 @@
 ## Unreleased
  - The `new` method of loggers are now `#[must_use]` to prevent confusion when `new` is used called instead of `init`
 ## v0.12.0
- - Replaces the semingly unmainted chrono library with the time crate.
+ - Replaces the semingly unmaintained chrono library with the time crate.
  - Addresses through this update 
      - RUSTSEC-2020-0159 (chrono)
      - RUSTSEC-2020-0071 (time)
@@ -45,7 +45,7 @@
 ## v0.8.0
  - Switch from `term` to `termcolor` (PR #59. credits to @raybritton)
  - Fix typo in docs (PR #58, credits to @anthonyjmartinez)
- - Switch default padding to `Off`. Padding is annoyingly controversal, just set it to whatever you prefer, if you want it.
+ - Switch default padding to `Off`. Padding is annoyingly controversial, just set it to whatever you prefer, if you want it.
 
 ## v0.7.6
  - Derive `Clone`,`Copy`,`PartialEq`,`Eq`,`Debug` and `Hash` for `TerminalMode`. (PR #56, credits to @panhania)
@@ -98,7 +98,7 @@
  - Fixed building non-default feature sets
 
 ## v0.4.3
- - Publically export TermLogger Error type
+ - Publicly export TermLogger Error type
 
 ## v0.4.2
  - Removed a debug println! statement
@@ -131,7 +131,7 @@
  - Removed some internal code duplication
 
 ## v0.2.0
- - Local changes that (accidentially) made it to crates.io, but not git
+ - Local changes that (accidentally) made it to crates.io, but not git
      - Basically a worse version of *Antoni Boucher* 0.3.0 changes
      - Got noticed, when he made a Pull Request
 

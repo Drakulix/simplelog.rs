@@ -42,7 +42,7 @@ fn main() {
 ### Results in
 ```
 $ cargo run --example usage
-   Compiling simplelog v0.12.0 (file:///home/drakulix/Projects/simplelog)
+   Compiling simplelog v0.12.1 (file:///home/drakulix/Projects/simplelog)
      Running `target/debug/examples/usage`
 [ERROR] Bright red error
 ```
@@ -57,7 +57,7 @@ and my_rust_binary.log
 Just add
 ```
 [dependencies]
-simplelog = "^0.12.0"
+simplelog = "^0.12.1"
 ```
 to your `Cargo.toml`
 
@@ -67,7 +67,7 @@ This crate can internally depend on a [paris](https://github.com/0x20F/paris) cr
 To use this feature you need to set a _paris_ feature, like this:
 ```
 [dependencies]
-simplelog = { version = "^0.11.0", features = ["paris"] }
+simplelog = { version = "^0.12.1", features = ["paris"] }
 ```
 in your `Cargo.toml`
 

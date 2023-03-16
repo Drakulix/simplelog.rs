@@ -242,8 +242,8 @@ impl ConfigBuilder {
         self
     }
 
-    /// Add allowed module filters.
-    /// If any are specified, only records from modules starting with one of these entries will be printed
+    /// Add allowed target filters.
+    /// If any are specified, only records from targets matching one of these entries will be printed
     ///
     /// For example, `add_filter_allow_str("tokio::uds")` would allow only logging from the `tokio` crates `uds` module.
     pub fn add_filter_allow_str(&mut self, filter_allow: &'static str) -> &mut ConfigBuilder {
@@ -253,8 +253,8 @@ impl ConfigBuilder {
         self
     }
 
-    /// Add allowed module filters.
-    /// If any are specified, only records from modules starting with one of these entries will be printed
+    /// Add allowed target filters.
+    /// If any are specified, only records from targets matching one of these entries will be printed
     ///
     /// For example, `add_filter_allow(format!("{}::{}","tokio", "uds"))` would allow only logging from the `tokio` crates `uds` module.
     pub fn add_filter_allow(&mut self, filter_allow: String) -> &mut ConfigBuilder {
@@ -264,15 +264,15 @@ impl ConfigBuilder {
         self
     }
 
-    /// Clear allowed module filters.
+    /// Clear allowed target filters.
     /// If none are specified, nothing is filtered out
     pub fn clear_filter_allow(&mut self) -> &mut ConfigBuilder {
         self.0.filter_allow = Cow::Borrowed(&[]);
         self
     }
 
-    /// Add denied module filters.
-    /// If any are specified, records from modules starting with one of these entries will be ignored
+    /// Add denied target filters.
+    /// If any are specified, records from targets matching one of these entries will be ignored
     ///
     /// For example, `add_filter_ignore_str("tokio::uds")` would deny logging from the `tokio` crates `uds` module.
     pub fn add_filter_ignore_str(&mut self, filter_ignore: &'static str) -> &mut ConfigBuilder {
@@ -282,8 +282,8 @@ impl ConfigBuilder {
         self
     }
 
-    /// Add denied module filters.
-    /// If any are specified, records from modules starting with one of these entries will be ignored
+    /// Add denied target filters.
+    /// If any are specified, records from targets matching one of these entries will be ignored
     ///
     /// For example, `add_filter_ignore(format!("{}::{}","tokio", "uds"))` would deny logging from the `tokio` crates `uds` module.
     pub fn add_filter_ignore(&mut self, filter_ignore: String) -> &mut ConfigBuilder {
@@ -293,7 +293,7 @@ impl ConfigBuilder {
         self
     }
 
-    /// Clear ignore module filters.
+    /// Clear ignore target filters.
     /// If none are specified, nothing is filtered
     pub fn clear_filter_ignore(&mut self) -> &mut ConfigBuilder {
         self.0.filter_ignore = Cow::Borrowed(&[]);

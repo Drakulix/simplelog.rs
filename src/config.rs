@@ -7,6 +7,8 @@ use std::borrow::Cow;
 use termcolor::Color;
 pub use time::{format_description::FormatItem, macros::format_description, UtcOffset};
 
+use crate::format::*;
+
 #[derive(Debug, Clone, Copy)]
 /// Padding to be used for logging the level
 pub enum LevelPadding {
@@ -81,6 +83,7 @@ pub struct Config {
     pub(crate) location: LevelFilter,
     pub(crate) time_format: TimeFormat,
     pub(crate) time_offset: UtcOffset,
+    pub(crate) output_format: Format,
     pub(crate) filter_allow: Cow<'static, [Cow<'static, str>]>,
     pub(crate) filter_ignore: Cow<'static, [Cow<'static, str>]>,
     #[cfg(feature = "termcolor")]
@@ -300,6 +303,31 @@ impl ConfigBuilder {
         self
     }
 
+    /// Sets the output format to a custom representation.
+    ///
+    /// # Usage
+    ///
+    /// ```
+    /// use simplelog::ConfigBuilder;
+    /// use simplelog::FormatBuilder;
+    ///
+    /// let format = FormatBuilder::new()
+    ///     .time()
+    ///     .literal(" [")
+    ///     .level()
+    ///     .literal("] ")
+    ///     .args()
+    ///     .build();
+    ///
+    /// let config = ConfigBuilder::new()
+    ///     .set_output_format_custom(format)
+    ///     .build();
+    /// ```
+    pub fn set_output_format_custom(&mut self, output_format: Format) -> &mut ConfigBuilder {
+        self.0.output_format = output_format;
+        self
+    }
+
     /// Build new `Config`
     pub fn build(&mut self) -> Config {
         self.0.clone()
@@ -326,6 +354,7 @@ impl Default for Config {
             location: LevelFilter::Trace,
             time_format: TimeFormat::Custom(format_description!("[hour]:[minute]:[second]")),
             time_offset: UtcOffset::UTC,
+            output_format: Default::default(),
             filter_allow: Cow::Borrowed(&[]),
             filter_ignore: Cow::Borrowed(&[]),
             write_log_enable_colors: false,

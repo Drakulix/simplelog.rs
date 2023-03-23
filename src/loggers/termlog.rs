@@ -11,7 +11,7 @@ use termcolor::{ColorSpec, WriteColor};
 
 use super::logging::*;
 
-use crate::{Config, SharedLogger, ThreadLogMode};
+use crate::{Config, SharedLogger};
 
 struct OutputStreams {
     err: BufferedStandardStream,
@@ -126,60 +126,60 @@ impl TermLogger {
         })
     }
 
-    fn try_log_term(
-        &self,
-        record: &Record<'_>,
-        term_lock: &mut BufferedStandardStream,
-    ) -> Result<(), Error> {
-        #[cfg(not(feature = "ansi_term"))]
-        let color = self.config.level_color[record.level() as usize];
+    // fn try_log_term(
+    //     &self,
+    //     record: &Record<'_>,
+    //     term_lock: &mut BufferedStandardStream,
+    // ) -> Result<(), Error> {
+    //     #[cfg(not(feature = "ansi_term"))]
+    //     let color = self.config.level_color[record.level() as usize];
 
-        if self.config.time <= record.level() && self.config.time != LevelFilter::Off {
-            write_time(term_lock, &self.config)?;
-        }
+    //     if self.config.time <= record.level() && self.config.time != LevelFilter::Off {
+    //         write_time(term_lock, &self.config)?;
+    //     }
 
-        if self.config.level <= record.level() && self.config.level != LevelFilter::Off {
-            #[cfg(not(feature = "ansi_term"))]
-            if !self.config.write_log_enable_colors {
-                term_lock.set_color(ColorSpec::new().set_fg(color))?;
-            }
+    //     if self.config.level <= record.level() && self.config.level != LevelFilter::Off {
+    //         #[cfg(not(feature = "ansi_term"))]
+    //         if !self.config.write_log_enable_colors {
+    //             term_lock.set_color(ColorSpec::new().set_fg(color))?;
+    //         }
 
-            write_level(record, term_lock, &self.config)?;
+    //         write_level(record, term_lock, &self.config)?;
 
-            #[cfg(not(feature = "ansi_term"))]
-            if !self.config.write_log_enable_colors {
-                term_lock.reset()?;
-            }
-        }
+    //         #[cfg(not(feature = "ansi_term"))]
+    //         if !self.config.write_log_enable_colors {
+    //             term_lock.reset()?;
+    //         }
+    //     }
 
-        if self.config.thread <= record.level() && self.config.thread != LevelFilter::Off {
-            match self.config.thread_log_mode {
-                ThreadLogMode::IDs => {
-                    write_thread_id(term_lock, &self.config)?;
-                }
-                ThreadLogMode::Names | ThreadLogMode::Both => {
-                    write_thread_name(term_lock, &self.config)?;
-                }
-            }
-        }
+    //     if self.config.thread <= record.level() && self.config.thread != LevelFilter::Off {
+    //         match self.config.thread_log_mode {
+    //             ThreadLogMode::IDs => {
+    //                 write_thread_id(term_lock, &self.config)?;
+    //             }
+    //             ThreadLogMode::Names | ThreadLogMode::Both => {
+    //                 write_thread_name(term_lock, &self.config)?;
+    //             }
+    //         }
+    //     }
 
-        if self.config.target <= record.level() && self.config.target != LevelFilter::Off {
-            write_target(record, term_lock, &self.config)?;
-        }
+    //     if self.config.target <= record.level() && self.config.target != LevelFilter::Off {
+    //         write_target(record, term_lock, &self.config)?;
+    //     }
 
-        if self.config.location <= record.level() && self.config.location != LevelFilter::Off {
-            write_location(record, term_lock)?;
-        }
+    //     if self.config.location <= record.level() && self.config.location != LevelFilter::Off {
+    //         write_location(record, term_lock)?;
+    //     }
 
-        write_args(record, term_lock)?;
+    //     write_args(record, term_lock)?;
 
-        // The log crate holds the logger as a `static mut`, which isn't dropped
-        // at program exit: https://doc.rust-lang.org/reference/items/static-items.html
-        // Sadly, this means we can't rely on the BufferedStandardStreams flushing
-        // themselves on the way out, so to avoid the Case of the Missing 8k,
-        // flush each entry.
-        term_lock.flush()
-    }
+    //     // The log crate holds the logger as a `static mut`, which isn't dropped
+    //     // at program exit: https://doc.rust-lang.org/reference/items/static-items.html
+    //     // Sadly, this means we can't rely on the BufferedStandardStreams flushing
+    //     // themselves on the way out, so to avoid the Case of the Missing 8k,
+    //     // flush each entry.
+    //     term_lock.flush()
+    // }
 
     fn try_log(&self, record: &Record<'_>) -> Result<(), Error> {
         if self.enabled(record.metadata()) {
@@ -189,11 +189,43 @@ impl TermLogger {
 
             let mut streams = self.streams.lock().unwrap();
 
+            #[cfg(not(feature = "ansi_term"))]
+            let color = self.config.level_color[record.level() as usize];
+            let set_color = |term_lock: &mut BufferedStandardStream| -> Result<(), Error> {
+                #[cfg(not(feature = "ansi_term"))]
+                if !self.config.write_log_enable_colors {
+                    term_lock.set_color(ColorSpec::new().set_fg(color))?;
+                }
+                Ok(())
+            };
+            let reset_color = |term_lock: &mut BufferedStandardStream| -> Result<(), Error> {
+                #[cfg(not(feature = "ansi_term"))]
+                if !self.config.write_log_enable_colors {
+                    term_lock.reset()?;
+                }
+                Ok(())
+            };
+
             if record.level() == Level::Error {
-                self.try_log_term(record, &mut streams.err)
+                try_log(
+                    &self.config,
+                    record,
+                    &mut streams.err,
+                    set_color,
+                    reset_color,
+                )?;
+                streams.err.flush()?;
             } else {
-                self.try_log_term(record, &mut streams.out)
+                try_log(
+                    &self.config,
+                    record,
+                    &mut streams.out,
+                    set_color,
+                    reset_color,
+                )?;
+                streams.out.flush()?;
             }
+            Ok(())
         } else {
             Ok(())
         }

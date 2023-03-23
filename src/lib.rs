@@ -21,6 +21,7 @@
 
 #![deny(missing_docs, rust_2018_idioms)]
 
+mod format;
 mod config;
 mod loggers;
 
@@ -28,6 +29,8 @@ pub use self::config::{
     format_description, Config, ConfigBuilder, FormatItem, LevelPadding, TargetPadding,
     ThreadLogMode, ThreadPadding,
 };
+pub use self::format::Format;
+pub use self::format::FormatBuilder;
 #[cfg(feature = "test")]
 pub use self::loggers::TestLogger;
 pub use self::loggers::{CombinedLogger, SimpleLogger, WriteLogger};

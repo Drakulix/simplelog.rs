@@ -1,6 +1,6 @@
 use crate::config::{TargetPadding, TimeFormat};
 use crate::{Config, LevelPadding, ThreadLogMode, ThreadPadding};
-use log::{LevelFilter, Record};
+use log::{Level, LevelFilter, Record};
 use std::io::{Error, Write};
 use std::thread;
 #[cfg(all(feature = "termcolor", feature = "ansi_term"))]
@@ -22,46 +22,106 @@ pub fn termcolor_to_ansiterm(color: &Color) -> Option<ansi_term::Color> {
 }
 
 #[inline(always)]
-pub fn try_log<W>(config: &Config, record: &Record<'_>, write: &mut W) -> Result<(), Error>
+pub(crate) fn try_log<W, SF, RF>(
+    config: &Config,
+    record: &Record<'_>,
+    write: &mut W,
+    mut set_color: SF,
+    mut reset_color: RF,
+) -> Result<(), Error>
 where
     W: Write + Sized,
+    SF: FnMut(&mut W, Level, &FormatPart) -> Result<(), Error>,
+    RF: FnMut(&mut W, Level, &FormatPart) -> Result<(), Error>,
 {
     if should_skip(config, record) {
         return Ok(());
     }
 
-    if config.time <= record.level() && config.time != LevelFilter::Off {
-        write_time(write, config)?;
-    }
+    let (mut need_space, parts) = if config.output_format.format_parts.len() >= 2 {
+        let part = &config.output_format.format_parts[0];
 
-    if config.level <= record.level() && config.level != LevelFilter::Off {
-        write_level(record, write, config)?;
-    }
-
-    if config.thread <= record.level() && config.thread != LevelFilter::Off {
-        match config.thread_log_mode {
-            ThreadLogMode::IDs => {
-                write_thread_id(write, config)?;
-            }
-            ThreadLogMode::Names | ThreadLogMode::Both => {
-                write_thread_name(write, config)?;
-            }
+        if record.level() <= part.level_filter && part.level_filter != LevelFilter::Off {
+            write_part(
+                record,
+                write,
+                config,
+                &part,
+                &mut set_color,
+                &mut reset_color,
+            )?;
+            (part.wrap_space, &config.output_format.format_parts[1..])
+        } else {
+            (false, &config.output_format.format_parts[1..])
         }
+    } else {
+        (false, &config.output_format.format_parts[..])
+    };
+
+    for part in parts {
+        if record.level() > part.level_filter || part.level_filter == LevelFilter::Off {
+            continue;
+        }
+
+        if part.wrap_space || need_space {
+            write!(write, " ")?;
+        }
+        need_space = part.wrap_space;
+
+        write_part(
+            record,
+            write,
+            config,
+            part,
+            &mut set_color,
+            &mut reset_color,
+        )?;
     }
 
-    if config.target <= record.level() && config.target != LevelFilter::Off {
-        write_target(record, write, config)?;
-    }
+    Ok(())
+}
 
-    if config.location <= record.level() && config.location != LevelFilter::Off {
-        write_location(record, write)?;
-    }
+use crate::format::FormatPart;
 
-    write_args(record, write)
+#[inline(always)]
+fn write_part<W, SF, RF>(
+    record: &Record<'_>,
+    write: &mut W,
+    config: &Config,
+    part: &FormatPart,
+    mut set_color: SF,
+    mut reset_color: RF,
+) -> Result<(), Error>
+where
+    W: Write + Sized,
+    SF: FnMut(&mut W, Level, &FormatPart) -> Result<(), Error>,
+    RF: FnMut(&mut W, Level, &FormatPart) -> Result<(), Error>,
+{
+    use crate::format::FormatPartType as FP;
+
+    set_color(write, record.level(), part)?;
+
+    let res = match part.part_type {
+        FP::Time => write_time(write, config),
+        FP::Level => write_level(record, write, config),
+        FP::Thread => match config.thread_log_mode {
+            ThreadLogMode::IDs => write_thread_id(write, config),
+            ThreadLogMode::Names | ThreadLogMode::Both => write_thread_name(write, config),
+        },
+        FP::Target => write_target(record, write, config),
+        FP::Location => write_location(record, write),
+        FP::ModulePath => write_module_path(record, write),
+        FP::Args => write_args(record, write),
+        FP::Literal(literal) => write!(write, "{}", literal),
+    };
+
+    reset_color(write, record.level(), part)?;
+
+    res
 }
 
 #[inline(always)]
-pub fn write_time<W>(write: &mut W, config: &Config) -> Result<(), Error>
+fn write_time<W>(write: &mut W, config: &Config) -> Result<(), Error>
 where
     W: Write + Sized,
 {
@@ -80,12 +140,12 @@ where
         _ => {}
     };
 
-    write!(write, " ")?;
+    // write!(write, " ")?;
     Ok(())
 }
 
 #[inline(always)]
-pub fn write_level<W>(record: &Record<'_>, write: &mut W, config: &Config) -> Result<(), Error>
+fn write_level<W>(record: &Record<'_>, write: &mut W, config: &Config) -> Result<(), Error>
 where
     W: Write + Sized,
 {
@@ -102,48 +162,38 @@ where
     };
 
     let level = match config.level_padding {
-        LevelPadding::Left => format!("[{: >5}]", record.level()),
-        LevelPadding::Right => format!("[{: <5}]", record.level()),
-        LevelPadding::Off => format!("[{}]", record.level()),
+        LevelPadding::Left => format!("{: >5}", record.level()),
+        LevelPadding::Right => format!("{: <5}", record.level()),
+        LevelPadding::Off => format!("{}", record.level()),
     };
 
     #[cfg(all(feature = "termcolor", feature = "ansi_term"))]
     match color {
-        Some(c) => write!(write, "{} ", c.paint(level))?,
-        None => write!(write, "{} ", level)?,
+        Some(c) => write!(write, "{}", c.paint(level))?,
+        None => write!(write, "{}", level)?,
     };
 
     #[cfg(not(feature = "ansi_term"))]
-    write!(write, "{} ", level)?;
+    write!(write, "{}", level)?;
 
     Ok(())
 }
 
 #[inline(always)]
-pub fn write_target<W>(record: &Record<'_>, write: &mut W, config: &Config) -> Result<(), Error>
+fn write_target<W>(record: &Record<'_>, write: &mut W, config: &Config) -> Result<(), Error>
 where
     W: Write + Sized,
 {
     // dbg!(&config.target_padding);
     match config.target_padding {
         TargetPadding::Left(pad) => {
-            write!(
-                write,
-                "{target:>pad$}: ",
-                pad = pad,
-                target = record.target()
-            )?;
+            write!(write, "{target:>pad$}", pad = pad, target = record.target())?;
         }
         TargetPadding::Right(pad) => {
-            write!(
-                write,
-                "{target:<pad$}: ",
-                pad = pad,
-                target = record.target()
-            )?;
+            write!(write, "{target:<pad$}", pad = pad, target = record.target())?;
         }
         TargetPadding::Off => {
-            write!(write, "{}: ", record.target())?;
+            write!(write, "{}", record.target())?;
         }
     }
 
@@ -151,33 +201,33 @@ where
 }
 
 #[inline(always)]
-pub fn write_location<W>(record: &Record<'_>, write: &mut W) -> Result<(), Error>
+fn write_location<W>(record: &Record<'_>, write: &mut W) -> Result<(), Error>
 where
     W: Write + Sized,
 {
     let file = record.file().unwrap_or("<unknown>");
     if let Some(line) = record.line() {
-        write!(write, "[{}:{}] ", file, line)?;
+        write!(write, "{}:{}", file, line)?;
     } else {
-        write!(write, "[{}:<unknown>] ", file)?;
+        write!(write, "{}:<unknown>", file)?;
     }
     Ok(())
 }
 
-pub fn write_thread_name<W>(write: &mut W, config: &Config) -> Result<(), Error>
+fn write_thread_name<W>(write: &mut W, config: &Config) -> Result<(), Error>
 where
     W: Write + Sized,
 {
     if let Some(name) = thread::current().name() {
         match config.thread_padding {
             ThreadPadding::Left { 0: qty } => {
-                write!(write, "({name:>0$}) ", qty, name = name)?;
+                write!(write, "({name:>0$})", qty, name = name)?;
             }
             ThreadPadding::Right { 0: qty } => {
-                write!(write, "({name:<0$}) ", qty, name = name)?;
+                write!(write, "({name:<0$})", qty, name = name)?;
             }
             ThreadPadding::Off => {
-                write!(write, "({}) ", name)?;
+                write!(write, "({})", name)?;
             }
         }
     } else if config.thread_log_mode == ThreadLogMode::Both {
@@ -187,7 +237,7 @@ where
     Ok(())
 }
 
-pub fn write_thread_id<W>(write: &mut W, config: &Config) -> Result<(), Error>
+fn write_thread_id<W>(write: &mut W, config: &Config) -> Result<(), Error>
 where
     W: Write + Sized,
 {
@@ -196,20 +246,29 @@ where
     let id = id.replace(")", "");
     match config.thread_padding {
         ThreadPadding::Left { 0: qty } => {
-            write!(write, "({id:>0$}) ", qty, id = id)?;
+            write!(write, "({id:>0$} ", qty, id = id)?;
         }
         ThreadPadding::Right { 0: qty } => {
-            write!(write, "({id:<0$}) ", qty, id = id)?;
+            write!(write, "({id:<0$})", qty, id = id)?;
         }
         ThreadPadding::Off => {
-            write!(write, "({}) ", id)?;
+            write!(write, "({})", id)?;
         }
     }
     Ok(())
 }
 
 #[inline(always)]
-pub fn write_args<W>(record: &Record<'_>, write: &mut W) -> Result<(), Error>
+fn write_module_path<W>(record: &Record<'_>, write: &mut W) -> Result<(), Error>
+where
+    W: Write + Sized,
+{
+    writeln!(write, "{}", record.module_path().unwrap_or("<unknown>"))?;
+    Ok(())
+}
+
+#[inline(always)]
+fn write_args<W>(record: &Record<'_>, write: &mut W) -> Result<(), Error>
 where
     W: Write + Sized,
 {

@@ -83,8 +83,8 @@ impl Log for SimpleLogger {
                         &self.config,
                         record,
                         &mut stderr_lock,
-                        |_| Ok(()),
-                        |_| Ok(()),
+                        |_, _, _| Ok(()),
+                        |_, _, _| Ok(()),
                     );
                 }
                 _ => {
@@ -94,8 +94,8 @@ impl Log for SimpleLogger {
                         &self.config,
                         record,
                         &mut stdout_lock,
-                        |_| Ok(()),
-                        |_| Ok(()),
+                        |_, _, _| Ok(()),
+                        |_, _, _| Ok(()),
                     );
                 }
             }

@@ -189,16 +189,25 @@ impl TermLogger {
 
             let mut streams = self.streams.lock().unwrap();
 
-            #[cfg(not(feature = "ansi_term"))]
-            let color = self.config.level_color[record.level() as usize];
-            let set_color = |term_lock: &mut BufferedStandardStream| -> Result<(), Error> {
+            use crate::format::FormatPart;
+
+            // #[cfg(not(feature = "ansi_term"))]
+            // let color = self.config.level_color[record.level() as usize];
+            let set_color = |term_lock: &mut BufferedStandardStream,
+                             level: Level,
+                             part: &FormatPart|
+             -> Result<(), Error> {
                 #[cfg(not(feature = "ansi_term"))]
                 if !self.config.write_log_enable_colors {
-                    term_lock.set_color(ColorSpec::new().set_fg(color))?;
+                    term_lock
+                        .set_color(ColorSpec::new().set_fg(part.level_color[level as usize]))?;
                 }
                 Ok(())
             };
-            let reset_color = |term_lock: &mut BufferedStandardStream| -> Result<(), Error> {
+            let reset_color = |term_lock: &mut BufferedStandardStream,
+                               _level: Level,
+                               _part: &FormatPart|
+             -> Result<(), Error> {
                 #[cfg(not(feature = "ansi_term"))]
                 if !self.config.write_log_enable_colors {
                     term_lock.reset()?;

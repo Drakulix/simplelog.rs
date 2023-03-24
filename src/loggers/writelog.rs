@@ -78,8 +78,8 @@ impl<W: Write + Send + 'static> Log for WriteLogger<W> {
                 &self.config,
                 record,
                 &mut *write_lock,
-                |_| Ok(()),
-                |_| Ok(()),
+                |_, _, _| Ok(()),
+                |_, _, _| Ok(()),
             );
         }
     }

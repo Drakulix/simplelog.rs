@@ -1,6 +1,6 @@
 use crate::config::{TargetPadding, TimeFormat};
 use crate::{Config, LevelPadding, ThreadLogMode, ThreadPadding};
-use log::{LevelFilter, Record};
+use log::{Level, LevelFilter, Record};
 use std::io::{Error, Write};
 use std::thread;
 #[cfg(all(feature = "termcolor", feature = "ansi_term"))]
@@ -22,7 +22,7 @@ pub fn termcolor_to_ansiterm(color: &Color) -> Option<ansi_term::Color> {
 }
 
 #[inline(always)]
-pub fn try_log<W, SF, RF>(
+pub(crate) fn try_log<W, SF, RF>(
     config: &Config,
     record: &Record<'_>,
     write: &mut W,
@@ -31,8 +31,8 @@ pub fn try_log<W, SF, RF>(
 ) -> Result<(), Error>
 where
     W: Write + Sized,
-    SF: FnMut(&mut W) -> Result<(), Error>,
-    RF: FnMut(&mut W) -> Result<(), Error>,
+    SF: FnMut(&mut W, Level, &FormatPart) -> Result<(), Error>,
+    RF: FnMut(&mut W, Level, &FormatPart) -> Result<(), Error>,
 {
     if should_skip(config, record) {
         return Ok(());
@@ -100,50 +100,43 @@ fn write_part<W, SF, RF>(
 ) -> Result<(), Error>
 where
     W: Write + Sized,
-    SF: FnMut(&mut W) -> Result<(), Error>,
-    RF: FnMut(&mut W) -> Result<(), Error>,
+    SF: FnMut(&mut W, Level, &FormatPart) -> Result<(), Error>,
+    RF: FnMut(&mut W, Level, &FormatPart) -> Result<(), Error>,
 {
     use crate::format::FormatPartType as FP;
 
-    match part.part_type {
+    set_color(write, record.level(), part)?;
+
+    let res = match part.part_type {
         FP::Time if config.time <= record.level() && config.time != LevelFilter::Off => {
-            write_time(write, config)?;
+            write_time(write, config)
         }
         FP::Level if config.level <= record.level() && config.level != LevelFilter::Off => {
-            set_color(write)?;
-            match write_level(record, write, config) {
-                Ok(()) => reset_color(write)?,
-                Err(e) => {
-                    reset_color(write)?;
-                    return Err(e);
-                }
-            };
+            write_level(record, write, config)
         }
         FP::Thread if config.thread <= record.level() && config.thread != LevelFilter::Off => {
             match config.thread_log_mode {
-                ThreadLogMode::IDs => {
-                    write_thread_id(write, config)?;
-                }
-                ThreadLogMode::Names | ThreadLogMode::Both => {
-                    write_thread_name(write, config)?;
-                }
+                ThreadLogMode::IDs => write_thread_id(write, config),
+                ThreadLogMode::Names | ThreadLogMode::Both => write_thread_name(write, config),
             }
         }
         FP::Target if config.target <= record.level() && config.target != LevelFilter::Off => {
-            write_target(record, write, config)?
+            write_target(record, write, config)
         }
         FP::Location
             if config.location <= record.level() && config.location != LevelFilter::Off =>
         {
-            write_location(record, write)?;
+            write_location(record, write)
         }
-        FP::ModulePath => write_module_path(record, write)?,
-        FP::Args => write_args(record, write)?,
-        FP::Literal(literal) => write!(write, "{}", literal)?,
-        _ => (),
-    }
+        FP::ModulePath => write_module_path(record, write),
+        FP::Args => write_args(record, write),
+        FP::Literal(literal) => write!(write, "{}", literal),
+        _ => Ok(()),
+    };
 
-    Ok(())
+    reset_color(write, record.level(), part)?;
+
+    res
 }
 
 #[inline(always)]

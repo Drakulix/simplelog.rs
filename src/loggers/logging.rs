@@ -39,31 +39,31 @@ where
     }
 
     let (mut have_space, parts) = if config.output_format.format_parts.len() >= 2 {
-        let (level, wrap_space, part) = config.output_format.format_parts[0];
-        if record.level() <= level {
+        let part = &config.output_format.format_parts[0];
+        if record.level() <= part.level_filter {
             write_part(
                 record,
                 write,
                 config,
-                part,
+                &part,
                 &mut set_color,
                 &mut reset_color,
             )?;
         }
-        if wrap_space {
+        if part.wrap_space {
             write!(write, " ")?;
         }
-        (wrap_space, &config.output_format.format_parts[1..])
+        (part.wrap_space, &config.output_format.format_parts[1..])
     } else {
         (false, &config.output_format.format_parts[..])
     };
 
-    for (level, wrap_space, part) in parts {
-        if record.level() > *level {
+    for part in parts {
+        if record.level() > part.level_filter {
             continue;
         }
 
-        if *wrap_space && !have_space {
+        if part.wrap_space && !have_space {
             write!(write, " ")?;
         }
 
@@ -71,12 +71,12 @@ where
             record,
             write,
             config,
-            *part,
+            part,
             &mut set_color,
             &mut reset_color,
         )?;
 
-        if *wrap_space {
+        if part.wrap_space {
             write!(write, " ")?;
             have_space = true;
         } else {
@@ -94,7 +94,7 @@ fn write_part<W, SF, RF>(
     record: &Record<'_>,
     write: &mut W,
     config: &Config,
-    part: FormatPart,
+    part: &FormatPart,
     mut set_color: SF,
     mut reset_color: RF,
 ) -> Result<(), Error>
@@ -103,9 +103,9 @@ where
     SF: FnMut(&mut W) -> Result<(), Error>,
     RF: FnMut(&mut W) -> Result<(), Error>,
 {
-    use FormatPart as FP;
+    use crate::format::FormatPartType as FP;
 
-    match part {
+    match part.part_type {
         FP::Time if config.time <= record.level() && config.time != LevelFilter::Off => {
             write_time(write, config)?;
         }

@@ -21,8 +21,8 @@
 
 #![deny(missing_docs, rust_2018_idioms)]
 
-mod format;
 mod config;
+mod format;
 mod loggers;
 
 pub use self::config::{

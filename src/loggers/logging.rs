@@ -38,9 +38,10 @@ where
         return Ok(());
     }
 
-    let (mut have_space, parts) = if config.output_format.format_parts.len() >= 2 {
+    let (mut need_space, parts) = if config.output_format.format_parts.len() >= 2 {
         let part = &config.output_format.format_parts[0];
-        if record.level() <= part.level_filter {
+
+        if record.level() <= part.level_filter && part.level_filter != LevelFilter::Off {
             write_part(
                 record,
                 write,
@@ -49,23 +50,23 @@ where
                 &mut set_color,
                 &mut reset_color,
             )?;
+            (part.wrap_space, &config.output_format.format_parts[1..])
+        } else {
+            (false, &config.output_format.format_parts[1..])
         }
-        if part.wrap_space {
-            write!(write, " ")?;
-        }
-        (part.wrap_space, &config.output_format.format_parts[1..])
     } else {
         (false, &config.output_format.format_parts[..])
     };
 
     for part in parts {
-        if record.level() > part.level_filter {
+        if record.level() > part.level_filter || part.level_filter == LevelFilter::Off {
             continue;
         }
 
-        if part.wrap_space && !have_space {
+        if part.wrap_space || need_space {
             write!(write, " ")?;
         }
+        need_space = part.wrap_space;
 
         write_part(
             record,
@@ -75,13 +76,6 @@ where
             &mut set_color,
             &mut reset_color,
         )?;
-
-        if part.wrap_space {
-            write!(write, " ")?;
-            have_space = true;
-        } else {
-            have_space = false;
-        }
     }
 
     Ok(())
@@ -108,30 +102,17 @@ where
     set_color(write, record.level(), part)?;
 
     let res = match part.part_type {
-        FP::Time if config.time <= record.level() && config.time != LevelFilter::Off => {
-            write_time(write, config)
-        }
-        FP::Level if config.level <= record.level() && config.level != LevelFilter::Off => {
-            write_level(record, write, config)
-        }
-        FP::Thread if config.thread <= record.level() && config.thread != LevelFilter::Off => {
-            match config.thread_log_mode {
-                ThreadLogMode::IDs => write_thread_id(write, config),
-                ThreadLogMode::Names | ThreadLogMode::Both => write_thread_name(write, config),
-            }
-        }
-        FP::Target if config.target <= record.level() && config.target != LevelFilter::Off => {
-            write_target(record, write, config)
-        }
-        FP::Location
-            if config.location <= record.level() && config.location != LevelFilter::Off =>
-        {
-            write_location(record, write)
-        }
+        FP::Time => write_time(write, config),
+        FP::Level => write_level(record, write, config),
+        FP::Thread => match config.thread_log_mode {
+            ThreadLogMode::IDs => write_thread_id(write, config),
+            ThreadLogMode::Names | ThreadLogMode::Both => write_thread_name(write, config),
+        },
+        FP::Target => write_target(record, write, config),
+        FP::Location => write_location(record, write),
         FP::ModulePath => write_module_path(record, write),
         FP::Args => write_args(record, write),
         FP::Literal(literal) => write!(write, "{}", literal),
-        _ => Ok(()),
     };
 
     reset_color(write, record.level(), part)?;

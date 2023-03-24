@@ -60,20 +60,29 @@ impl Format {
 
 impl Default for Format {
     fn default() -> Self {
+        // try to be consistent with the original format.
         FormatBuilder::new()
             .begin_time()
+            .filter_level(LevelFilter::Error)
             .wrap_space(true)
             .end()
             .literal("[")
             .level()
             .literal("]")
             .begin_thread()
+            .filter_level(LevelFilter::Debug)
             .wrap_space(true)
             .end()
-            .target()
-            .literal(": ")
+            .begin_target()
+            .filter_level(LevelFilter::Debug)
+            .end()
+            .begin_literal(": ")
+            .filter_level(LevelFilter::Debug)
+            .end()
             .literal("[")
-            .location()
+            .begin_location()
+            .filter_level(LevelFilter::Trace)
+            .end()
             .literal("]")
             .begin_args()
             .wrap_space(true)
@@ -266,7 +275,7 @@ impl FormatBuilder {
     /// {
     ///     use log::Level;
     ///     use termcolor::Color;
-    /// 
+    ///
     ///     builder.begin_level()
     ///         .level_color(Level::Error, Color::Red)
     ///         .level_color(Level::Warn, Color::Yellow)

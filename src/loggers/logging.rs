@@ -57,7 +57,10 @@ where
         write_location(record, write)?;
     }
 
-    write_args(record, write)
+    #[cfg(feature = "paris")]
+    return write_args(record, write, config.enable_paris_formatting);
+    #[cfg(not(feature = "paris"))]
+    return write_args(record, write);
 }
 
 #[inline(always)]
@@ -209,6 +212,17 @@ where
 }
 
 #[inline(always)]
+#[cfg(feature = "paris")]
+pub fn write_args<W>(record: &Record<'_>, write: &mut W, with_colors: bool) -> Result<(), Error>
+where
+    W: Write + Sized,
+{
+    writeln!(write, "{}", crate::__private::paris::formatter::format_string(format!("{}", record.args()), with_colors))?;
+    Ok(())
+}
+
+#[inline(always)]
+#[cfg(not(feature = "paris"))]
 pub fn write_args<W>(record: &Record<'_>, write: &mut W) -> Result<(), Error>
 where
     W: Write + Sized,

@@ -217,7 +217,14 @@ pub fn write_args<W>(record: &Record<'_>, write: &mut W, with_colors: bool) -> R
 where
     W: Write + Sized,
 {
-    writeln!(write, "{}", crate::__private::paris::formatter::format_string(format!("{}", record.args()), with_colors))?;
+    writeln!(
+        write,
+        "{}",
+        crate::__private::paris::formatter::format_string(
+            format!("{}", record.args()),
+            with_colors
+        )
+    )?;
     Ok(())
 }
 

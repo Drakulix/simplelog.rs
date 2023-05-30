@@ -87,7 +87,7 @@ pub struct Config {
     pub(crate) level_color: [Option<Color>; 6],
     pub(crate) write_log_enable_colors: bool,
     #[cfg(feature = "paris")]
-    pub(crate) enable_paris_formatting: bool
+    pub(crate) enable_paris_formatting: bool,
 }
 
 /// Builder for the Logger Configurations (`Config`)
@@ -245,7 +245,7 @@ impl ConfigBuilder {
     }
 
     /// set if you want paris formatting to be applied to this logger (default is On)
-    /// 
+    ///
     /// If disabled, paris markup and formatting will be stripped.
     #[cfg(feature = "paris")]
     pub fn set_enable_paris_formatting(&mut self, enable_formatting: bool) -> &mut ConfigBuilder {
@@ -352,7 +352,7 @@ impl Default for Config {
             ],
 
             #[cfg(feature = "paris")]
-            enable_paris_formatting: true
+            enable_paris_formatting: true,
         }
     }
 }

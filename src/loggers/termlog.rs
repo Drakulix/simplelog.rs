@@ -171,6 +171,9 @@ impl TermLogger {
             write_location(record, term_lock)?;
         }
 
+        #[cfg(feature = "paris")]
+        write_args(record, term_lock, self.config.enable_paris_formatting)?;
+        #[cfg(not(feature = "paris"))]
         write_args(record, term_lock)?;
 
         // The log crate holds the logger as a `static mut`, which isn't dropped

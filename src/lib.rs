@@ -39,15 +39,12 @@ pub use termcolor::{Color, ColorChoice};
 pub use log::{Level, LevelFilter};
 
 use log::Log;
-#[cfg(all(test, not(feature = "paris")))]
+#[cfg(test)]
 use log::*;
 
 #[cfg(feature = "paris")]
-pub(crate) mod paris_macros;
-#[cfg(feature = "paris")]
 #[doc(hidden)]
 pub mod __private {
-    pub use log;
     pub use paris;
 }
 

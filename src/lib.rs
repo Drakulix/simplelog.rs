@@ -24,9 +24,10 @@
 mod config;
 mod loggers;
 
+#[cfg(feature = "time")]
+pub use self::config::{format_description, FormatItem};
 pub use self::config::{
-    format_description, Config, ConfigBuilder, FormatItem, LevelPadding, TargetPadding,
-    ThreadLogMode, ThreadPadding,
+    Config, ConfigBuilder, LevelPadding, TargetPadding, ThreadLogMode, ThreadPadding,
 };
 #[cfg(feature = "test")]
 pub use self::loggers::TestLogger;
@@ -103,8 +104,12 @@ mod tests {
             let mut vec = Vec::new();
             let mut conf_builder = ConfigBuilder::new();
 
-            let conf_thread_name = ConfigBuilder::new()
-                .set_time_level(LevelFilter::Off)
+            let mut conf_thread_name = ConfigBuilder::new();
+
+            #[cfg(feature = "time")]
+            let mut conf_thread_name = conf_thread_name.set_time_level(LevelFilter::Off);
+
+            let conf_thread_name = conf_thread_name
                 .set_thread_level(LevelFilter::Error)
                 .set_thread_mode(ThreadLogMode::Names)
                 .build();
@@ -126,9 +131,12 @@ mod tests {
                 let conf = conf_builder
                     .set_location_level(elem)
                     .set_target_level(elem)
-                    .set_max_level(elem)
-                    .set_time_level(elem)
-                    .build();
+                    .set_max_level(elem);
+
+                #[cfg(feature = "time")]
+                let conf = conf.set_time_level(elem);
+
+                let conf = conf.build();
                 i += 1;
 
                 //error

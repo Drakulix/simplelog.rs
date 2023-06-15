@@ -124,6 +124,10 @@ pub fn log(config: &Config, record: &Record<'_>) {
         write_location(record);
     }
 
+    if config.module <= record.level() && config.module != LevelFilter::Off {
+        write_module(record);
+    }
+
     write_args(record);
 }
 
@@ -173,6 +177,12 @@ pub fn write_location(record: &Record<'_>) {
     } else {
         print!("[{}:<unknown>] ", file);
     }
+}
+
+#[inline(always)]
+pub fn write_module(record: &Record<'_>) {
+    let module = record.module_path().unwrap_or("<unknown>");
+    print!("[{}] ", module);
 }
 
 #[inline(always)]

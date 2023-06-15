@@ -171,6 +171,10 @@ impl TermLogger {
             write_location(record, term_lock)?;
         }
 
+        if self.config.module <= record.level() && self.config.module != LevelFilter::Off {
+            write_module(record, term_lock)?;
+        }
+
         #[cfg(feature = "paris")]
         write_args(record, term_lock, self.config.enable_paris_formatting)?;
         #[cfg(not(feature = "paris"))]

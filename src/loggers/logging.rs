@@ -57,6 +57,10 @@ where
         write_location(record, write)?;
     }
 
+    if config.module <= record.level() && config.module != LevelFilter::Off {
+        write_module(record, write)?;
+    }
+
     #[cfg(feature = "paris")]
     return write_args(record, write, config.enable_paris_formatting);
     #[cfg(not(feature = "paris"))]
@@ -164,6 +168,16 @@ where
     } else {
         write!(write, "[{}:<unknown>] ", file)?;
     }
+    Ok(())
+}
+
+#[inline(always)]
+pub fn write_module<W>(record: &Record<'_>, write: &mut W) -> Result<(), Error>
+where
+    W: Write + Sized,
+{
+    let module = record.module_path().unwrap_or("<unknown>");
+    write!(write, "[{}] ", module)?;
     Ok(())
 }
 

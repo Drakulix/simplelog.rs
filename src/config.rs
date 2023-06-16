@@ -79,6 +79,7 @@ pub struct Config {
     pub(crate) target: LevelFilter,
     pub(crate) target_padding: TargetPadding,
     pub(crate) location: LevelFilter,
+    pub(crate) module: LevelFilter,
     pub(crate) time_format: TimeFormat,
     pub(crate) time_offset: UtcOffset,
     pub(crate) filter_allow: Cow<'static, [Cow<'static, str>]>,
@@ -146,6 +147,12 @@ impl ConfigBuilder {
     /// Set at which level and above (more verbose) a source code reference shall be logged (default is Trace)
     pub fn set_location_level(&mut self, location: LevelFilter) -> &mut ConfigBuilder {
         self.0.location = location;
+        self
+    }
+
+    /// Set at which level and above (more verbose) a module shall be logged (default is Off)
+    pub fn set_module_level(&mut self, module: LevelFilter) -> &mut ConfigBuilder {
+        self.0.module = module;
         self
     }
 
@@ -335,6 +342,7 @@ impl Default for Config {
             target: LevelFilter::Debug,
             target_padding: TargetPadding::Off,
             location: LevelFilter::Trace,
+            module: LevelFilter::Off,
             time_format: TimeFormat::Custom(format_description!("[hour]:[minute]:[second]")),
             time_offset: UtcOffset::UTC,
             filter_allow: Cow::Borrowed(&[]),

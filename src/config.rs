@@ -2,9 +2,15 @@
 use log::Level;
 use log::LevelFilter;
 
+#[cfg(feature = "chrono")]
+pub use chrono::{
+    offset::{FixedOffset, Local, Offset, TimeZone, Utc},
+    DateTime,
+};
 use std::borrow::Cow;
 #[cfg(feature = "termcolor")]
 use termcolor::Color;
+#[cfg(not(feature = "chrono"))]
 pub use time::{format_description::FormatItem, macros::format_description, UtcOffset};
 
 #[derive(Debug, Clone, Copy)]
@@ -52,10 +58,21 @@ pub enum ThreadLogMode {
 }
 
 #[derive(Debug, Clone)]
-pub(crate) enum TimeFormat {
+pub enum TimeFormat {
     Rfc2822,
     Rfc3339,
+    #[cfg(feature = "chrono")]
+    Custom(Cow<'static, str>),
+    #[cfg(not(feature = "chrono"))]
     Custom(&'static [time::format_description::FormatItem<'static>]),
+}
+
+#[derive(Debug, Clone)]
+pub enum TimeOffset {
+    #[cfg(feature = "chrono")]
+    Chrono(chrono::offset::FixedOffset),
+    #[cfg(not(feature = "chrono"))]
+    Time(time::UtcOffset),
 }
 
 /// Configuration for the Loggers
@@ -80,8 +97,10 @@ pub struct Config {
     pub(crate) target_padding: TargetPadding,
     pub(crate) location: LevelFilter,
     pub(crate) module: LevelFilter,
+    #[cfg(feature = "chrono")]
+    pub(crate) time_local: bool,
     pub(crate) time_format: TimeFormat,
-    pub(crate) time_offset: UtcOffset,
+    pub(crate) time_offset: TimeOffset,
     pub(crate) filter_allow: Cow<'static, [Cow<'static, str>]>,
     pub(crate) filter_ignore: Cow<'static, [Cow<'static, str>]>,
     #[cfg(feature = "termcolor")]
@@ -200,6 +219,16 @@ impl ConfigBuilder {
     ///     .set_time_format_custom(format_description!("[hour]:[minute]:[second].[subsecond]"))
     ///     .build();
     /// ```
+    #[cfg(feature = "chrono")]
+    pub fn set_time_format_custom(
+        &mut self,
+        time_format: Cow<'static, str>,
+    ) -> &mut ConfigBuilder {
+        self.0.time_format = TimeFormat::Custom(time_format);
+        self
+    }
+
+    #[cfg(not(feature = "chrono"))]
     pub fn set_time_format_custom(
         &mut self,
         time_format: &'static [FormatItem<'static>],
@@ -221,8 +250,8 @@ impl ConfigBuilder {
     }
 
     /// Set offset used for logging time (default is UTC)
-    pub fn set_time_offset(&mut self, offset: UtcOffset) -> &mut ConfigBuilder {
-        self.0.time_offset = offset;
+    pub fn set_time_offset(&mut self, time_offset: TimeOffset) -> &mut ConfigBuilder {
+        self.0.time_offset = time_offset;
         self
     }
 
@@ -233,6 +262,7 @@ impl ConfigBuilder {
     /// This may be the case, when the program is multi-threaded by the time of calling this function.
     /// One can opt-out of this behavior by setting `RUSTFLAGS="--cfg unsound_local_offset"`.
     /// Doing so is not recommended, completely untested and may cause unexpected segfaults.
+    #[cfg(not(feature = "chrono"))]
     #[cfg(feature = "local-offset")]
     pub fn set_time_offset_to_local(&mut self) -> Result<&mut ConfigBuilder, &mut ConfigBuilder> {
         match UtcOffset::current_local_offset() {
@@ -343,8 +373,16 @@ impl Default for Config {
             target_padding: TargetPadding::Off,
             location: LevelFilter::Trace,
             module: LevelFilter::Off,
+            #[cfg(feature = "chrono")]
+            time_local: false,
+            #[cfg(feature = "chrono")]
+            time_format: TimeFormat::Custom(Cow::Borrowed("%H:%M:%S")),
+            #[cfg(not(feature = "chrono"))]
             time_format: TimeFormat::Custom(format_description!("[hour]:[minute]:[second]")),
-            time_offset: UtcOffset::UTC,
+            #[cfg(feature = "chrono")]
+            time_offset: TimeOffset::Chrono(FixedOffset::east_opt(0).unwrap()),
+            #[cfg(not(feature = "chrono"))]
+            time_offset: TimeOffset::Time(UtcOffset::UTC),
             filter_allow: Cow::Borrowed(&[]),
             filter_ignore: Cow::Borrowed(&[]),
             write_log_enable_colors: false,

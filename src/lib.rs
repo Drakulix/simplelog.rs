@@ -24,6 +24,12 @@
 mod config;
 mod loggers;
 
+#[cfg(feature = "chrono")]
+pub use self::config::{
+    Config, ConfigBuilder, LevelPadding, TargetPadding, ThreadLogMode, ThreadPadding,
+};
+
+#[cfg(not(feature = "chrono"))]
 pub use self::config::{
     format_description, Config, ConfigBuilder, FormatItem, LevelPadding, TargetPadding,
     ThreadLogMode, ThreadPadding,

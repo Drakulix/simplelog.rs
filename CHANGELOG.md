@@ -1,5 +1,6 @@
 ## Unreleased
  - The `new` method of loggers are now `#[must_use]` to prevent confusion when `new` is used called instead of `init`
+ - Adjusted dependency to support termcolor crate version 1.2 (PR #131, credits to @danielparks)
 ## v0.12.0
  - Replaces the semingly unmaintained chrono library with the time crate.
  - Addresses through this update 

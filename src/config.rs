@@ -206,7 +206,7 @@ impl ConfigBuilder {
     /// The easiest way to satisfy the static lifetime of the argument is to directly use the
     /// re-exported [`time::macros::format_description`] macro.
     ///
-    /// *Note*: The default time format is "[hour]:[minute]:[second]".
+    /// *Note*: The default time format is `[hour]:[minute]:[second]`.
     ///
     /// The syntax for the format_description macro can be found in the
     /// [`time` crate book](https://time-rs.github.io/book/api/format-description.html).

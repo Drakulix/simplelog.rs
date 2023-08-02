@@ -58,6 +58,17 @@ pub(crate) enum TimeFormat {
     Custom(&'static [time::format_description::FormatItem<'static>]),
 }
 
+#[derive(Debug, Clone, Copy)]
+/// Padding to be used for logging the time
+pub enum TimePadding {
+    /// Add spaces on the right side, up to usize many
+    Right(usize),
+    /// Do not pad the time
+    Off,
+    /// If appliciable, add zeros to the subseconds
+    AddZeros
+}
+
 /// Configuration for the Loggers
 ///
 /// All loggers print the message in the following form:
@@ -82,6 +93,7 @@ pub struct Config {
     pub(crate) module: LevelFilter,
     pub(crate) time_format: TimeFormat,
     pub(crate) time_offset: UtcOffset,
+    pub(crate) time_padding: TimePadding,
     pub(crate) filter_allow: Cow<'static, [Cow<'static, str>]>,
     pub(crate) filter_ignore: Cow<'static, [Cow<'static, str>]>,
     #[cfg(feature = "termcolor")]
@@ -226,6 +238,12 @@ impl ConfigBuilder {
         self
     }
 
+    /// Set how the time should be padded
+    pub fn set_time_padding(&mut self, padding: TimePadding) -> &mut ConfigBuilder {
+        self.0.time_padding = padding;
+        self
+    }
+
     /// Sets the offset used to the current local time offset
     /// (overriding values previously set by [`ConfigBuilder::set_time_offset`]).
     ///
@@ -345,6 +363,7 @@ impl Default for Config {
             module: LevelFilter::Off,
             time_format: TimeFormat::Custom(format_description!("[hour]:[minute]:[second]")),
             time_offset: UtcOffset::UTC,
+            time_padding: TimePadding::AddZeros,
             filter_allow: Cow::Borrowed(&[]),
             filter_ignore: Cow::Borrowed(&[]),
             write_log_enable_colors: false,

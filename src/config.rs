@@ -91,6 +91,13 @@ pub struct Config {
     pub(crate) enable_paris_formatting: bool,
 }
 
+impl Config {
+    /// Create a new default `ConfigBuilder`
+    pub fn builder() -> ConfigBuilder {
+        ConfigBuilder::new()
+    }
+}
+
 /// Builder for the Logger Configurations (`Config`)
 ///
 /// All loggers print the message in the following form:

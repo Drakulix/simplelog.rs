@@ -1,4 +1,4 @@
-use crate::config::{TargetPadding, TimeFormat};
+use crate::config::{TargetPadding, TimeFormat, TimePadding};
 use crate::{Config, LevelPadding, ThreadLogMode, ThreadPadding};
 use log::{LevelFilter, Record};
 use std::io::{Error, Write};
@@ -72,22 +72,35 @@ pub fn write_time<W>(write: &mut W, config: &Config) -> Result<(), Error>
 where
     W: Write + Sized,
 {
-    use time::error::Format;
     use time::format_description::well_known::*;
 
     let time = time::OffsetDateTime::now_utc().to_offset(config.time_offset);
-    let res = match config.time_format {
-        TimeFormat::Rfc2822 => time.format_into(write, &Rfc2822),
-        TimeFormat::Rfc3339 => time.format_into(write, &Rfc3339),
-        TimeFormat::Custom(format) => time.format_into(write, &format),
+    let formatted = match config.time_format {
+        TimeFormat::Rfc2822 => time.format(&Rfc2822),
+        TimeFormat::Rfc3339 => time.format(&Rfc3339),
+        TimeFormat::Custom(format) => time.format(&format),
     };
-    match res {
-        Err(Format::StdIo(err)) => return Err(err),
-        Err(err) => panic!("Invalid time format: {}", err),
-        _ => {}
+    let mut formatted: String =
+        formatted.unwrap_or_else(|err| panic!("Invalid time format: {}", err));
+
+    formatted = match config.time_padding {
+        TimePadding::Right(offset) => format!("{: <1$}", formatted, offset),
+        TimePadding::AddZeros => {
+            if matches!(config.time_format, TimeFormat::Rfc3339) {
+                // only appliciable with Rfc3339
+                //
+                // the rfc3339 timestamp is 30 characters long, if it would not end with a 0 in the
+                // subseconds part. To fix this inconsistency, we add zeros before the Z.
+                while formatted.len() < 30 {
+                    formatted.insert(formatted.len() - 1, '0')
+                }
+            }
+            format!("{}", formatted)
+        }
+        TimePadding::Off => format!("{}", formatted),
     };
 
-    write!(write, " ")?;
+    write!(write, "{} ", formatted)?;
     Ok(())
 }
 

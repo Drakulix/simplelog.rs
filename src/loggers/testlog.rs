@@ -158,9 +158,10 @@ pub fn write_level(record: &Record<'_>, config: &Config) {
 
 #[inline(always)]
 pub fn write_thread_id() {
-    let id = format!("{:?}", thread::current().id());
-    let id = id.replace("ThreadId(", "");
-    let id = id.replace(")", "");
+    let id = format!("{:?}", thread::current().id())
+        .replace("ThreadId(", "")
+        .replace(")", "");
+
     print!("({}) ", id);
 }
 

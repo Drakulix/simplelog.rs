@@ -92,12 +92,14 @@ pub trait SharedLogger: Log {
 mod tests {
     use std::fs::File;
     use std::io::Read;
+    use std::env::{temp_dir};
 
     use super::*;
 
     #[test]
     fn test() {
         let mut i = 0;
+        let tmpdir = temp_dir();
 
         CombinedLogger::init({
             let mut vec = Vec::new();
@@ -112,7 +114,7 @@ mod tests {
             vec.push(WriteLogger::new(
                 LevelFilter::Error,
                 conf_thread_name,
-                File::create("thread_naming.log").unwrap(),
+                File::create(tmpdir.join("thread_naming.log")).unwrap(),
             ) as Box<dyn SharedLogger>);
 
             for elem in vec![
@@ -145,7 +147,7 @@ mod tests {
                 vec.push(WriteLogger::new(
                     LevelFilter::Error,
                     conf.clone(),
-                    File::create(&format!("error_{}.log", i)).unwrap(),
+                    File::create(tmpdir.join(&format!("error_{}.log", i))).unwrap(),
                 ) as Box<dyn SharedLogger>);
                 #[cfg(feature = "test")]
                 vec.push(TestLogger::new(LevelFilter::Error, conf.clone()));
@@ -164,7 +166,7 @@ mod tests {
                 vec.push(WriteLogger::new(
                     LevelFilter::Warn,
                     conf.clone(),
-                    File::create(&format!("warn_{}.log", i)).unwrap(),
+                    File::create(tmpdir.join(&format!("warn_{}.log", i))).unwrap(),
                 ) as Box<dyn SharedLogger>);
                 #[cfg(feature = "test")]
                 vec.push(TestLogger::new(LevelFilter::Warn, conf.clone()));
@@ -183,7 +185,7 @@ mod tests {
                 vec.push(WriteLogger::new(
                     LevelFilter::Info,
                     conf.clone(),
-                    File::create(&format!("info_{}.log", i)).unwrap(),
+                    File::create(tmpdir.join(&format!("info_{}.log", i))).unwrap(),
                 ) as Box<dyn SharedLogger>);
                 #[cfg(feature = "test")]
                 vec.push(TestLogger::new(LevelFilter::Info, conf.clone()));
@@ -202,7 +204,7 @@ mod tests {
                 vec.push(WriteLogger::new(
                     LevelFilter::Debug,
                     conf.clone(),
-                    File::create(&format!("debug_{}.log", i)).unwrap(),
+                    File::create(tmpdir.join(&format!("debug_{}.log", i))).unwrap(),
                 ) as Box<dyn SharedLogger>);
                 #[cfg(feature = "test")]
                 vec.push(TestLogger::new(LevelFilter::Debug, conf.clone()));
@@ -221,7 +223,7 @@ mod tests {
                 vec.push(WriteLogger::new(
                     LevelFilter::Trace,
                     conf.clone(),
-                    File::create(&format!("trace_{}.log", i)).unwrap(),
+                    File::create(tmpdir.join(&format!("trace_{}.log", i))).unwrap(),
                 ) as Box<dyn SharedLogger>);
                 #[cfg(feature = "test")]
                 vec.push(TestLogger::new(LevelFilter::Trace, conf.clone()));
@@ -238,7 +240,7 @@ mod tests {
         trace!("Test Trace");
 
         let mut thread_naming = String::new();
-        File::open("thread_naming.log")
+        File::open(tmpdir.join("thread_naming.log"))
             .unwrap()
             .read_to_string(&mut thread_naming)
             .unwrap();
@@ -249,27 +251,27 @@ mod tests {
 
         for j in 1..i {
             let mut error = String::new();
-            File::open(&format!("error_{}.log", j))
+            File::open(tmpdir.join(&format!("error_{}.log", j)))
                 .unwrap()
                 .read_to_string(&mut error)
                 .unwrap();
             let mut warn = String::new();
-            File::open(&format!("warn_{}.log", j))
+            File::open(tmpdir.join(&format!("warn_{}.log", j)))
                 .unwrap()
                 .read_to_string(&mut warn)
                 .unwrap();
             let mut info = String::new();
-            File::open(&format!("info_{}.log", j))
+            File::open(tmpdir.join(&format!("info_{}.log", j)))
                 .unwrap()
                 .read_to_string(&mut info)
                 .unwrap();
             let mut debug = String::new();
-            File::open(&format!("debug_{}.log", j))
+            File::open(tmpdir.join(&format!("debug_{}.log", j)))
                 .unwrap()
                 .read_to_string(&mut debug)
                 .unwrap();
             let mut trace = String::new();
-            File::open(&format!("trace_{}.log", j))
+            File::open(tmpdir.join(&format!("trace_{}.log", j)))
                 .unwrap()
                 .read_to_string(&mut trace)
                 .unwrap();

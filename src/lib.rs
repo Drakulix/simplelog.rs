@@ -37,6 +37,7 @@ pub use self::loggers::{TermLogger, TerminalMode};
 pub use termcolor::{Color, ColorChoice};
 
 pub use log::{Level, LevelFilter};
+pub use loggers::logging::try_log;
 
 use log::Log;
 #[cfg(test)]

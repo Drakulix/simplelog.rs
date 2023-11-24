@@ -21,6 +21,42 @@ pub fn termcolor_to_ansiterm(color: &Color) -> Option<ansi_term::Color> {
     }
 }
 
+/// Allows for custom loggers to be created, making formatting easier.
+/// 
+/// Takes a `Config` and a `Record` and writes the log to the specified `Write`r.
+/// Fails if the `Write`r fails to write.
+/// 
+/// # Example
+/// ```rs
+/// impl log::Log for ... {
+///     fn enabled(&self, metadata: &log::Metadata) -> bool {
+///         metadata.level() <= self.level
+///     }
+///     fn log(&self, record: &log::Record) {
+///         if !self.enabled(record.metadata()) {
+///             return;
+///         }
+///
+///         let mut s = Vec::new();
+///         let _ = simplelog::try_log(&self.config, record, &mut std::io::Cursor::new(&mut s));
+///         let s = std::str::from_utf8(&s).expect("utf8").trim();
+///
+///         ...
+///     }
+///     fn flush(&self) {}
+/// }
+/// impl simplelog::SharedLogger for ... {
+///     fn level(&self) -> simplelog::LevelFilter {
+///         self.level
+///     }
+///     fn config(&self) -> Option<&simplelog::Config> {
+///         Some(&self.config)
+///     }
+///     fn as_log(self: Box<Self>) -> Box<dyn log::Log> {
+///         Box::new(*self)
+///     }
+/// }
+/// ```
 #[inline(always)]
 pub fn try_log<W>(config: &Config, record: &Record<'_>, write: &mut W) -> Result<(), Error>
 where

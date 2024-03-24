@@ -21,6 +21,11 @@ pub fn termcolor_to_ansiterm(color: &Color) -> Option<ansi_term::Color> {
     }
 }
 
+#[cfg(target_os = "windows")]
+const LINE_END: &str = "\r\n";
+#[cfg(not(target_os = "windows"))]
+const LINE_END: &str = "\n";
+
 #[inline(always)]
 pub fn try_log<W>(config: &Config, record: &Record<'_>, write: &mut W) -> Result<(), Error>
 where
@@ -231,13 +236,14 @@ pub fn write_args<W>(record: &Record<'_>, write: &mut W, with_colors: bool) -> R
 where
     W: Write + Sized,
 {
-    writeln!(
+    write!(
         write,
-        "{}",
+        "{}{}",
         crate::__private::paris::formatter::format_string(
             format!("{}", record.args()),
             with_colors
-        )
+        ),
+        LINE_END
     )?;
     Ok(())
 }
@@ -248,7 +254,7 @@ pub fn write_args<W>(record: &Record<'_>, write: &mut W) -> Result<(), Error>
 where
     W: Write + Sized,
 {
-    writeln!(write, "{}", record.args())?;
+    write!(write, "{}{}", record.args(), LINE_END)?;
     Ok(())
 }
 

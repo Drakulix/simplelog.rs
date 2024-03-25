@@ -20,7 +20,7 @@ include = [
 
 [features]
 test = []
-crlf-line-endings = []
+
 default = ["termcolor", "local-offset"]
 local-offset = ["time/local-offset"]
 

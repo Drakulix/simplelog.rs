@@ -21,9 +21,9 @@ pub fn termcolor_to_ansiterm(color: &Color) -> Option<ansi_term::Color> {
     }
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(feature = "crlf-line-endings")]
 const LINE_END: &str = "\r\n";
-#[cfg(not(target_os = "windows"))]
+#[cfg(not(feature = "crlf-line-endings"))]
 const LINE_END: &str = "\n";
 
 #[inline(always)]

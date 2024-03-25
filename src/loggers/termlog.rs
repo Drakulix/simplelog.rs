@@ -178,7 +178,7 @@ impl TermLogger {
         #[cfg(feature = "paris")]
         write_args(record, term_lock, self.config.enable_paris_formatting)?;
         #[cfg(not(feature = "paris"))]
-        write_args(record, term_lock)?;
+        write_args(record, term_lock, &self.config.line_ending)?;
 
         // The log crate holds the logger as a `static mut`, which isn't dropped
         // at program exit: https://doc.rust-lang.org/reference/items/static-items.html

@@ -65,13 +65,13 @@ pub enum LineEnding {
     /// Carriage return
     CR,
     /// Carriage return + Line feed
-    CRLF,
+    Crlf,
     /// Vertical tab
     VT,
     /// Form feed
     FF,
     /// Next line
-    NEL,
+    Nel,
     /// Line separator
     LS,
     /// Paragraph separator
@@ -142,14 +142,15 @@ impl ConfigBuilder {
         ConfigBuilder(Config::default())
     }
 
+    /// Set a custom line ending
     pub fn set_line_ending(&mut self, line_ending: LineEnding) -> &mut ConfigBuilder {
         match line_ending {
             LineEnding::LF => self.0.line_ending = String::from("\u{000A}"),
             LineEnding::CR => self.0.line_ending = String::from("\u{000D}"),
-            LineEnding::CRLF => self.0.line_ending = String::from("\u{000D}\u{000A}"),
+            LineEnding::Crlf => self.0.line_ending = String::from("\u{000D}\u{000A}"),
             LineEnding::VT => self.0.line_ending = String::from("\u{000B}"),
             LineEnding::FF => self.0.line_ending = String::from("\u{000C}"),
-            LineEnding::NEL => self.0.line_ending = String::from("\u{0085}"),
+            LineEnding::Nel => self.0.line_ending = String::from("\u{0085}"),
             LineEnding::LS => self.0.line_ending = String::from("\u{2028}"),
             LineEnding::PS => self.0.line_ending = String::from("\u{2029}"),
         }
@@ -403,7 +404,7 @@ impl Default for Config {
 
             #[cfg(feature = "paris")]
             enable_paris_formatting: true,
-            line_ending: '\n'
+            line_ending: String::from("\u{000A}"),
         }
     }
 }

@@ -176,7 +176,12 @@ impl TermLogger {
         }
 
         #[cfg(feature = "paris")]
-        write_args(record, term_lock, self.config.enable_paris_formatting)?;
+        write_args(
+            record,
+            term_lock,
+            self.config.enable_paris_formatting,
+            &self.config.line_ending,
+        )?;
         #[cfg(not(feature = "paris"))]
         write_args(record, term_lock, &self.config.line_ending)?;
 

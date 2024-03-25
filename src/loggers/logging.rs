@@ -62,7 +62,12 @@ where
     }
 
     #[cfg(feature = "paris")]
-    return write_args(record, write, config.enable_paris_formatting, &config.line_ending);
+    return write_args(
+        record,
+        write,
+        config.enable_paris_formatting,
+        &config.line_ending,
+    );
     #[cfg(not(feature = "paris"))]
     return write_args(record, write, &config.line_ending);
 }
@@ -227,7 +232,12 @@ where
 
 #[inline(always)]
 #[cfg(feature = "paris")]
-pub fn write_args<W>(record: &Record<'_>, write: &mut W, with_colors: bool, line_ending: &str) -> Result<(), Error>
+pub fn write_args<W>(
+    record: &Record<'_>,
+    write: &mut W,
+    with_colors: bool,
+    line_ending: &str,
+) -> Result<(), Error>
 where
     W: Write + Sized,
 {

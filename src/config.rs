@@ -58,6 +58,26 @@ pub(crate) enum TimeFormat {
     Custom(&'static [time::format_description::FormatItem<'static>]),
 }
 
+/// UTF-8 end of line character sequences
+pub enum LineEnding {
+    /// Line feed
+    LF,
+    /// Carriage return
+    CR,
+    /// Carriage return + Line feed
+    Crlf,
+    /// Vertical tab
+    VT,
+    /// Form feed
+    FF,
+    /// Next line
+    Nel,
+    /// Line separator
+    LS,
+    /// Paragraph separator
+    PS,
+}
+
 /// Configuration for the Loggers
 ///
 /// All loggers print the message in the following form:
@@ -89,6 +109,7 @@ pub struct Config {
     pub(crate) write_log_enable_colors: bool,
     #[cfg(feature = "paris")]
     pub(crate) enable_paris_formatting: bool,
+    pub(crate) line_ending: String,
 }
 
 impl Config {
@@ -119,6 +140,21 @@ impl ConfigBuilder {
     /// Create a new default ConfigBuilder
     pub fn new() -> ConfigBuilder {
         ConfigBuilder(Config::default())
+    }
+
+    /// Set a custom line ending
+    pub fn set_line_ending(&mut self, line_ending: LineEnding) -> &mut ConfigBuilder {
+        match line_ending {
+            LineEnding::LF => self.0.line_ending = String::from("\u{000A}"),
+            LineEnding::CR => self.0.line_ending = String::from("\u{000D}"),
+            LineEnding::Crlf => self.0.line_ending = String::from("\u{000D}\u{000A}"),
+            LineEnding::VT => self.0.line_ending = String::from("\u{000B}"),
+            LineEnding::FF => self.0.line_ending = String::from("\u{000C}"),
+            LineEnding::Nel => self.0.line_ending = String::from("\u{0085}"),
+            LineEnding::LS => self.0.line_ending = String::from("\u{2028}"),
+            LineEnding::PS => self.0.line_ending = String::from("\u{2029}"),
+        }
+        self
     }
 
     /// Set at which level and above (more verbose) the level itself shall be logged (default is Error)
@@ -368,6 +404,7 @@ impl Default for Config {
 
             #[cfg(feature = "paris")]
             enable_paris_formatting: true,
+            line_ending: String::from("\u{000A}"),
         }
     }
 }

@@ -62,9 +62,14 @@ where
     }
 
     #[cfg(feature = "paris")]
-    return write_args(record, write, config.enable_paris_formatting);
+    return write_args(
+        record,
+        write,
+        config.enable_paris_formatting,
+        &config.line_ending,
+    );
     #[cfg(not(feature = "paris"))]
-    return write_args(record, write);
+    return write_args(record, write, &config.line_ending);
 }
 
 #[inline(always)]
@@ -227,28 +232,34 @@ where
 
 #[inline(always)]
 #[cfg(feature = "paris")]
-pub fn write_args<W>(record: &Record<'_>, write: &mut W, with_colors: bool) -> Result<(), Error>
+pub fn write_args<W>(
+    record: &Record<'_>,
+    write: &mut W,
+    with_colors: bool,
+    line_ending: &str,
+) -> Result<(), Error>
 where
     W: Write + Sized,
 {
-    writeln!(
+    write!(
         write,
-        "{}",
+        "{}{}",
         crate::__private::paris::formatter::format_string(
             format!("{}", record.args()),
             with_colors
-        )
+        ),
+        line_ending
     )?;
     Ok(())
 }
 
 #[inline(always)]
 #[cfg(not(feature = "paris"))]
-pub fn write_args<W>(record: &Record<'_>, write: &mut W) -> Result<(), Error>
+pub fn write_args<W>(record: &Record<'_>, write: &mut W, line_ending: &str) -> Result<(), Error>
 where
     W: Write + Sized,
 {
-    writeln!(write, "{}", record.args())?;
+    write!(write, "{}{}", record.args(), line_ending)?;
     Ok(())
 }
 

@@ -25,7 +25,7 @@ mod config;
 mod loggers;
 
 pub use self::config::{
-    format_description, Config, ConfigBuilder, FormatItem, LevelPadding, TargetPadding,
+    format_description, Config, ConfigBuilder, FormatItem, LevelPadding, LineEnding, TargetPadding,
     ThreadLogMode, ThreadPadding,
 };
 #[cfg(feature = "test")]
@@ -90,7 +90,7 @@ pub trait SharedLogger: Log {
 
 #[cfg(test)]
 mod tests {
-    use std::fs::File;
+    use std::fs::{self, File};
     use std::io::Read;
 
     use super::*;
@@ -98,6 +98,17 @@ mod tests {
     #[test]
     fn test() {
         let mut i = 0;
+        let _ = fs::create_dir("./test_logs");
+        let line_endings = vec![
+            (LineEnding::LF, String::from("\u{000A}")),
+            (LineEnding::CR, String::from("\u{000D}")),
+            (LineEnding::Crlf, String::from("\u{000D}\u{000A}")),
+            (LineEnding::VT, String::from("\u{000B}")),
+            (LineEnding::FF, String::from("\u{000C}")),
+            (LineEnding::Nel, String::from("\u{0085}")),
+            (LineEnding::LS, String::from("\u{2028}")),
+            (LineEnding::PS, String::from("\u{2029}")),
+        ];
 
         CombinedLogger::init({
             let mut vec = Vec::new();
@@ -112,7 +123,7 @@ mod tests {
             vec.push(WriteLogger::new(
                 LevelFilter::Error,
                 conf_thread_name,
-                File::create("thread_naming.log").unwrap(),
+                File::create("./test_logs/thread_naming.log").unwrap(),
             ) as Box<dyn SharedLogger>);
 
             for elem in vec![
@@ -123,110 +134,109 @@ mod tests {
                 LevelFilter::Warn,
                 LevelFilter::Error,
             ] {
-                let conf = conf_builder
-                    .set_location_level(elem)
-                    .set_target_level(elem)
-                    .set_max_level(elem)
-                    .set_time_level(elem)
-                    .build();
-                i += 1;
+                for line_end in &line_endings {
+                    let conf = conf_builder
+                        .set_location_level(elem)
+                        .set_target_level(elem)
+                        .set_max_level(elem)
+                        .set_time_level(elem)
+                        .set_line_ending(line_end.0)
+                        .build();
+                    i += 1;
 
-                //error
-                vec.push(
-                    SimpleLogger::new(LevelFilter::Error, conf.clone()) as Box<dyn SharedLogger>
-                );
-                #[cfg(feature = "termcolor")]
-                vec.push(TermLogger::new(
-                    LevelFilter::Error,
-                    conf.clone(),
-                    TerminalMode::Mixed,
-                    ColorChoice::Auto,
-                ) as Box<dyn SharedLogger>);
-                vec.push(WriteLogger::new(
-                    LevelFilter::Error,
-                    conf.clone(),
-                    File::create(&format!("error_{}.log", i)).unwrap(),
-                ) as Box<dyn SharedLogger>);
-                #[cfg(feature = "test")]
-                vec.push(TestLogger::new(LevelFilter::Error, conf.clone()));
+                    //error
+                    vec.push(SimpleLogger::new(LevelFilter::Error, conf.clone())
+                        as Box<dyn SharedLogger>);
+                    #[cfg(feature = "termcolor")]
+                    vec.push(TermLogger::new(
+                        LevelFilter::Error,
+                        conf.clone(),
+                        TerminalMode::Mixed,
+                        ColorChoice::Auto,
+                    ) as Box<dyn SharedLogger>);
+                    vec.push(WriteLogger::new(
+                        LevelFilter::Error,
+                        conf.clone(),
+                        File::create(&format!("./test_logs/error_{}.log", i)).unwrap(),
+                    ) as Box<dyn SharedLogger>);
+                    #[cfg(feature = "test")]
+                    vec.push(TestLogger::new(LevelFilter::Error, conf.clone()));
 
-                //warn
-                vec.push(
-                    SimpleLogger::new(LevelFilter::Warn, conf.clone()) as Box<dyn SharedLogger>
-                );
-                #[cfg(feature = "termcolor")]
-                vec.push(TermLogger::new(
-                    LevelFilter::Warn,
-                    conf.clone(),
-                    TerminalMode::Mixed,
-                    ColorChoice::Auto,
-                ) as Box<dyn SharedLogger>);
-                vec.push(WriteLogger::new(
-                    LevelFilter::Warn,
-                    conf.clone(),
-                    File::create(&format!("warn_{}.log", i)).unwrap(),
-                ) as Box<dyn SharedLogger>);
-                #[cfg(feature = "test")]
-                vec.push(TestLogger::new(LevelFilter::Warn, conf.clone()));
+                    //warn
+                    vec.push(
+                        SimpleLogger::new(LevelFilter::Warn, conf.clone()) as Box<dyn SharedLogger>
+                    );
+                    #[cfg(feature = "termcolor")]
+                    vec.push(TermLogger::new(
+                        LevelFilter::Warn,
+                        conf.clone(),
+                        TerminalMode::Mixed,
+                        ColorChoice::Auto,
+                    ) as Box<dyn SharedLogger>);
+                    vec.push(WriteLogger::new(
+                        LevelFilter::Warn,
+                        conf.clone(),
+                        File::create(&format!("./test_logs/warn_{}.log", i)).unwrap(),
+                    ) as Box<dyn SharedLogger>);
+                    #[cfg(feature = "test")]
+                    vec.push(TestLogger::new(LevelFilter::Warn, conf.clone()));
 
-                //info
-                vec.push(
-                    SimpleLogger::new(LevelFilter::Info, conf.clone()) as Box<dyn SharedLogger>
-                );
-                #[cfg(feature = "termcolor")]
-                vec.push(TermLogger::new(
-                    LevelFilter::Info,
-                    conf.clone(),
-                    TerminalMode::Mixed,
-                    ColorChoice::Auto,
-                ) as Box<dyn SharedLogger>);
-                vec.push(WriteLogger::new(
-                    LevelFilter::Info,
-                    conf.clone(),
-                    File::create(&format!("info_{}.log", i)).unwrap(),
-                ) as Box<dyn SharedLogger>);
-                #[cfg(feature = "test")]
-                vec.push(TestLogger::new(LevelFilter::Info, conf.clone()));
+                    //info
+                    vec.push(
+                        SimpleLogger::new(LevelFilter::Info, conf.clone()) as Box<dyn SharedLogger>
+                    );
+                    #[cfg(feature = "termcolor")]
+                    vec.push(TermLogger::new(
+                        LevelFilter::Info,
+                        conf.clone(),
+                        TerminalMode::Mixed,
+                        ColorChoice::Auto,
+                    ) as Box<dyn SharedLogger>);
+                    vec.push(WriteLogger::new(
+                        LevelFilter::Info,
+                        conf.clone(),
+                        File::create(&format!("./test_logs/info_{}.log", i)).unwrap(),
+                    ) as Box<dyn SharedLogger>);
+                    #[cfg(feature = "test")]
+                    vec.push(TestLogger::new(LevelFilter::Info, conf.clone()));
 
-                //debug
-                vec.push(
-                    SimpleLogger::new(LevelFilter::Debug, conf.clone()) as Box<dyn SharedLogger>
-                );
-                #[cfg(feature = "termcolor")]
-                vec.push(TermLogger::new(
-                    LevelFilter::Debug,
-                    conf.clone(),
-                    TerminalMode::Mixed,
-                    ColorChoice::Auto,
-                ) as Box<dyn SharedLogger>);
-                vec.push(WriteLogger::new(
-                    LevelFilter::Debug,
-                    conf.clone(),
-                    File::create(&format!("debug_{}.log", i)).unwrap(),
-                ) as Box<dyn SharedLogger>);
-                #[cfg(feature = "test")]
-                vec.push(TestLogger::new(LevelFilter::Debug, conf.clone()));
+                    //debug
+                    vec.push(SimpleLogger::new(LevelFilter::Debug, conf.clone())
+                        as Box<dyn SharedLogger>);
+                    #[cfg(feature = "termcolor")]
+                    vec.push(TermLogger::new(
+                        LevelFilter::Debug,
+                        conf.clone(),
+                        TerminalMode::Mixed,
+                        ColorChoice::Auto,
+                    ) as Box<dyn SharedLogger>);
+                    vec.push(WriteLogger::new(
+                        LevelFilter::Debug,
+                        conf.clone(),
+                        File::create(&format!("./test_logs/debug_{}.log", i)).unwrap(),
+                    ) as Box<dyn SharedLogger>);
+                    #[cfg(feature = "test")]
+                    vec.push(TestLogger::new(LevelFilter::Debug, conf.clone()));
 
-                //trace
-                vec.push(
-                    SimpleLogger::new(LevelFilter::Trace, conf.clone()) as Box<dyn SharedLogger>
-                );
-                #[cfg(feature = "termcolor")]
-                vec.push(TermLogger::new(
-                    LevelFilter::Trace,
-                    conf.clone(),
-                    TerminalMode::Mixed,
-                    ColorChoice::Auto,
-                ) as Box<dyn SharedLogger>);
-                vec.push(WriteLogger::new(
-                    LevelFilter::Trace,
-                    conf.clone(),
-                    File::create(&format!("trace_{}.log", i)).unwrap(),
-                ) as Box<dyn SharedLogger>);
-                #[cfg(feature = "test")]
-                vec.push(TestLogger::new(LevelFilter::Trace, conf.clone()));
+                    //trace
+                    vec.push(SimpleLogger::new(LevelFilter::Trace, conf.clone())
+                        as Box<dyn SharedLogger>);
+                    #[cfg(feature = "termcolor")]
+                    vec.push(TermLogger::new(
+                        LevelFilter::Trace,
+                        conf.clone(),
+                        TerminalMode::Mixed,
+                        ColorChoice::Auto,
+                    ) as Box<dyn SharedLogger>);
+                    vec.push(WriteLogger::new(
+                        LevelFilter::Trace,
+                        conf.clone(),
+                        File::create(&format!("./test_logs/trace_{}.log", i)).unwrap(),
+                    ) as Box<dyn SharedLogger>);
+                    #[cfg(feature = "test")]
+                    vec.push(TestLogger::new(LevelFilter::Trace, conf.clone()));
+                }
             }
-
             vec
         })
         .unwrap();
@@ -238,7 +248,7 @@ mod tests {
         trace!("Test Trace");
 
         let mut thread_naming = String::new();
-        File::open("thread_naming.log")
+        File::open("./test_logs/thread_naming.log")
             .unwrap()
             .read_to_string(&mut thread_naming)
             .unwrap();
@@ -248,28 +258,29 @@ mod tests {
         }
 
         for j in 1..i {
+            let k = (j - 1) % line_endings.len();
             let mut error = String::new();
-            File::open(&format!("error_{}.log", j))
+            File::open(&format!("./test_logs/error_{}.log", j))
                 .unwrap()
                 .read_to_string(&mut error)
                 .unwrap();
             let mut warn = String::new();
-            File::open(&format!("warn_{}.log", j))
+            File::open(&format!("./test_logs/warn_{}.log", j))
                 .unwrap()
                 .read_to_string(&mut warn)
                 .unwrap();
             let mut info = String::new();
-            File::open(&format!("info_{}.log", j))
+            File::open(&format!("./test_logs/info_{}.log", j))
                 .unwrap()
                 .read_to_string(&mut info)
                 .unwrap();
             let mut debug = String::new();
-            File::open(&format!("debug_{}.log", j))
+            File::open(&format!("./test_logs/debug_{}.log", j))
                 .unwrap()
                 .read_to_string(&mut debug)
                 .unwrap();
             let mut trace = String::new();
-            File::open(&format!("trace_{}.log", j))
+            File::open(&format!("./test_logs/trace_{}.log", j))
                 .unwrap()
                 .read_to_string(&mut trace)
                 .unwrap();
@@ -279,30 +290,35 @@ mod tests {
             assert!(!error.contains("Test Information"));
             assert!(!error.contains("Test Debug"));
             assert!(!error.contains("Test Trace"));
+            assert!(error.ends_with(line_endings[k].1.as_str()));
 
             assert!(warn.contains("Test Error"));
             assert!(warn.contains("Test Warning"));
             assert!(!warn.contains("Test Information"));
             assert!(!warn.contains("Test Debug"));
             assert!(!warn.contains("Test Trace"));
+            assert!(warn.ends_with(line_endings[k].1.as_str()));
 
             assert!(info.contains("Test Error"));
             assert!(info.contains("Test Warning"));
             assert!(info.contains("Test Information"));
             assert!(!info.contains("Test Debug"));
             assert!(!info.contains("Test Trace"));
+            assert!(info.ends_with(line_endings[k].1.as_str()));
 
             assert!(debug.contains("Test Error"));
             assert!(debug.contains("Test Warning"));
             assert!(debug.contains("Test Information"));
             assert!(debug.contains("Test Debug"));
             assert!(!debug.contains("Test Trace"));
+            assert!(debug.ends_with(line_endings[k].1.as_str()));
 
             assert!(trace.contains("Test Error"));
             assert!(trace.contains("Test Warning"));
             assert!(trace.contains("Test Information"));
             assert!(trace.contains("Test Debug"));
             assert!(trace.contains("Test Trace"));
+            assert!(trace.ends_with(line_endings[k].1.as_str()));
         }
     }
 }

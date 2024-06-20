@@ -213,9 +213,10 @@ pub fn write_thread_id<W>(write: &mut W, config: &Config) -> Result<(), Error>
 where
     W: Write + Sized,
 {
-    let id = format!("{:?}", thread::current().id());
-    let id = id.replace("ThreadId(", "");
-    let id = id.replace(")", "");
+    let id = format!("{:?}", thread::current().id())
+        .replace("ThreadId(", "")
+        .replace(")", "");
+
     match config.thread_padding {
         ThreadPadding::Left { 0: qty } => {
             write!(write, "({id:>0$}) ", qty, id = id)?;

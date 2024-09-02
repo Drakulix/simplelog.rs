@@ -58,6 +58,7 @@ pub(crate) enum TimeFormat {
     Custom(&'static [time::format_description::FormatItem<'static>]),
 }
 
+#[derive(Debug, Clone, Copy)]
 /// UTF-8 end of line character sequences
 pub enum LineEnding {
     /// Line feed

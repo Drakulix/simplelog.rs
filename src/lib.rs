@@ -32,7 +32,7 @@ pub use self::config::{
 pub use self::loggers::TestLogger;
 pub use self::loggers::{CombinedLogger, SimpleLogger, WriteLogger};
 #[cfg(feature = "termcolor")]
-pub use self::loggers::{TermLogger, TerminalMode};
+pub use self::loggers::{Target, TermLogger, TerminalMode};
 #[cfg(feature = "termcolor")]
 pub use termcolor::{Color, ColorChoice};
 

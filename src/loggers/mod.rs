@@ -10,7 +10,7 @@ mod writelog;
 pub use self::comblog::CombinedLogger;
 pub use self::simplelog::SimpleLogger;
 #[cfg(feature = "termcolor")]
-pub use self::termlog::{TermLogger, TerminalMode};
+pub use self::termlog::{Target, TermLogger, TerminalMode};
 #[cfg(feature = "test")]
 pub use self::testlog::TestLogger;
 pub use self::writelog::WriteLogger;

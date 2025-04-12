@@ -52,7 +52,7 @@ pub enum ThreadLogMode {
 }
 
 #[derive(Debug, Clone)]
-pub(crate) enum TimeFormat {
+pub enum TimeFormat {
     Rfc2822,
     Rfc3339,
     Custom(&'static [time::format_description::FormatItem<'static>]),
@@ -116,6 +116,108 @@ impl Config {
     /// Create a new default `ConfigBuilder`
     pub fn builder() -> ConfigBuilder {
         ConfigBuilder::new()
+    }
+
+    /// The level at which and above (more verbose) the current time shall be logged
+    pub fn time(&self) -> &LevelFilter {
+        &self.time
+    }
+
+    /// The level at which and above (more verbose) the level itself shall be logged
+    pub fn level(&self) -> &LevelFilter {
+        &self.level
+    }
+
+    /// Specifies how the level block shall be padded
+    pub fn level_padding(&self) -> &LevelPadding {
+        &self.level_padding
+    }
+
+    /// The level at which and above (more verbose) the executing thread shall be logged
+    pub fn thread(&self) -> &LevelFilter {
+        &self.thread
+    }
+
+    /// Specifies how the executing thread shall be logged
+    pub fn thread_log_mode(&self) -> &ThreadLogMode {
+        &self.thread_log_mode
+    }
+
+    /// Specifies how the thread block shall be padded
+    pub fn thread_padding(&self) -> &ThreadPadding {
+        &self.thread_padding
+    }
+
+    /// The level at which and above (more verbose) the target shall be logged
+    pub fn target(&self) -> &LevelFilter {
+        &self.target
+    }
+
+    /// Specifies how the target block shall be padded
+    pub fn target_padding(&self) -> &TargetPadding {
+        &self.target_padding
+    }
+
+    /// The level at which and above (more verbose) a source code reference shall be logged
+    pub fn location(&self) -> &LevelFilter {
+        &self.location
+    }
+
+    /// The level at which and above (more verbose) the module of the log statement shall be logged
+    pub fn module(&self) -> &LevelFilter {
+        &self.module
+    }
+
+    /// The format to use to log the current time
+    pub fn time_format(&self) -> &TimeFormat {
+        &self.time_format
+    }
+
+    /// The Offset from UTC to use when logging the current time
+    pub fn time_offset(&self) -> &UtcOffset {
+        &self.time_offset
+    }
+
+    /// The filters that specify which targets should be allowed to get logged.
+    /// If any are specified, only records from targets matching one of these entries should get logged
+    ///
+    /// For example, `["tokio::uds"]` would allow only logging from the `tokio` crates `uds` module.
+    pub fn allow_filters(&self) -> &[Cow<'static, str>] {
+        &self.filter_allow
+    }
+
+    /// The filters that specify which targets should not be allowed to get logged.
+    /// If any are specified, records from targets matching one of these entries should not get logged
+    ///
+    /// For example, `["tokio::uds"]` would ignore logging from the `tokio` crates `uds` module.
+    pub fn filter_ignore(&self) -> &[Cow<'static, str>] {
+        &self.filter_ignore
+    }
+
+    /// The color used for printing the level (if the logger supports it),
+    /// or None if the default foreground color shall get used
+    #[cfg(feature = "termcolor")]
+    pub fn level_color(&self) -> &[Option<Color>; 6] {
+        &self.level_color
+    }
+
+    /// If colors should be written in the logfile
+    #[cfg(feature = "ansi_term")]
+    pub fn write_log_enable_colors(&self) -> &bool {
+        &self.write_log_enable_colors
+    }
+
+    /// If you want paris formatting should be applied to this logger
+    ///
+    /// If disabled, paris markup and formatting should be stripped.
+    #[cfg(feature = "paris")]
+    pub fn enable_paris_formatting(&self) -> &bool {
+        &self.enable_paris_formatting
+    }
+
+    /// How the logged string should be ended
+    pub fn line_ending(&self) -> &String {
+        &self.line_ending
     }
 }
 

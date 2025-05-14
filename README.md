@@ -54,7 +54,7 @@ and my_rust_binary.log
 ## Getting Started
 
 Just add
-```
+```toml
 [dependencies]
 simplelog = "^0.12.0"
 ```
@@ -64,7 +64,7 @@ to your `Cargo.toml`
 
 This crate can internally depend on a [paris](https://github.com/0x20F/paris) crate to provide support for ANSI color and styles.
 To use this feature you need to set a _paris_ feature, like this:
-```
+```toml
 [dependencies]
 simplelog = { version = "^0.11.0", features = ["paris"] }
 ```

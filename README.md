@@ -17,8 +17,7 @@ easy alternative.
 
 ## Usage
 ```rust
-#[macro_use] extern crate log;
-extern crate simplelog;
+use log::{debug, error, info};
 
 use simplelog::*;
 

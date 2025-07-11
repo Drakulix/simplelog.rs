@@ -48,7 +48,10 @@ impl TermLogger {
     /// init function. Globally initializes the TermLogger as the one and only used log facility.
     ///
     /// Takes the desired `Level` and `Config` as arguments. They cannot be changed later on.
-    /// Fails if another Logger was already initialized
+    ///
+    /// # Errors
+    ///
+    /// An error is returned if a logger has already been set.
     ///
     /// # Examples
     /// ```

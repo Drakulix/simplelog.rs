@@ -7,16 +7,16 @@ use std::thread;
 use termcolor::Color;
 
 #[cfg(all(feature = "termcolor", feature = "ansi_term"))]
-pub fn termcolor_to_ansiterm(color: &Color) -> Option<ansi_term::Color> {
+pub fn termcolor_to_ansiterm(color: &Color) -> Option<nu_ansi_term::Color> {
     match color {
-        Color::Black => Some(ansi_term::Color::Black),
-        Color::Red => Some(ansi_term::Color::Red),
-        Color::Green => Some(ansi_term::Color::Green),
-        Color::Yellow => Some(ansi_term::Color::Yellow),
-        Color::Blue => Some(ansi_term::Color::Blue),
-        Color::Magenta => Some(ansi_term::Color::Purple),
-        Color::Cyan => Some(ansi_term::Color::Cyan),
-        Color::White => Some(ansi_term::Color::White),
+        Color::Black => Some(nu_ansi_term::Color::Black),
+        Color::Red => Some(nu_ansi_term::Color::Red),
+        Color::Green => Some(nu_ansi_term::Color::Green),
+        Color::Yellow => Some(nu_ansi_term::Color::Yellow),
+        Color::Blue => Some(nu_ansi_term::Color::Blue),
+        Color::Magenta => Some(nu_ansi_term::Color::Purple),
+        Color::Cyan => Some(nu_ansi_term::Color::Cyan),
+        Color::White => Some(nu_ansi_term::Color::White),
         _ => None,
     }
 }
